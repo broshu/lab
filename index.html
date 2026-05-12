@@ -1,5 +1,3 @@
----
----
 <!doctype html>
 <html lang="en">
 <head>
@@ -11,11 +9,20 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg: #f7f7f5;
+      --card: #fff;
+      --ink: #111;
+      --muted: #646464;
+      --line: #d9d9d4;
+      --soft-line: #ececea;
+    }
+
     body {
       margin: 0;
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: #f5f5f3;
-      color: #1f1f1f;
+      background: var(--bg);
+      color: var(--ink);
     }
 
     main {
@@ -24,116 +31,108 @@
       padding: 36px 0;
     }
 
-    h1 {
-      margin: 0 0 22px;
-      font-size: 30px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 64px;
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .card-title {
+      color: var(--ink);
+      font-size: 19px;
       line-height: 1.2;
       font-weight: 650;
       letter-spacing: 0;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr));
-      gap: 18px;
-    }
-
-    .module {
-      min-height: 260px;
-      padding: 22px;
-      border: 1px solid #deded8;
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .module h2 {
-      margin: 0 0 18px;
-      font-size: 19px;
-      line-height: 1.25;
-      font-weight: 650;
-      letter-spacing: 0;
-    }
-
-    .list {
-      display: grid;
-      gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .file-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 14px;
-      min-height: 46px;
-      padding: 11px 0;
-      border-top: 1px solid #eeeeea;
-    }
-
-    .file-row:first-child {
-      border-top: 0;
-      padding-top: 0;
-    }
-
-    .file-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 15px;
-    }
-
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 34px;
-      padding: 0 12px;
-      border: 1px solid #242424;
-      border-radius: 6px;
-      color: #242424;
-      background: #fff;
-      font-size: 13px;
-      font-weight: 600;
       text-decoration: none;
-      white-space: nowrap;
     }
 
-    .button:hover,
-    .button:focus-visible {
-      color: #fff;
-      background: #242424;
+    .card-title:hover,
+    .card-title:focus-visible {
+      text-decoration: underline;
       outline: none;
     }
 
-    .folder-list {
+    .card-count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      padding: 8px 22px 18px;
+    }
+
+    .item-list {
       display: grid;
-      gap: 10px;
       margin: 0;
       padding: 0;
       list-style: none;
     }
 
-    .folder-row {
-      padding: 11px 0;
-      border-top: 1px solid #eeeeea;
+    .item-row {
+      min-height: 54px;
+      padding: 12px 0;
+      border-top: 1px solid var(--soft-line);
     }
 
-    .folder-row:first-child {
+    .item-row:first-child {
       border-top: 0;
-      padding-top: 0;
     }
 
-    .folder-button {
+    .item-link {
+      display: block;
       width: 100%;
-      justify-content: flex-start;
+      overflow: hidden;
+      padding: 9px 0;
+      border: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: 600;
+      line-height: 1.35;
+      text-align: left;
+      text-decoration: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
     }
 
-    .folder-button::before,
-    .folder-summary::before {
-      content: "";
+    .item-link:hover,
+    .item-link:focus-visible {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .item-note {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .folder-icon {
+      display: inline-block;
       width: 15px;
       height: 11px;
       margin-right: 8px;
@@ -144,94 +143,19 @@
       flex: 0 0 auto;
     }
 
-    .folder-tree {
-      margin: 0;
+    .question-card {
+      min-height: 260px;
     }
 
-    .folder-summary {
-      display: flex;
-      align-items: center;
-      min-height: 34px;
-      padding: 0 12px;
-      border: 1px solid #242424;
-      border-radius: 6px;
-      color: #242424;
-      background: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      list-style: none;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .folder-summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .folder-tree[open] .folder-summary {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-      background: #242424;
-      color: #fff;
-    }
-
-    .tree-list {
-      display: grid;
-      gap: 8px;
-      margin: 0;
-      padding: 12px;
-      border: 1px solid #242424;
-      border-top: 0;
-      border-bottom-left-radius: 6px;
-      border-bottom-right-radius: 6px;
-      list-style: none;
-      background: #fff;
-    }
-
-    .tree-file {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-      font-size: 14px;
-    }
-
-    .tree-file span {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .empty {
-      color: #777;
-      background: #fbfbfa;
-    }
-
-    .empty p {
-      margin: 0;
-      font-size: 15px;
-    }
-
-    .ask-card {
+    .ask-link {
       display: grid;
       place-items: center;
       min-height: 178px;
-      border: 1px solid #242424;
-      border-radius: 8px;
-      color: #242424;
+      color: var(--ink);
       text-decoration: none;
-      background: #fff;
     }
 
-    .ask-card:hover,
-    .ask-card:focus-visible {
-      color: #fff;
-      background: #242424;
-      outline: none;
-    }
-
-    .ask-icon {
+    .ask-mark {
       display: grid;
       place-items: center;
       width: 96px;
@@ -242,31 +166,32 @@
       font-weight: 700;
     }
 
+    .ask-link:hover,
+    .ask-link:focus-visible {
+      color: #fff;
+      background: var(--ink);
+      outline: none;
+    }
+
     @media (max-width: 560px) {
       main {
         width: min(100% - 24px, 1120px);
         padding: 24px 0;
       }
 
-      .module {
-        min-height: 220px;
-        padding: 18px;
+      .card {
+        min-height: 240px;
       }
 
-      .file-row {
-        grid-template-columns: 1fr;
-        align-items: start;
+      .card-header {
+        padding: 18px 18px 14px;
       }
 
-      .file-name {
-        white-space: normal;
+      .card-body {
+        padding: 8px 18px 16px;
       }
 
-      .tree-file {
-        grid-template-columns: 1fr;
-      }
-
-      .tree-file span {
+      .item-link {
         white-space: normal;
       }
     }
@@ -274,80 +199,97 @@
 </head>
 <body>
   <main>
-    <div class="grid">
-      <section class="module">
-        <h2>PPT</h2>
-        <ul class="list">
-          {% for file in site.static_files %}
-            {% if file.path contains "/ppt/" and file.extname == ".pptx" %}
-              {% unless file.name contains "~$" %}
-                {% assign title = file.name | replace: ".pptx", "" %}
-                <li class="file-row">
-                  <span class="file-name" title="{{ title }}">{{ title }}</span>
-                  <a class="button" href="{{ file.path | relative_url }}" download>Download</a>
-                </li>
-              {% endunless %}
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </section>
-
-      <section class="module">
-        <h2>Games</h2>
-        <ul class="folder-list">
-          {% for file in site.static_files %}
-            {% if file.path contains "/games/" and file.name == "index.html" and file.path != "/games/index.html" %}
-              {% assign parts = file.path | split: "/" %}
-              {% assign demo_title = parts[2] %}
-              <li class="folder-row">
-                <a class="button folder-button" href="{{ file.path | relative_url }}" target="_blank" rel="noopener">{{ demo_title }}</a>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </section>
-
-      <section class="module">
-        <h2>Resources</h2>
-        <ul class="folder-list">
-          {% assign resource_folders = "" %}
-          {% for file in site.static_files %}
-            {% if file.path contains "/resources/" and file.name != ".DS_Store" %}
-              {% assign parts = file.path | split: "/" %}
-              {% assign folder_name = parts[2] %}
-              {% assign folder_key = "|" | append: folder_name | append: "|" %}
-              {% unless resource_folders contains folder_key %}
-                {% assign resource_folders = resource_folders | append: folder_key %}
-                <li class="folder-row">
-                  <details class="folder-tree">
-                    <summary class="folder-summary">{{ folder_name }}</summary>
-                    <ul class="tree-list">
-                      {% assign folder_prefix = "/resources/" | append: folder_name | append: "/" %}
-                      {% for child in site.static_files %}
-                        {% if child.path contains folder_prefix and child.name != ".DS_Store" %}
-                          {% assign child_title = child.path | remove_first: folder_prefix %}
-                          <li class="tree-file">
-                            <span title="{{ child_title }}">{{ child_title }}</span>
-                            <a class="button" href="{{ child.path | relative_url }}" download>Download</a>
-                          </li>
-                        {% endif %}
-                      {% endfor %}
-                    </ul>
-                  </details>
-                </li>
-              {% endunless %}
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </section>
-
-      <section class="module">
-        <h2>Question</h2>
-        <a class="ask-card" href="https://forms.cloud.microsoft/r/Lg4N3RAWZR" target="_blank" rel="noopener">
-          <span class="ask-icon">Ask</span>
-        </a>
-      </section>
-    </div>
+    <div class="grid" id="cards"></div>
   </main>
+
+  <script src="library-data.js"></script>
+  <script>
+    const questionCard = {
+      title: "Question",
+      href: "https://forms.cloud.microsoft/r/Lg4N3RAWZR"
+    };
+
+    const cardsRoot = document.querySelector("#cards");
+
+    function createElement(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) {
+        element.className = className;
+      }
+      if (text) {
+        element.textContent = text;
+      }
+      return element;
+    }
+
+    function itemCount(card) {
+      return card.items.length;
+    }
+
+    function makeFileLink(item, shouldDownload) {
+      const action = createElement("a", "item-link", item.name);
+      action.href = item.href;
+      action.title = item.name;
+      if (shouldDownload) {
+        action.download = "";
+      } else {
+        action.target = "_blank";
+        action.rel = "noopener";
+      }
+      return action;
+    }
+
+    function makeFolderPreview(folder) {
+      const link = createElement("a", "item-link");
+      const icon = createElement("span", "folder-icon");
+      const name = document.createTextNode(folder.name);
+      const note = createElement("span", "item-note", `${folder.children.length} items`);
+      link.href = `library.html?section=resources&path=${encodeURIComponent(folder.name)}`;
+      link.title = folder.name;
+      link.append(icon, name, note);
+      return link;
+    }
+
+    function renderCard(card) {
+      const section = createElement("section", "card");
+      const header = createElement("div", "card-header");
+      const title = createElement("a", "card-title", card.title);
+      title.href = `library.html?section=${encodeURIComponent(card.id)}`;
+      header.append(title, createElement("span", "card-count", `${itemCount(card)} items`));
+
+      const body = createElement("div", "card-body");
+      const list = createElement("ul", "item-list");
+      const shouldDownload = card.type === "download";
+      card.items.forEach((item) => {
+        const row = createElement("li", "item-row");
+        if (item.type === "folder") {
+          row.append(makeFolderPreview(item));
+        } else {
+          row.append(makeFileLink(item, shouldDownload));
+        }
+        list.append(row);
+      });
+      body.append(list);
+      section.append(header, body);
+      return section;
+    }
+
+    function renderQuestionCard() {
+      const section = createElement("section", "card question-card");
+      const header = createElement("div", "card-header");
+      header.append(createElement("span", "card-title", questionCard.title));
+
+      const link = createElement("a", "ask-link");
+      link.href = questionCard.href;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.append(createElement("span", "ask-mark", "Ask"));
+
+      section.append(header, link);
+      return section;
+    }
+
+    cardsRoot.replaceChildren(...window.LAB_DATA.map(renderCard), renderQuestionCard());
+  </script>
 </body>
 </html>

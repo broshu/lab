@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Physics Lab Library</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f7f5;
+      --card: #fff;
+      --ink: #111;
+      --muted: #646464;
+      --line: #d9d9d4;
+      --soft-line: #ececea;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .back-link:hover,
+    .back-link:focus-visible {
+      color: #fff;
+      background: var(--ink);
+      outline: none;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .path {
+      margin: -8px 0 20px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .item-list {
+      display: grid;
+      margin: 0;
+      padding: 0 22px;
+      list-style: none;
+    }
+
+    .item-row {
+      min-height: 58px;
+      padding: 12px 0;
+      border-top: 1px solid var(--soft-line);
+    }
+
+    .item-row:first-child {
+      border-top: 0;
+    }
+
+    .item-link {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      padding: 10px 0;
+      border: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 16px;
+      font-family: inherit;
+      font-weight: 600;
+      line-height: 1.35;
+      text-align: left;
+      text-decoration: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .item-link:hover,
+    .item-link:focus-visible {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .item-note {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .folder-icon {
+      display: inline-block;
+      width: 15px;
+      height: 11px;
+      margin-right: 8px;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+      border-top-left-radius: 1px;
+      box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 0 currentColor;
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 24px, 1120px);
+        padding: 22px 0 32px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .item-list {
+        padding: 0 18px;
+      }
+
+      .item-link {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="topbar">
+      <a class="back-link" id="back-link" href="index.html">Back</a>
+      <span class="meta" id="item-count"></span>
+    </div>
+    <h1 id="page-title"></h1>
+    <div class="path" id="page-path"></div>
+    <section class="panel">
+      <ul class="item-list" id="item-list"></ul>
+    </section>
+  </main>
+
+  <script src="library-data.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const sectionId = params.get("section") || "ppt";
+    const path = params.get("path") ? params.get("path").split("/").filter(Boolean) : [];
+    const section = window.LAB_DATA.find((item) => item.id === sectionId) || window.LAB_DATA[0];
+    const listRoot = document.querySelector("#item-list");
+    const pageTitle = document.querySelector("#page-title");
+    const pagePath = document.querySelector("#page-path");
+    const itemCount = document.querySelector("#item-count");
+    const backLink = document.querySelector("#back-link");
+
+    function createElement(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) {
+        element.className = className;
+      }
+      if (text) {
+        element.textContent = text;
+      }
+      return element;
+    }
+
+    function findFolder(items, pathParts) {
+      let current = {
+        name: section.title,
+        children: items
+      };
+
+      pathParts.forEach((part) => {
+        const decodedPart = decodeURIComponent(part);
+        const next = current.children.find((item) => item.type === "folder" && item.name === decodedPart);
+        if (next) {
+          current = next;
+        }
+      });
+
+      return current;
+    }
+
+    function makeSectionUrl(nextPath) {
+      const query = new URLSearchParams({
+        section: section.id
+      });
+      if (nextPath.length > 0) {
+        query.set("path", nextPath.join("/"));
+      }
+      return `library.html?${query.toString()}`;
+    }
+
+    function makeFolderLink(folder, nextPath) {
+      const link = createElement("a", "item-link");
+      const icon = createElement("span", "folder-icon");
+      const name = document.createTextNode(folder.name);
+      const note = createElement("span", "item-note", `${folder.children.length} items`);
+      link.href = makeSectionUrl(nextPath);
+      link.title = folder.name;
+      link.append(icon, name, note);
+      return link;
+    }
+
+    function makeFileLink(item) {
+      const link = createElement("a", "item-link", item.name);
+      link.href = item.href;
+      link.title = item.name;
+      if (section.type === "download" || section.type === "resources") {
+        link.download = "";
+      } else {
+        link.target = "_blank";
+        link.rel = "noopener";
+      }
+      return link;
+    }
+
+    function renderItems(items) {
+      listRoot.replaceChildren();
+      items.forEach((item) => {
+        const row = createElement("li", "item-row");
+        if (item.type === "folder") {
+          row.append(makeFolderLink(item, [...path.map(decodeURIComponent), item.name]));
+        } else {
+          row.append(makeFileLink(item));
+        }
+        listRoot.append(row);
+      });
+    }
+
+    const currentFolder = findFolder(section.items, path);
+    const decodedPath = path.map(decodeURIComponent);
+    const title = decodedPath.length > 0 ? currentFolder.name : section.title;
+
+    document.title = `${title} - Physics Lab`;
+    pageTitle.textContent = title;
+    pagePath.textContent = decodedPath.length > 0 ? [section.title, ...decodedPath].join(" / ") : "";
+    itemCount.textContent = `${currentFolder.children.length} items`;
+    backLink.href = decodedPath.length > 0 ? makeSectionUrl(decodedPath.slice(0, -1)) : "index.html";
+    renderItems(currentFolder.children);
+  </script>
+</body>
+</html>
