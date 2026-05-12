@@ -5,6 +5,10 @@ const fallbackLabData = [
     type: "download",
     items: [
       {
+        name: "test",
+        href: "ppt/test.pptx"
+      },
+      {
         name: "带电粒子在电场中运动的综合问题",
         href: "ppt/带电粒子在电场中运动的综合问题.pptx"
       },
@@ -51,6 +55,64 @@ const fallbackLabData = [
             href: "resources/周末小练/高一物理周末小练20260510（含答案）.docx"
           }
         ]
+      },
+      {
+        name: "必修三 三维设计",
+        type: "folder",
+        children: [
+          {
+            name: "参考答案与详解",
+            type: "folder",
+            children: [
+              {
+                name: "学习讲义部分",
+                href: "resources/必修三 三维设计/参考答案与详解/学习讲义部分.docx"
+              },
+              {
+                name: "答案目录",
+                href: "resources/必修三 三维设计/参考答案与详解/答案目录.docx"
+              },
+              {
+                name: "综合质量检测部分",
+                href: "resources/必修三 三维设计/参考答案与详解/综合质量检测部分.docx"
+              },
+              {
+                name: "课时跟踪检测部分",
+                href: "resources/必修三 三维设计/参考答案与详解/课时跟踪检测部分.docx"
+              }
+            ]
+          },
+          {
+            name: "综合质量检测",
+            type: "folder",
+            children: [
+              {
+                name: "模块达标检测",
+                href: "resources/必修三 三维设计/综合质量检测/模块达标检测.docx"
+              },
+              {
+                name: "章末综合检测（一）　静电场及其应用",
+                href: "resources/必修三 三维设计/综合质量检测/章末综合检测（一）　静电场及其应用.docx"
+              },
+              {
+                name: "章末综合检测（三）　电路及其应用",
+                href: "resources/必修三 三维设计/综合质量检测/章末综合检测（三）　电路及其应用.docx"
+              },
+              {
+                name: "章末综合检测（二）　静电场中的能量",
+                href: "resources/必修三 三维设计/综合质量检测/章末综合检测（二）　静电场中的能量.docx"
+              },
+              {
+                name: "章末综合检测（五）　电磁感应与电磁波初步",
+                href: "resources/必修三 三维设计/综合质量检测/章末综合检测（五）　电磁感应与电磁波初步.docx"
+              },
+              {
+                name: "章末综合检测（四）　电能　能量守恒定律",
+                href: "resources/必修三 三维设计/综合质量检测/章末综合检测（四）　电能　能量守恒定律.docx"
+              }
+            ]
+          }
+        ]
       }
     ]
   }
@@ -94,8 +156,8 @@ async function listDirectory(path) {
       }
 
       const url = new URL(rawHref, base);
-      const isDirectory = rawHref.endsWith("/");
-      const decodedName = decodeURIComponent(rawHref).replace(/\/$/, "");
+      const isDirectory = rawHref.endsWith("/") || url.pathname.endsWith("/");
+      const decodedName = decodeURIComponent(url.pathname.split("/").filter(Boolean).pop() || rawHref).replace(/\/$/, "");
       const href = url.pathname.replace(/^\/+/, "");
 
       return {
@@ -152,9 +214,14 @@ async function scanResources(path = "resources/") {
 
 async function loadSection(fallbackSection, scanner) {
   try {
+    const scannedItems = await scanner();
+    if (scannedItems.length === 0) {
+      return fallbackSection;
+    }
+
     return {
       ...fallbackSection,
-      items: await scanner()
+      items: scannedItems
     };
   } catch (error) {
     console.warn(error);
