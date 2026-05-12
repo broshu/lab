@@ -108,13 +108,39 @@
       outline: none;
     }
 
-    .demo-list {
-      display: flex;
-      flex-wrap: wrap;
+    .folder-list {
+      display: grid;
       gap: 10px;
       margin: 0;
       padding: 0;
       list-style: none;
+    }
+
+    .folder-row {
+      padding: 11px 0;
+      border-top: 1px solid #eeeeea;
+    }
+
+    .folder-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .folder-button {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .folder-button::before {
+      content: "";
+      width: 15px;
+      height: 11px;
+      margin-right: 8px;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+      border-top-left-radius: 1px;
+      box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 0 currentColor;
+      flex: 0 0 auto;
     }
 
     .empty {
@@ -156,13 +182,13 @@
     <div class="grid">
       <section class="module">
         <h2>games</h2>
-        <ul class="demo-list">
+        <ul class="folder-list">
           {% for file in site.static_files %}
             {% if file.path contains "/games/" and file.name == "index.html" and file.path != "/games/index.html" %}
               {% assign parts = file.path | split: "/" %}
               {% assign demo_title = parts[2] %}
-              <li>
-                <a class="button" href="{{ file.path | relative_url }}" target="_blank" rel="noopener">{{ demo_title }}</a>
+              <li class="folder-row">
+                <a class="button folder-button" href="{{ file.path | relative_url }}" target="_blank" rel="noopener">{{ demo_title }}</a>
               </li>
             {% endif %}
           {% endfor %}
@@ -186,9 +212,24 @@
         </ul>
       </section>
 
-      <section class="module empty">
-        <h2>Section 3</h2>
-        <p>Empty</p>
+      <section class="module">
+        <h2>resources</h2>
+        <ul class="folder-list">
+          {% assign resource_folders = "" %}
+          {% for file in site.static_files %}
+            {% if file.path contains "/resources/" and file.name != ".DS_Store" %}
+              {% assign parts = file.path | split: "/" %}
+              {% assign folder_name = parts[2] %}
+              {% assign folder_key = "|" | append: folder_name | append: "|" %}
+              {% unless resource_folders contains folder_key %}
+                {% assign resource_folders = resource_folders | append: folder_key %}
+                <li class="folder-row">
+                  <span class="button folder-button">{{ folder_name }}</span>
+                </li>
+              {% endunless %}
+            {% endif %}
+          {% endfor %}
+        </ul>
       </section>
 
       <section class="module empty">
