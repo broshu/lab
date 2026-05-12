@@ -131,7 +131,8 @@
       justify-content: flex-start;
     }
 
-    .folder-button::before {
+    .folder-button::before,
+    .folder-summary::before {
       content: "";
       width: 15px;
       height: 11px;
@@ -141,6 +142,65 @@
       border-top-left-radius: 1px;
       box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 0 currentColor;
       flex: 0 0 auto;
+    }
+
+    .folder-tree {
+      margin: 0;
+    }
+
+    .folder-summary {
+      display: flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid #242424;
+      border-radius: 6px;
+      color: #242424;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      list-style: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .folder-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .folder-tree[open] .folder-summary {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      background: #242424;
+      color: #fff;
+    }
+
+    .tree-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 12px;
+      border: 1px solid #242424;
+      border-top: 0;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+      list-style: none;
+      background: #fff;
+    }
+
+    .tree-file {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .tree-file span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .empty {
@@ -170,6 +230,14 @@
       }
 
       .file-name {
+        white-space: normal;
+      }
+
+      .tree-file {
+        grid-template-columns: 1fr;
+      }
+
+      .tree-file span {
         white-space: normal;
       }
     }
@@ -224,7 +292,21 @@
               {% unless resource_folders contains folder_key %}
                 {% assign resource_folders = resource_folders | append: folder_key %}
                 <li class="folder-row">
-                  <span class="button folder-button">{{ folder_name }}</span>
+                  <details class="folder-tree">
+                    <summary class="folder-summary">{{ folder_name }}</summary>
+                    <ul class="tree-list">
+                      {% assign folder_prefix = "/resources/" | append: folder_name | append: "/" %}
+                      {% for child in site.static_files %}
+                        {% if child.path contains folder_prefix and child.name != ".DS_Store" %}
+                          {% assign child_title = child.path | remove_first: folder_prefix %}
+                          <li class="tree-file">
+                            <span title="{{ child_title }}">{{ child_title }}</span>
+                            <a class="button" href="{{ child.path | relative_url }}" download>Download</a>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  </details>
                 </li>
               {% endunless %}
             {% endif %}
