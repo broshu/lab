@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Resources</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f6f6f6;
+      color: #222;
+    }
+
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    h1 {
+      margin: 0 0 24px;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .section {
+      min-height: 280px;
+      padding: 18px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .section h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .empty {
+      color: #777;
+      background: #fafafa;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .item {
+      display: grid;
+      gap: 8px;
+      padding: 10px 0;
+      border-top: 1px solid #eee;
+    }
+
+    .item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .file-link {
+      color: #222;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .file-link:hover {
+      text-decoration: underline;
+    }
+
+    .download {
+      width: fit-content;
+      padding: 7px 10px;
+      border: 1px solid #222;
+      border-radius: 4px;
+      color: #222;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .download:hover {
+      background: #222;
+      color: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 24px, 1080px);
+        padding: 24px 0;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Learning Resources</h1>
+
+    <div class="grid">
+      <section class="section">
+        <h2>Interactive Demos</h2>
+        <ul class="list">
+          <li class="item">
+            <a class="file-link" href="./games/electric-field-lines/">Electric Field Lines</a>
+          </li>
+          <li class="item">
+            <a class="file-link" href="./games/potential_3d_visualization/">3D Potential Visualization</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>Slides</h2>
+        <ul class="list">
+          <li class="item">
+            <span>Charged Particles in Electric Fields</span>
+            <a class="download" href="./ppt/带电粒子在电场中运动的综合问题.pptx" download>Download PPT</a>
+          </li>
+          <li class="item">
+            <span>Capacitance of Capacitors</span>
+            <a class="download" href="./ppt/电容器的电容.pptx" download>Download PPT</a>
+          </li>
+          <li class="item">
+            <span>Capacitors and Capacitance</span>
+            <a class="download" href="./ppt/第1课时　电容器及电容.pptx" download>Download PPT</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section empty">
+        <h2>Section 3</h2>
+        <p>Empty</p>
+      </section>
+
+      <section class="section empty">
+        <h2>Section 4</h2>
+        <p>Empty</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
