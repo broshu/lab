@@ -97,7 +97,7 @@
     }
 
     .item-row {
-      min-height: 58px;
+      height: 60px;
       padding: 12px 0;
       border-top: 1px solid var(--soft-line);
     }
@@ -125,6 +125,20 @@
       cursor: pointer;
     }
 
+    .folder-link {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .folder-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .item-link:hover,
     .item-link:focus-visible {
       text-decoration: underline;
@@ -133,10 +147,11 @@
 
     .item-note {
       display: block;
-      margin-top: 4px;
       color: var(--muted);
       font-size: 12px;
       line-height: 1.2;
+      text-align: right;
+      white-space: nowrap;
     }
 
     .folder-icon {
@@ -171,7 +186,7 @@
       }
 
       .item-link {
-        white-space: normal;
+        white-space: nowrap;
       }
     }
   </style>
@@ -240,13 +255,14 @@
     }
 
     function makeFolderLink(folder, nextPath) {
-      const link = createElement("a", "item-link");
+      const link = createElement("a", "item-link folder-link");
       const icon = createElement("span", "folder-icon");
-      const name = document.createTextNode(folder.name);
+      const name = createElement("span", "folder-name", folder.name);
       const note = createElement("span", "item-note", `${folder.children.length} items`);
       link.href = makeSectionUrl(nextPath);
       link.title = folder.name;
-      link.append(icon, name, note);
+      name.prepend(icon);
+      link.append(name, note);
       return link;
     }
 

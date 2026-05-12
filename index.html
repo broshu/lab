@@ -33,13 +33,13 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 18px;
       align-items: start;
     }
 
     .card {
-      min-height: 280px;
+      height: 240px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--card);
@@ -51,16 +51,16 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      min-height: 64px;
+      height: 60px;
       padding: 20px 22px 16px;
       border-bottom: 1px solid var(--soft-line);
     }
 
     .card-title {
       color: var(--ink);
-      font-size: 19px;
-      line-height: 1.2;
-      font-weight: 650;
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 600;
       letter-spacing: 0;
       text-decoration: none;
     }
@@ -78,7 +78,7 @@
     }
 
     .card-body {
-      padding: 8px 22px 18px;
+      padding: 0 22px;
     }
 
     .item-list {
@@ -89,7 +89,7 @@
     }
 
     .item-row {
-      min-height: 54px;
+      height: 60px;
       padding: 12px 0;
       border-top: 1px solid var(--soft-line);
     }
@@ -117,6 +117,20 @@
       cursor: pointer;
     }
 
+    .folder-link {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .folder-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .item-link:hover,
     .item-link:focus-visible {
       text-decoration: underline;
@@ -125,10 +139,11 @@
 
     .item-note {
       display: block;
-      margin-top: 3px;
       color: var(--muted);
       font-size: 12px;
       line-height: 1.2;
+      text-align: right;
+      white-space: nowrap;
     }
 
     .folder-icon {
@@ -143,14 +158,10 @@
       flex: 0 0 auto;
     }
 
-    .question-card {
-      min-height: 260px;
-    }
-
     .ask-link {
       display: grid;
       place-items: center;
-      min-height: 178px;
+      height: 180px;
       color: var(--ink);
       text-decoration: none;
     }
@@ -180,19 +191,23 @@
       }
 
       .card {
-        min-height: 240px;
+        height: 240px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
       }
 
       .card-header {
-        padding: 18px 18px 14px;
+        padding: 12px 18px;
       }
 
       .card-body {
-        padding: 8px 18px 16px;
+        padding: 0 18px;
       }
 
       .item-link {
-        white-space: normal;
+        white-space: nowrap;
       }
     }
   </style>
@@ -240,13 +255,14 @@
     }
 
     function makeFolderPreview(folder) {
-      const link = createElement("a", "item-link");
+      const link = createElement("a", "item-link folder-link");
       const icon = createElement("span", "folder-icon");
-      const name = document.createTextNode(folder.name);
+      const name = createElement("span", "folder-name", folder.name);
       const note = createElement("span", "item-note", `${folder.children.length} items`);
       link.href = `library.html?section=resources&path=${encodeURIComponent(folder.name)}`;
       link.title = folder.name;
-      link.append(icon, name, note);
+      name.prepend(icon);
+      link.append(name, note);
       return link;
     }
 
