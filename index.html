@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Learning Resources</title>
+  <title>Physics Lab</title>
   <style>
     * {
       box-sizing: border-box;
@@ -274,26 +274,9 @@
 </head>
 <body>
   <main>
-    <h1>Learning Resources</h1>
-
     <div class="grid">
       <section class="module">
-        <h2>games</h2>
-        <ul class="folder-list">
-          {% for file in site.static_files %}
-            {% if file.path contains "/games/" and file.name == "index.html" and file.path != "/games/index.html" %}
-              {% assign parts = file.path | split: "/" %}
-              {% assign demo_title = parts[2] %}
-              <li class="folder-row">
-                <a class="button folder-button" href="{{ file.path | relative_url }}" target="_blank" rel="noopener">{{ demo_title }}</a>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </section>
-
-      <section class="module">
-        <h2>ppt</h2>
+        <h2>PPT</h2>
         <ul class="list">
           {% for file in site.static_files %}
             {% if file.path contains "/ppt/" and file.extname == ".pptx" %}
@@ -310,7 +293,22 @@
       </section>
 
       <section class="module">
-        <h2>resources</h2>
+        <h2>Games</h2>
+        <ul class="folder-list">
+          {% for file in site.static_files %}
+            {% if file.path contains "/games/" and file.name == "index.html" and file.path != "/games/index.html" %}
+              {% assign parts = file.path | split: "/" %}
+              {% assign demo_title = parts[2] %}
+              <li class="folder-row">
+                <a class="button folder-button" href="{{ file.path | relative_url }}" target="_blank" rel="noopener">{{ demo_title }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="module">
+        <h2>Resources</h2>
         <ul class="folder-list">
           {% assign resource_folders = "" %}
           {% for file in site.static_files %}
@@ -344,7 +342,7 @@
       </section>
 
       <section class="module">
-        <h2>question</h2>
+        <h2>Question</h2>
         <a class="ask-card" href="https://forms.cloud.microsoft/r/Lg4N3RAWZR" target="_blank" rel="noopener">
           <span class="ask-icon">Ask</span>
         </a>
