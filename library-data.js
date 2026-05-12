@@ -12,6 +12,12 @@ const fallbackLabData = [
       },
       {
         name: "带电粒子在电场中运动的综合问题",
+        href: "ppt/带电粒子在电场中运动的综合问题/index.html",
+        kind: "html",
+        action: "open"
+      },
+      {
+        name: "带电粒子在电场中运动的综合问题",
         href: "ppt/带电粒子在电场中运动的综合问题.pptx",
         kind: "ppt",
         action: "download"
@@ -179,18 +185,17 @@ async function listDirectory(path) {
 
 async function scanPpt() {
   const entries = await listDirectory("ppt/");
-  const files = entries
-    .filter((entry) => !entry.isDirectory && entry.name.endsWith(".pptx") && !entry.name.startsWith("~$"))
-    .map((entry) => ({
-      name: cleanFileName(entry.name),
-      href: entry.href,
-      kind: "ppt",
-      action: "download"
-    }));
+  const items = await Promise.all(entries.map(async (entry) => {
+    if (!entry.isDirectory && entry.name.endsWith(".pptx") && !entry.name.startsWith("~$")) {
+      return {
+        name: cleanFileName(entry.name),
+        href: entry.href,
+        kind: "ppt",
+        action: "download"
+      };
+    }
 
-  const htmlLessons = await Promise.all(entries
-    .filter((entry) => entry.isDirectory)
-    .map(async (entry) => {
+    if (entry.isDirectory) {
       let htmlEntry = {
         href: `${entry.href}index.html`
       };
@@ -216,9 +221,12 @@ async function scanPpt() {
         kind: "html",
         action: "open"
       };
-    }));
+    }
 
-  return [...files, ...htmlLessons.filter(Boolean)];
+    return null;
+  }));
+
+  return items.filter(Boolean);
 }
 
 async function scanGames() {
