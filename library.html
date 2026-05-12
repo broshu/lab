@@ -206,15 +206,13 @@
 
   <script src="library-data.js"></script>
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const sectionId = params.get("section") || "ppt";
-    const path = params.get("path") ? params.get("path").split("/").filter(Boolean) : [];
-    const section = window.LAB_DATA.find((item) => item.id === sectionId) || window.LAB_DATA[0];
     const listRoot = document.querySelector("#item-list");
     const pageTitle = document.querySelector("#page-title");
     const pagePath = document.querySelector("#page-path");
     const itemCount = document.querySelector("#item-count");
     const backLink = document.querySelector("#back-link");
+    let section;
+    let path;
 
     function createElement(tag, className, text) {
       const element = document.createElement(tag);
@@ -292,16 +290,26 @@
       });
     }
 
-    const currentFolder = findFolder(section.items, path);
-    const decodedPath = path.map(decodeURIComponent);
-    const title = decodedPath.length > 0 ? currentFolder.name : section.title;
+    async function init() {
+      const data = await window.loadLabData();
+      const params = new URLSearchParams(window.location.search);
+      const sectionId = params.get("section") || "ppt";
+      path = params.get("path") ? params.get("path").split("/").filter(Boolean) : [];
+      section = data.find((item) => item.id === sectionId) || data[0];
 
-    document.title = `${title} - Physics Lab`;
-    pageTitle.textContent = title;
-    pagePath.textContent = decodedPath.length > 0 ? [section.title, ...decodedPath].join(" / ") : "";
-    itemCount.textContent = `${currentFolder.children.length} items`;
-    backLink.href = decodedPath.length > 0 ? makeSectionUrl(decodedPath.slice(0, -1)) : "index.html";
-    renderItems(currentFolder.children);
+      const currentFolder = findFolder(section.items, path);
+      const decodedPath = path.map(decodeURIComponent);
+      const title = decodedPath.length > 0 ? currentFolder.name : section.title;
+
+      document.title = `${title} - Physics Lab`;
+      pageTitle.textContent = title;
+      pagePath.textContent = decodedPath.length > 0 ? [section.title, ...decodedPath].join(" / ") : "";
+      itemCount.textContent = `${currentFolder.children.length} items`;
+      backLink.href = decodedPath.length > 0 ? makeSectionUrl(decodedPath.slice(0, -1)) : "index.html";
+      renderItems(currentFolder.children);
+    }
+
+    init();
   </script>
 </body>
 </html>

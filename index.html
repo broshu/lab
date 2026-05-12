@@ -305,7 +305,12 @@
       return section;
     }
 
-    cardsRoot.replaceChildren(...window.LAB_DATA.map(renderCard), renderQuestionCard());
+    async function init() {
+      const data = await window.loadLabData();
+      cardsRoot.replaceChildren(...data.map(renderCard), renderQuestionCard());
+    }
+
+    init();
   </script>
 </body>
 </html>
