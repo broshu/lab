@@ -125,6 +125,32 @@
       cursor: pointer;
     }
 
+    .typed-link {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .type-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 18px;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .typed-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .folder-link {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -265,10 +291,15 @@
     }
 
     function makeFileLink(item) {
-      const link = createElement("a", "item-link", item.name);
+      const link = createElement("a", item.kind ? "item-link typed-link" : "item-link", item.kind ? "" : item.name);
       link.href = item.href;
       link.title = item.name;
-      if (section.type === "download" || section.type === "resources") {
+      if (item.kind) {
+        const icon = createElement("span", "type-icon", item.kind.toUpperCase());
+        const name = createElement("span", "typed-name", item.name);
+        link.append(icon, name);
+      }
+      if (item.action === "download" || (!item.action && (section.type === "download" || section.type === "resources"))) {
         link.download = "";
       } else {
         link.target = "_blank";

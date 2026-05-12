@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>带电粒子在电场中运动的综合问题</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f7f5;
+      --card: #fff;
+      --ink: #111;
+      --muted: #666;
+      --line: #d9d9d4;
+      --soft-line: #ececea;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 247, 245, 0.96);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      width: min(1180px, calc(100% - 32px));
+      min-height: 60px;
+      margin: 0 auto;
+    }
+
+    .title {
+      overflow: hidden;
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .nav a,
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible,
+    .button:hover,
+    .button:focus-visible {
+      color: #fff;
+      background: var(--ink);
+      outline: none;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.92fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 60px;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .panel-body {
+      padding: 22px;
+    }
+
+    .lead {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .formula {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .formula li {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 14px;
+      min-height: 46px;
+      padding: 11px 0;
+      border-top: 1px solid var(--soft-line);
+      align-items: center;
+    }
+
+    .formula li:first-child {
+      border-top: 0;
+    }
+
+    .formula strong {
+      font-size: 15px;
+    }
+
+    .formula span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .sim {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 520px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 330px;
+      background: #fff;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+      padding: 18px 22px 22px;
+      border-top: 1px solid var(--soft-line);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--ink);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .segmented button {
+      min-height: 34px;
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .segmented button[aria-pressed="true"] {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .steps li {
+      min-height: 72px;
+      padding: 14px 0 14px 38px;
+      border-top: 1px solid var(--soft-line);
+      counter-increment: step;
+      position: relative;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .steps li:first-child {
+      border-top: 0;
+    }
+
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 16px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .asset-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .asset-strip img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: contain;
+      border: 1px solid var(--soft-line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .control-grid,
+      .asset-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 0;
+      }
+
+      main {
+        width: min(100% - 24px, 1180px);
+        padding: 22px 0 36px;
+      }
+
+      .control-grid,
+      .asset-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .formula li {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <h1 class="title">带电粒子在电场中运动的综合问题</h1>
+      <nav class="nav" aria-label="页面导航">
+        <a href="#model">模型</a>
+        <a href="#method">方法</a>
+        <a href="#practice">练习</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="model">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">核心模型</h2>
+        </div>
+        <div class="panel-body">
+          <p class="lead">带电粒子在匀强电场中的运动，本质是“受恒力的曲线运动”。先判受力方向，再把运动分解到两个互相垂直的方向。</p>
+          <ul class="formula">
+            <li>
+              <strong>受力</strong>
+              <span>F = qE，正电荷受力沿电场方向，负电荷受力反向。</span>
+            </li>
+            <li>
+              <strong>加速度</strong>
+              <span>a = qE / m，方向由 q 的正负决定。</span>
+            </li>
+            <li>
+              <strong>类平抛</strong>
+              <span>沿初速度方向匀速，沿电场力方向匀加速。</span>
+            </li>
+            <li>
+              <strong>能量</strong>
+              <span>电场力做功 W = qU，对应动能变化。</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel sim">
+        <div class="panel-header">
+          <h2 class="panel-title">交互演示</h2>
+          <button class="button" id="reset">重置轨迹</button>
+        </div>
+        <canvas id="field" width="760" height="430" aria-label="带电粒子在匀强电场中的轨迹演示"></canvas>
+        <div class="controls">
+          <div class="control-grid">
+            <label>
+              初速度 vx
+              <input id="vx" type="range" min="70" max="210" value="140">
+            </label>
+            <label>
+              电场强度 E
+              <input id="fieldStrength" type="range" min="30" max="150" value="90">
+            </label>
+            <label>
+              粒子质量 m
+              <input id="mass" type="range" min="1" max="6" value="3">
+            </label>
+          </div>
+          <div class="segmented" aria-label="电荷性质">
+            <button type="button" id="positive" aria-pressed="true">正电荷</button>
+            <button type="button" id="negative" aria-pressed="false">负电荷</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid" id="method">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">解题步骤</h2>
+        </div>
+        <div class="panel-body">
+          <ol class="steps">
+            <li>画出电场方向，标出粒子电性，确定电场力方向。</li>
+            <li>选择坐标轴：一个方向沿初速度，一个方向沿电场力。</li>
+            <li>列分运动方程，通常 x = v0t，y = 1/2 at²。</li>
+            <li>用几何条件、时间条件或能量条件联立求解。</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">易错点</h2>
+        </div>
+        <div class="panel-body">
+          <ol class="steps">
+            <li>负电荷受力方向与电场方向相反，不能只看场线方向。</li>
+            <li>电势能变化和电场力做功符号要分清。</li>
+            <li>离开电场后，粒子通常做匀速直线运动，不再继续弯曲。</li>
+            <li>偏转距离和偏转角分别对应位移关系与速度关系。</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="panel" id="practice">
+        <div class="panel-header">
+          <h2 class="panel-title">课堂追问</h2>
+        </div>
+        <div class="panel-body">
+          <ol class="steps">
+            <li>若只把粒子电性改为负，轨迹如何改变？</li>
+            <li>若电场强度加倍，离开电场时偏转距离如何变化？</li>
+            <li>若初速度加倍，粒子在电场中运动时间如何变化？</li>
+            <li>什么时候用运动分解更方便，什么时候用动能定理更方便？</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">素材区</h2>
+      </div>
+      <div class="panel-body">
+        <p class="lead">下方图片来自同名 PPT 的资源包，可在讲解时作为补充素材使用。</p>
+        <div class="asset-strip">
+          <img src="assets/image1.png" alt="PPT 素材 1">
+          <img src="assets/image4.png" alt="PPT 素材 2">
+          <img src="assets/image8.png" alt="PPT 素材 3">
+          <img src="assets/image13.png" alt="PPT 素材 4">
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.querySelector("#field");
+    const context = canvas.getContext("2d");
+    const vxInput = document.querySelector("#vx");
+    const fieldInput = document.querySelector("#fieldStrength");
+    const massInput = document.querySelector("#mass");
+    const resetButton = document.querySelector("#reset");
+    const positiveButton = document.querySelector("#positive");
+    const negativeButton = document.querySelector("#negative");
+    let charge = 1;
+
+    function drawArrow(x1, y1, x2, y2) {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.stroke();
+      context.beginPath();
+      context.moveTo(x2, y2);
+      context.lineTo(x2 - 10 * Math.cos(angle - Math.PI / 6), y2 - 10 * Math.sin(angle - Math.PI / 6));
+      context.lineTo(x2 - 10 * Math.cos(angle + Math.PI / 6), y2 - 10 * Math.sin(angle + Math.PI / 6));
+      context.closePath();
+      context.fill();
+    }
+
+    function draw() {
+      const width = canvas.width;
+      const height = canvas.height;
+      const vx = Number(vxInput.value);
+      const fieldStrength = Number(fieldInput.value);
+      const mass = Number(massInput.value);
+      const acceleration = charge * fieldStrength / mass;
+      const startX = 70;
+      const startY = height / 2;
+
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, width, height);
+
+      context.strokeStyle = "#d2d2cc";
+      context.fillStyle = "#111";
+      context.lineWidth = 1.4;
+      for (let y = 55; y < height; y += 52) {
+        drawArrow(38, y, width - 38, y);
+      }
+
+      context.strokeStyle = "#111";
+      context.lineWidth = 3;
+      context.beginPath();
+      for (let t = 0; t <= 3.7; t += 0.04) {
+        const x = startX + vx * t;
+        const y = startY + 0.5 * acceleration * t * t;
+        if (x > width - 30 || y < 28 || y > height - 28) {
+          break;
+        }
+        if (t === 0) {
+          context.moveTo(x, y);
+        } else {
+          context.lineTo(x, y);
+        }
+      }
+      context.stroke();
+
+      context.fillStyle = "#111";
+      context.beginPath();
+      context.arc(startX, startY, 12, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = "#fff";
+      context.font = "700 16px Arial";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(charge > 0 ? "+" : "-", startX, startY);
+
+      context.fillStyle = "#111";
+      context.font = "600 16px Arial";
+      context.textAlign = "left";
+      context.fillText("E", width - 56, 42);
+      context.fillText(`a = ${acceleration.toFixed(1)}`, 28, height - 28);
+    }
+
+    function setCharge(nextCharge) {
+      charge = nextCharge;
+      positiveButton.setAttribute("aria-pressed", String(charge > 0));
+      negativeButton.setAttribute("aria-pressed", String(charge < 0));
+      draw();
+    }
+
+    [vxInput, fieldInput, massInput].forEach((input) => input.addEventListener("input", draw));
+    resetButton.addEventListener("click", draw);
+    positiveButton.addEventListener("click", () => setCharge(1));
+    negativeButton.addEventListener("click", () => setCharge(-1));
+    draw();
+  </script>
+</body>
+</html>

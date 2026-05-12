@@ -6,19 +6,27 @@ const fallbackLabData = [
     items: [
       {
         name: "test",
-        href: "ppt/test.pptx"
+        href: "ppt/test.pptx",
+        kind: "ppt",
+        action: "download"
       },
       {
         name: "带电粒子在电场中运动的综合问题",
-        href: "ppt/带电粒子在电场中运动的综合问题.pptx"
+        href: "ppt/带电粒子在电场中运动的综合问题.pptx",
+        kind: "ppt",
+        action: "download"
       },
       {
         name: "电容器的电容",
-        href: "ppt/电容器的电容.pptx"
+        href: "ppt/电容器的电容.pptx",
+        kind: "ppt",
+        action: "download"
       },
       {
         name: "第1课时　电容器及电容",
-        href: "ppt/第1课时　电容器及电容.pptx"
+        href: "ppt/第1课时　电容器及电容.pptx",
+        kind: "ppt",
+        action: "download"
       }
     ]
   },
@@ -171,12 +179,46 @@ async function listDirectory(path) {
 
 async function scanPpt() {
   const entries = await listDirectory("ppt/");
-  return entries
+  const files = entries
     .filter((entry) => !entry.isDirectory && entry.name.endsWith(".pptx") && !entry.name.startsWith("~$"))
     .map((entry) => ({
       name: cleanFileName(entry.name),
-      href: entry.href
+      href: entry.href,
+      kind: "ppt",
+      action: "download"
     }));
+
+  const htmlLessons = await Promise.all(entries
+    .filter((entry) => entry.isDirectory)
+    .map(async (entry) => {
+      let htmlEntry = {
+        href: `${entry.href}index.html`
+      };
+
+      try {
+        const indexResponse = await fetch(htmlEntry.href, { method: "HEAD", cache: "no-store" });
+        if (!indexResponse.ok) {
+          const children = await listDirectory(entry.href);
+          htmlEntry = children.find((child) => !child.isDirectory && child.name.toLowerCase().endsWith(".html"));
+        }
+      } catch (error) {
+        const children = await listDirectory(entry.href);
+        htmlEntry = children.find((child) => !child.isDirectory && child.name.toLowerCase().endsWith(".html"));
+      }
+
+      if (!htmlEntry) {
+        return null;
+      }
+
+      return {
+        name: entry.name,
+        href: htmlEntry.href,
+        kind: "html",
+        action: "open"
+      };
+    }));
+
+  return [...files, ...htmlLessons.filter(Boolean)];
 }
 
 async function scanGames() {
