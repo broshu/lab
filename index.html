@@ -213,6 +213,35 @@
       font-size: 15px;
     }
 
+    .ask-card {
+      display: grid;
+      place-items: center;
+      min-height: 178px;
+      border: 1px solid #242424;
+      border-radius: 8px;
+      color: #242424;
+      text-decoration: none;
+      background: #fff;
+    }
+
+    .ask-card:hover,
+    .ask-card:focus-visible {
+      color: #fff;
+      background: #242424;
+      outline: none;
+    }
+
+    .ask-icon {
+      display: grid;
+      place-items: center;
+      width: 96px;
+      height: 96px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
     @media (max-width: 560px) {
       main {
         width: min(100% - 24px, 1120px);
@@ -314,9 +343,11 @@
         </ul>
       </section>
 
-      <section class="module empty">
-        <h2>Section 4</h2>
-        <p>Empty</p>
+      <section class="module">
+        <h2>question</h2>
+        <a class="ask-card" href="https://forms.cloud.microsoft/r/Lg4N3RAWZR" target="_blank" rel="noopener">
+          <span class="ask-icon">Ask</span>
+        </a>
       </section>
     </div>
   </main>
