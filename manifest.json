@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T01:41:41.620Z",
+  "generatedAt": "2026-05-13T02:41:24.609Z",
   "sections": [
     {
       "id": "ppt",
@@ -53,6 +53,11 @@
       "title": "Resources",
       "type": "resources",
       "items": [
+        {
+          "name": "Notes ",
+          "href": "resources/Notes .pdf",
+          "updatedAt": "2026-05-13T10:41:08+08:00"
+        },
         {
           "name": "必修三 三维设计",
           "type": "folder",
