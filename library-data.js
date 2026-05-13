@@ -12,12 +12,6 @@ const fallbackLabData = [
       },
       {
         name: "带电粒子在电场中运动的综合问题",
-        href: "ppt/带电粒子在电场中运动的综合问题/index.html",
-        kind: "html",
-        action: "open"
-      },
-      {
-        name: "带电粒子在电场中运动的综合问题",
         href: "ppt/带电粒子在电场中运动的综合问题.pptx",
         kind: "ppt",
         action: "download"
@@ -191,48 +185,14 @@ async function listDirectory(path) {
 
 async function scanPpt() {
   const entries = await listDirectory("ppt/");
-  const items = await Promise.all(entries.map(async (entry) => {
-    if (!entry.isDirectory && entry.name.endsWith(".pptx") && !entry.name.startsWith("~$")) {
-      return {
-        name: cleanFileName(entry.name),
-        href: entry.href,
-        kind: "ppt",
-        action: "download"
-      };
-    }
-
-    if (entry.isDirectory) {
-      let htmlEntry = {
-        href: `${entry.href}index.html`
-      };
-
-      try {
-        const indexResponse = await fetch(htmlEntry.href, { method: "HEAD", cache: "no-store" });
-        if (!indexResponse.ok) {
-          const children = await listDirectory(entry.href);
-          htmlEntry = children.find((child) => !child.isDirectory && child.name.toLowerCase().endsWith(".html"));
-        }
-      } catch (error) {
-        const children = await listDirectory(entry.href);
-        htmlEntry = children.find((child) => !child.isDirectory && child.name.toLowerCase().endsWith(".html"));
-      }
-
-      if (!htmlEntry) {
-        return null;
-      }
-
-      return {
-        name: entry.name,
-        href: htmlEntry.href,
-        kind: "html",
-        action: "open"
-      };
-    }
-
-    return null;
-  }));
-
-  return items.filter(Boolean);
+  return entries
+    .filter((entry) => !entry.isDirectory && entry.name.endsWith(".pptx") && !entry.name.startsWith("~$"))
+    .map((entry) => ({
+      name: cleanFileName(entry.name),
+      href: entry.href,
+      kind: "ppt",
+      action: "download"
+    }));
 }
 
 async function scanGames() {
