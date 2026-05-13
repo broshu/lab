@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Physics Lab</title>
+  <link rel="icon" type="image/png" href="icon.png">
   <style>
     * {
       box-sizing: border-box;
@@ -115,33 +116,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       cursor: pointer;
-    }
-
-    .typed-link {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 8px;
-      align-items: center;
-    }
-
-    .type-icon {
-      display: inline-grid;
-      place-items: center;
-      width: 38px;
-      height: 18px;
-      border: 1px solid currentColor;
-      border-radius: 4px;
-      font-size: 10px;
-      line-height: 1;
-      font-weight: 700;
-      overflow: hidden;
-    }
-
-    .typed-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .folder-link {
@@ -279,14 +253,9 @@
     }
 
     function makeFileLink(item, card) {
-      const action = createElement("a", item.kind ? "item-link typed-link" : "item-link", item.kind ? "" : item.name);
+      const action = createElement("a", "item-link", item.name);
       action.href = item.href;
       action.title = item.name;
-      if (item.kind) {
-        const icon = createElement("span", "type-icon", item.kind.toUpperCase());
-        const name = createElement("span", "typed-name", item.name);
-        action.append(icon, name);
-      }
       if (shouldDownloadItem(item, card)) {
         action.download = "";
       } else {

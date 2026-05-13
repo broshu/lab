@@ -118,7 +118,6 @@ async function scanPpt() {
     .map((entry) => ({
       name: cleanFileName(entry.name),
       href: entry.href,
-      kind: "ppt",
       action: "download"
     }));
 }
