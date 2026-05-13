@@ -1,37 +1,56 @@
-name: Update manifest
+name: Build and deploy site
 
 on:
   push:
     branches:
       - main
     paths:
+      - "index.html"
+      - "library.html"
+      - "library-data.js"
+      - "icon.png"
+      - "CNAME"
       - "ppt/**"
       - "games/**"
       - "resources/**"
       - "scripts/build-manifest.mjs"
+      - ".github/workflows/update-manifest.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  update-manifest:
-    if: github.actor != 'github-actions[bot]'
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: node scripts/build-manifest.mjs
-      - name: Commit manifest
+
+      - name: Build manifest
+        run: node scripts/build-manifest.mjs
+
+      - name: Prepare site
         run: |
-          if git diff --quiet -- manifest.json; then
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add manifest.json
-          git commit -m "Update manifest [skip ci]"
-          git push
+          mkdir _site
+          cp index.html library.html library-data.js icon.png CNAME manifest.json _site/
+          cp -R ppt games resources _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - uses: actions/deploy-pages@v4
