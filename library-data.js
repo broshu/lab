@@ -153,14 +153,16 @@ function directoryHref(path) {
 }
 
 async function listDirectory(path) {
-  const response = await fetch(directoryHref(path), { cache: "no-store" });
+  const directory = directoryHref(path);
+  const response = await fetch(directory, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Unable to list ${path}`);
   }
 
   const html = await response.text();
   const documentHtml = new DOMParser().parseFromString(html, "text/html");
-  const base = new URL(directoryHref(path), window.location.href);
+  const base = new URL(directory, window.location.href);
+  const directoryPath = base.pathname.endsWith("/") ? base.pathname : `${base.pathname}/`;
 
   return Array.from(documentHtml.querySelectorAll("a"))
     .map((link) => {
@@ -170,6 +172,10 @@ async function listDirectory(path) {
       }
 
       const url = new URL(rawHref, base);
+      if (url.origin !== base.origin || url.pathname === directoryPath || !url.pathname.startsWith(directoryPath)) {
+        return null;
+      }
+
       const isDirectory = rawHref.endsWith("/") || url.pathname.endsWith("/");
       const decodedName = decodeURIComponent(url.pathname.split("/").filter(Boolean).pop() || rawHref).replace(/\/$/, "");
       const href = url.pathname.replace(/^\/+/, "");
