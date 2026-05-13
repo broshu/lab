@@ -6,7 +6,7 @@ function git(args) {
 }
 
 function cleanFileName(fileName) {
-  return fileName.replace(/\.[^/.]+$/, "");
+  return fileName.replace(/\.[^/.]+$/, "").trim();
 }
 
 function titleFromSlug(slug) {

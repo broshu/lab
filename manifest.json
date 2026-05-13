@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T02:41:24.609Z",
+  "generatedAt": "2026-05-13T02:51:54.334Z",
   "sections": [
     {
       "id": "ppt",
@@ -23,6 +23,12 @@
           "href": "ppt/电容器的电容.pptx",
           "action": "download",
           "updatedAt": "2026-05-12T16:01:03+08:00"
+        },
+        {
+          "name": "竞赛 静电场 2",
+          "href": "ppt/竞赛 静电场 2.pptx",
+          "action": "download",
+          "updatedAt": null
         }
       ]
     },
@@ -54,7 +60,7 @@
       "type": "resources",
       "items": [
         {
-          "name": "Notes ",
+          "name": "Notes",
           "href": "resources/Notes .pdf",
           "updatedAt": "2026-05-13T10:41:08+08:00"
         },
