@@ -1,0 +1,37 @@
+name: Update manifest
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "ppt/**"
+      - "games/**"
+      - "resources/**"
+      - "scripts/build-manifest.mjs"
+
+permissions:
+  contents: write
+
+jobs:
+  update-manifest:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/build-manifest.mjs
+      - name: Commit manifest
+        run: |
+          if git diff --quiet -- manifest.json; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git commit -m "Update manifest [skip ci]"
+          git push
