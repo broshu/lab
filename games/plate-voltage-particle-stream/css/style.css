@@ -42,7 +42,6 @@ p {
 }
 
 .top-bar h1 {
-    margin-bottom: 8px;
     font-size: 28px;
     line-height: 1.2;
     letter-spacing: 0;
@@ -51,7 +50,7 @@ p {
 .readout {
     display: grid;
     gap: 6px;
-    min-width: 170px;
+    min-width: 190px;
     padding: 12px 14px;
     border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 8px;
@@ -120,14 +119,9 @@ h3 {
     font-size: 15px;
 }
 
-.small {
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.45;
-}
-
 .ghost-button,
-.primary-button {
+.primary-button,
+.preset-button {
     font: inherit;
     font-weight: 700;
     cursor: pointer;
@@ -161,7 +155,7 @@ h3 {
 
 .slider-row {
     display: grid;
-    grid-template-columns: 76px minmax(0, 1fr) 70px;
+    grid-template-columns: 28px minmax(0, 1fr) 70px;
     align-items: center;
     gap: 12px;
     padding: 12px;
@@ -183,10 +177,32 @@ input[type="range"] {
     accent-color: var(--blue);
 }
 
+.preset-row,
 .button-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
+}
+
+.preset-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.button-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.preset-button {
+    min-height: 38px;
+    border: 1px solid #d5e0e8;
+    border-radius: 8px;
+    color: #25384d;
+    background: #f7fafc;
+}
+
+.preset-button.active {
+    border-color: var(--blue);
+    color: #ffffff;
+    background: var(--blue);
 }
 
 .formula-box {
@@ -208,6 +224,7 @@ input[type="range"] {
 .formula-box strong {
     color: var(--ink);
     font-variant-numeric: tabular-nums;
+    text-align: right;
 }
 
 .legend {
@@ -227,8 +244,8 @@ input[type="range"] {
 }
 
 .field-swatch,
-.flame-swatch,
-.path-swatch {
+.highlight-swatch,
+.stream-swatch {
     display: inline-block;
     width: 18px;
     height: 4px;
@@ -239,11 +256,11 @@ input[type="range"] {
     background: var(--blue);
 }
 
-.flame-swatch {
-    background: linear-gradient(90deg, #ffd979, var(--red));
+.highlight-swatch {
+    background: var(--amber);
 }
 
-.path-swatch {
+.stream-swatch {
     background: var(--violet);
 }
 
@@ -256,8 +273,8 @@ canvas {
 }
 
 #motionCanvas {
-    height: min(52vw, 500px);
-    min-height: 360px;
+    height: min(50vw, 520px);
+    min-height: 380px;
 }
 
 #graphCanvas {
@@ -295,9 +312,5 @@ canvas {
 
     .legend {
         justify-content: flex-start;
-    }
-
-    #motionCanvas {
-        min-height: 330px;
     }
 }

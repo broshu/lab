@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>交变电场释放粒子</title>
+    <title>Alternating Field Release</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="top-bar">
         <div>
-            <h1>交变电场释放粒子</h1>
-            <p class="lede">固定两板间的周期电压，只改变带正电粒子的释放时刻，观察它最终撞向 A 板还是 B 板。</p>
+            <h1>Alternating Field Release</h1>
         </div>
         <div class="readout">
-            <span>当前释放相位</span>
+            <span>Release time</span>
             <strong id="phaseReadout">5T/8</strong>
         </div>
     </header>
@@ -21,60 +20,48 @@
     <main class="layout">
         <section class="panel controls-panel">
             <div class="section-title">
-                <h2>释放控制</h2>
-                <button id="resetBtn" class="ghost-button" type="button">复位</button>
+                <h2>Controls</h2>
+                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
             </div>
 
             <label class="slider-row">
-                <span>释放时刻</span>
-                <input id="phaseInput" type="range" min="0.01" max="1.125" step="0.005" value="0.625">
+                <span>0</span>
+                <input id="phaseInput" type="range" min="0" max="1" step="0.005" value="0.625">
                 <output id="phaseLabel">5T/8</output>
             </label>
 
-            <div class="choice-grid" aria-label="答案选项">
-                <button class="choice-button" type="button" data-phase="0.125">A<br><span>0 ~ T/4</span></button>
-                <button class="choice-button active" type="button" data-phase="0.625">B<br><span>T/2 ~ 3T/4</span></button>
-                <button class="choice-button" type="button" data-phase="0.875">C<br><span>3T/4 ~ T</span></button>
-                <button class="choice-button" type="button" data-phase="1.0625">D<br><span>T ~ 9T/8</span></button>
-            </div>
-
             <div class="button-row">
-                <button id="releaseBtn" class="primary-button" type="button">释放粒子</button>
-                <button id="pauseBtn" class="ghost-button" type="button">暂停</button>
+                <button id="releaseBtn" class="primary-button" type="button">Release</button>
+                <button id="pauseBtn" class="ghost-button" type="button">Pause</button>
             </div>
 
             <div class="formula-box">
-                <h3>本次判断</h3>
-                <p>每周期净位移：<strong id="driftReadout">向 A 板</strong></p>
-                <p>运动结果：<strong id="resultReadout">等待释放</strong></p>
-                <p>速度大小：<strong id="speedReadout">0.00</strong></p>
+                <h3>Readout</h3>
+                <p>Net drift:<strong id="driftReadout">to plate A</strong></p>
+                <p>Result:<strong id="resultReadout">ready</strong></p>
+                <p>Speed:<strong id="speedReadout">0.00</strong></p>
             </div>
         </section>
 
         <section class="panel field-panel">
             <div class="section-title">
-                <h2>粒子运动</h2>
+                <h2>Motion</h2>
                 <div class="legend">
-                    <span><i class="field-swatch"></i>电场方向</span>
-                    <span><i class="flame-swatch"></i>速度尾焰</span>
-                    <span><i class="path-swatch"></i>运动轨迹</span>
+                    <span><i class="field-swatch"></i>Field</span>
+                    <span><i class="flame-swatch"></i>Trail</span>
+                    <span><i class="path-swatch"></i>Path</span>
                 </div>
             </div>
-            <canvas id="motionCanvas" width="980" height="500" aria-label="带正电粒子在交变电场中的运动"></canvas>
+            <canvas id="motionCanvas" width="980" height="500" aria-label="Positive particle motion in an alternating electric field"></canvas>
         </section>
 
         <section class="panel graph-panel">
             <div class="section-title">
-                <h2>固定电场与速度图像</h2>
-                <p class="small">上方是题图给定的 UAB-t 方波；下方从释放时刻开始画 v-t 图，面积方向对应位移方向。</p>
+                <h2>Graphs</h2>
             </div>
-            <canvas id="graphCanvas" width="1300" height="420" aria-label="电压时间图与速度时间图"></canvas>
+            <canvas id="graphCanvas" width="1300" height="420" aria-label="Voltage-time and velocity-time graphs"></canvas>
         </section>
     </main>
-
-    <footer>
-        <p>模型忽略重力，带正电粒子从两极板正中间 P 点静止释放。</p>
-    </footer>
 
     <script src="js/main.js"></script>
 </body>

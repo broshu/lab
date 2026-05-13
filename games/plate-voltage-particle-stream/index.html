@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Stream Between Plates</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="top-bar">
+        <div>
+            <h1>Particle Stream Between Plates</h1>
+        </div>
+        <div class="readout">
+            <span>Highlighted release</span>
+            <strong id="phaseReadout">T/4</strong>
+        </div>
+    </header>
+
+    <main class="layout">
+        <section class="panel controls-panel">
+            <div class="section-title">
+                <h2>Controls</h2>
+                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+            </div>
+
+            <label class="slider-row">
+                <span>0</span>
+                <input id="phaseInput" type="range" min="0" max="1" step="0.005" value="0.25">
+                <output id="phaseLabel">T/4</output>
+            </label>
+
+            <div class="preset-row">
+                <button class="preset-button" type="button" data-phase="0">0</button>
+                <button class="preset-button" type="button" data-phase="0.125">T/8</button>
+                <button class="preset-button active" type="button" data-phase="0.25">T/4</button>
+            </div>
+
+            <div class="button-row">
+                <button id="playBtn" class="primary-button" type="button">Pause</button>
+                <button id="clearBtn" class="ghost-button" type="button">Clear</button>
+            </div>
+
+            <div class="formula-box">
+                <h3>Readout</h3>
+                <p>Exit point:<strong id="exitReadout">plate P edge</strong></p>
+                <p>UPQ:<strong id="voltageReadout">+U0</strong></p>
+                <p>Particles:<strong id="countReadout">0</strong></p>
+            </div>
+        </section>
+
+        <section class="panel field-panel">
+            <div class="section-title">
+                <h2>Motion</h2>
+                <div class="legend">
+                    <span><i class="field-swatch"></i>Field</span>
+                    <span><i class="highlight-swatch"></i>Highlighted</span>
+                    <span><i class="stream-swatch"></i>Stream</span>
+                </div>
+            </div>
+            <canvas id="motionCanvas" width="1100" height="540" aria-label="Particle stream in alternating voltage plates"></canvas>
+        </section>
+
+        <section class="panel graph-panel">
+            <div class="section-title">
+                <h2>Graphs</h2>
+            </div>
+            <canvas id="graphCanvas" width="1300" height="430" aria-label="Voltage-time and vertical velocity graphs"></canvas>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

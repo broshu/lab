@@ -1,13 +1,13 @@
-# 交变电场释放粒子
+# Alternating Field Release
 
-纯前端 Canvas 游戏，用于演示带正电粒子在两平行金属板间的交变电场中从 P 点静止释放后的运动。
+Canvas game for a positive particle released between parallel plates in an alternating electric field.
 
-## 功能
-- 固定题图中的方波电压：`0 ~ T/2` 为 `+U0`，`T/2 ~ T` 为 `-U0`
-- 只能控制粒子的释放时刻，电场变化规律不可调
-- 粒子运动做慢速展示，便于课堂观察往复过程
-- 粒子尾焰长度随速度增大而变长
-- 同步显示每周期净位移、最终撞板结果、UAB-t 图与 v-t 图
+## Features
+- Release time ranges from `0` to `T`
+- Fixed square-wave voltage: `0 ~ T/2` is `+U0`, `T/2 ~ T` is `-U0`
+- Slow particle motion
+- Longer trail means higher speed
+- Shows net drift, result, `UAB-t`, and `v-t`
 
-## 使用
-直接在浏览器中打开 `index.html` 即可，无需构建或安装依赖。
+## Usage
+Open `index.html` in a browser.

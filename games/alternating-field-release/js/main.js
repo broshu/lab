@@ -13,8 +13,7 @@
         speedReadout: document.getElementById("speedReadout"),
         releaseBtn: document.getElementById("releaseBtn"),
         pauseBtn: document.getElementById("pauseBtn"),
-        resetBtn: document.getElementById("resetBtn"),
-        choices: [...document.querySelectorAll(".choice-button")]
+        resetBtn: document.getElementById("resetBtn")
     };
 
     const C = {
@@ -22,6 +21,7 @@
         timeScale: 0.115,
         plateLimit: 1,
         maxTrail: 130,
+        graphDuration: 2,
         grid: 40,
         particleRadius: 10
     };
@@ -74,19 +74,13 @@
             [0.75, "3T/4"],
             [0.875, "7T/8"],
             [1, "T"],
-            [1.0625, "17T/16"],
-            [1.125, "9T/8"]
+            [1.25, "5T/4"],
+            [1.5, "3T/2"],
+            [1.75, "7T/4"],
+            [2, "2T"]
         ];
         const hit = candidates.find(([phase]) => Math.abs(phase - scaled) < 0.004);
         return hit ? hit[1] : `${scaled.toFixed(3)}T`;
-    }
-
-    function optionForPhase(value) {
-        if (value > 0 && value < 0.25) return "A";
-        if (value > 0.5 && value < 0.75) return "B";
-        if (value > 0.75 && value < 1) return "C";
-        if (value > 1 && value < 1.125) return "D";
-        return "";
     }
 
     function driftForPhase(phase) {
@@ -105,19 +99,12 @@
     function syncLabels() {
         const text = phaseText(state.selectedPhase);
         const drift = driftForPhase(state.selectedPhase);
-        const direction = drift < 0 ? "向 A 板" : "向 B 板";
+        const direction = drift < 0 ? "to plate A" : "to plate B";
         ui.phaseLabel.textContent = text;
         ui.phaseReadout.textContent = text;
         ui.driftReadout.textContent = direction;
         ui.speedReadout.textContent = Math.abs(state.v).toFixed(2);
 
-        const option = optionForPhase(state.selectedPhase);
-        ui.choices.forEach((button) => {
-            const buttonPhase = Number(button.dataset.phase);
-            const samePreset = Math.abs(buttonPhase - state.selectedPhase) < 0.01;
-            const sameOption = option && button.textContent.trim().startsWith(option) && !samePreset;
-            button.classList.toggle("active", samePreset || sameOption);
-        });
         drawGraphs();
     }
 
@@ -130,8 +117,8 @@
         state.paused = false;
         state.result = keepResult ? state.result : null;
         state.trail = [];
-        ui.pauseBtn.textContent = "暂停";
-        ui.resultReadout.textContent = state.result || "等待释放";
+        ui.pauseBtn.textContent = "Pause";
+        ui.resultReadout.textContent = state.result || "ready";
         syncLabels();
         drawMotion();
     }
@@ -146,8 +133,8 @@
         state.result = null;
         state.trail = [];
         state.lastFrame = 0;
-        ui.pauseBtn.textContent = "暂停";
-        ui.resultReadout.textContent = "运动中";
+        ui.pauseBtn.textContent = "Pause";
+        ui.resultReadout.textContent = "running";
         syncLabels();
     }
 
@@ -178,7 +165,7 @@
 
         if (state.x <= -C.plateLimit || state.x >= C.plateLimit) {
             state.x = clamp(state.x, -C.plateLimit, C.plateLimit);
-            state.result = state.x < 0 ? "撞到 A 板" : "撞到 B 板";
+            state.result = state.x < 0 ? "hit plate A" : "hit plate B";
             state.running = false;
             ui.resultReadout.textContent = state.result;
         }
@@ -355,14 +342,8 @@
         mctx.fillStyle = "#25384d";
         mctx.font = "700 14px Avenir Next, Segoe UI, sans-serif";
         mctx.textAlign = "left";
-        mctx.fillText(`UAB ${phase < 0.5 ? "为 +U0" : "为 -U0"}，电场由 ${highPlate} 指向 ${lowPlate}`, 24, infoY);
-        mctx.fillText(`已运动 ${(state.elapsed).toFixed(2)}T`, 24, infoY + 24);
-        mctx.fillText(`尾焰长度随速度增大而变长`, 24, infoY + 48);
-
-        mctx.textAlign = "center";
-        mctx.fillStyle = "#637184";
-        mctx.font = "13px Avenir Next, Segoe UI, sans-serif";
-        mctx.fillText("两板正中间释放", (leftPlate + rightPlate) / 2, centerY + 106);
+        mctx.fillText(`UAB = ${phase < 0.5 ? "+U0" : "-U0"}  E: ${highPlate} -> ${lowPlate}`, 24, infoY);
+        mctx.fillText(`t = ${state.elapsed.toFixed(2)}T`, 24, infoY + 24);
     }
 
     function drawGraphs() {
@@ -379,8 +360,8 @@
         drawAxes(pad.left, midU, graphW, "UAB");
         drawAxes(pad.left, midV, graphW, "v");
         drawVoltageWave(pad.left, midU, graphW, uAmp);
-        drawReleaseMarker(pad.left, midU, midV, graphW);
         drawVelocityWave(pad.left, midV, graphW, vAmp);
+        drawTimeMarker(pad.left, midU, midV, graphW);
         drawGraphTicks(pad.left, midU, midV, graphW);
     }
 
@@ -413,41 +394,48 @@
     }
 
     function xForTime(startX, graphW, time) {
-        return startX + (time / 1.5) * graphW;
+        return startX + (time / C.graphDuration) * graphW;
     }
 
     function drawVoltageWave(startX, midY, graphW, amp) {
         gctx.strokeStyle = "#172333";
         gctx.lineWidth = 2.6;
         gctx.beginPath();
-        const segments = [
-            [0, 0.5, -amp],
-            [0.5, 1, amp],
-            [1, 1.5, -amp]
-        ];
-        segments.forEach(([a, b, y], index) => {
-            const x1 = xForTime(startX, graphW, a);
-            const x2 = xForTime(startX, graphW, b);
-            if (index === 0) gctx.moveTo(x1, midY + y);
-            else gctx.lineTo(x1, midY + y);
-            gctx.lineTo(x2, midY + y);
-        });
+        let time = 0;
+        let first = true;
+        while (time < C.graphDuration - 1e-6) {
+            const phase = wrap(time);
+            const sign = fieldSignAt(time);
+            const nextSwitch = time + (phase < 0.5 ? 0.5 - phase : 1 - phase);
+            const end = Math.min(nextSwitch, C.graphDuration);
+            const y = midY - sign * amp;
+            const x1 = xForTime(startX, graphW, time);
+            const x2 = xForTime(startX, graphW, end);
+            if (first) {
+                gctx.moveTo(x1, y);
+                first = false;
+            } else {
+                gctx.lineTo(x1, y);
+            }
+            gctx.lineTo(x2, y);
+            time = end;
+        }
         gctx.stroke();
 
         gctx.setLineDash([7, 6]);
         gctx.strokeStyle = "rgba(23, 35, 51, 0.55)";
-        [0.5, 1, 1.5].forEach((t) => {
+        for (let t = 0.25; t <= C.graphDuration + 1e-6; t += 0.25) {
             const x = xForTime(startX, graphW, t);
             gctx.beginPath();
             gctx.moveTo(x, midY - amp);
             gctx.lineTo(x, midY + amp);
             gctx.stroke();
-        });
+        }
         gctx.setLineDash([]);
     }
 
-    function drawReleaseMarker(startX, midU, midV, graphW) {
-        const markerTime = state.selectedPhase <= 1.125 ? state.selectedPhase : wrap(state.selectedPhase);
+    function drawTimeMarker(startX, midU, midV, graphW) {
+        const markerTime = clamp(state.selectedPhase + state.elapsed, 0, C.graphDuration);
         const x = xForTime(startX, graphW, markerTime);
         gctx.strokeStyle = "#d64f62";
         gctx.lineWidth = 2;
@@ -461,7 +449,7 @@
         gctx.fillStyle = "#d64f62";
         gctx.font = "700 13px Avenir Next, Segoe UI, sans-serif";
         gctx.textAlign = "center";
-        gctx.fillText(`释放 ${phaseText(state.selectedPhase)}`, x, midU - 82);
+        gctx.fillText(`t = ${phaseText(markerTime)}`, x, midU - 82);
     }
 
     function drawVelocityWave(startX, midY, graphW, amp) {
@@ -469,12 +457,13 @@
         let v = 0;
         const sampleCount = 360;
         const release = state.selectedPhase;
+        const visibleDuration = Math.max(0, C.graphDuration - release);
         let maxAbs = 0.001;
         for (let i = 0; i <= sampleCount; i++) {
-            const dt = (1.25 * i) / sampleCount;
+            const dt = (visibleDuration * i) / sampleCount;
             if (i > 0) {
-                const previous = release + (1.25 * (i - 1)) / sampleCount;
-                v += accelerationAt(previous) * (1.25 / sampleCount);
+                const previous = release + (visibleDuration * (i - 1)) / sampleCount;
+                v += accelerationAt(previous) * (visibleDuration / sampleCount);
             }
             maxAbs = Math.max(maxAbs, Math.abs(v));
             points.push({ t: release + dt, local: dt, v });
@@ -485,7 +474,7 @@
         gctx.lineWidth = 2.4;
         gctx.beginPath();
         points.forEach((point, index) => {
-            const x = startX + (point.local / 1.25) * graphW;
+            const x = xForTime(startX, graphW, point.t);
             const y = midY - point.v * scale;
             if (index === 0) gctx.moveTo(x, y);
             else gctx.lineTo(x, y);
@@ -495,12 +484,12 @@
         gctx.fillStyle = "rgba(111, 91, 184, 0.12)";
         gctx.beginPath();
         points.forEach((point, index) => {
-            const x = startX + (point.local / 1.25) * graphW;
+            const x = xForTime(startX, graphW, point.t);
             const y = midY - point.v * scale;
             if (index === 0) gctx.moveTo(x, midY);
             gctx.lineTo(x, y);
         });
-        gctx.lineTo(startX + graphW, midY);
+        gctx.lineTo(xForTime(startX, graphW, C.graphDuration), midY);
         gctx.closePath();
         gctx.fill();
     }
@@ -513,7 +502,9 @@
             [0.75, "3T/4"],
             [1, "T"],
             [1.25, "5T/4"],
-            [1.5, "3T/2"]
+            [1.5, "3T/2"],
+            [1.75, "7T/4"],
+            [2, "2T"]
         ];
         gctx.fillStyle = "#42546a";
         gctx.font = "12px Avenir Next, Segoe UI, sans-serif";
@@ -524,7 +515,7 @@
             gctx.fillRect(x - 1, midV - 4, 2, 8);
             gctx.fillText(label, x, midU + 22);
         });
-        gctx.fillText("释放后时间", startX + graphW - 42, midV + 26);
+        gctx.fillText("time", startX + graphW - 22, midV + 26);
     }
 
     function onPhaseChange(value) {
@@ -547,14 +538,11 @@
     }
 
     ui.phaseInput.addEventListener("input", () => onPhaseChange(ui.phaseInput.value));
-    ui.choices.forEach((button) => {
-        button.addEventListener("click", () => onPhaseChange(button.dataset.phase));
-    });
     ui.releaseBtn.addEventListener("click", releaseParticle);
     ui.pauseBtn.addEventListener("click", () => {
         if (!state.running || state.result) return;
         state.paused = !state.paused;
-        ui.pauseBtn.textContent = state.paused ? "继续" : "暂停";
+        ui.pauseBtn.textContent = state.paused ? "Resume" : "Pause";
     });
     ui.resetBtn.addEventListener("click", () => resetMotion(false));
     window.addEventListener("resize", () => {
