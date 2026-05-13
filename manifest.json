@@ -1,23 +1,11 @@
 {
-  "generatedAt": "2026-05-13T02:56:42.859Z",
+  "generatedAt": "2026-05-13T03:00:06.804Z",
   "sections": [
     {
       "id": "ppt",
       "title": "PPT",
       "type": "download",
       "items": [
-        {
-          "name": "竞赛 静电场 1",
-          "href": "ppt/竞赛 静电场 1.pptx",
-          "action": "download",
-          "updatedAt": "2026-05-13T10:54:05+08:00"
-        },
-        {
-          "name": "竞赛 静电场 2",
-          "href": "ppt/竞赛 静电场 2.pptx",
-          "action": "download",
-          "updatedAt": "2026-05-13T10:52:26+08:00"
-        },
         {
           "name": "电势差与电场强度的关系",
           "href": "ppt/电势差与电场强度的关系.pptx",
