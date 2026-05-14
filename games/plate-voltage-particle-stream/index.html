@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Particle Stream Between Plates</title>
+    <title>Particle Between Plates</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="top-bar">
         <div>
-            <h1>Particle Stream Between Plates</h1>
+            <h1>Particle Between Plates</h1>
         </div>
         <div class="readout">
-            <span>Highlighted release</span>
+            <span>Release time</span>
             <strong id="phaseReadout">T/4</strong>
         </div>
     </header>
@@ -37,15 +37,15 @@
             </div>
 
             <div class="button-row">
-                <button id="playBtn" class="primary-button" type="button">Pause</button>
-                <button id="clearBtn" class="ghost-button" type="button">Clear</button>
+                <button id="releaseBtn" class="primary-button" type="button">Release</button>
+                <button id="pauseBtn" class="ghost-button" type="button">Pause</button>
             </div>
 
             <div class="formula-box">
                 <h3>Readout</h3>
                 <p>Exit point:<strong id="exitReadout">plate P edge</strong></p>
                 <p>UPQ:<strong id="voltageReadout">+U0</strong></p>
-                <p>Particles:<strong id="countReadout">0</strong></p>
+                <p>Status:<strong id="statusReadout">ready</strong></p>
             </div>
         </section>
 
@@ -54,11 +54,12 @@
                 <h2>Motion</h2>
                 <div class="legend">
                     <span><i class="field-swatch"></i>Field</span>
-                    <span><i class="highlight-swatch"></i>Highlighted</span>
-                    <span><i class="stream-swatch"></i>Stream</span>
+                    <span><i class="particle-swatch"></i>Particle</span>
+                    <span><i class="path-swatch"></i>Path</span>
+                    <span><i class="switch-swatch"></i>Switch</span>
                 </div>
             </div>
-            <canvas id="motionCanvas" width="1100" height="540" aria-label="Particle stream in alternating voltage plates"></canvas>
+            <canvas id="motionCanvas" width="1100" height="540" aria-label="Single particle in alternating voltage plates"></canvas>
         </section>
 
         <section class="panel graph-panel">

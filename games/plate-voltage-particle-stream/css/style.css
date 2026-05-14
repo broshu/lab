@@ -244,8 +244,9 @@ input[type="range"] {
 }
 
 .field-swatch,
-.highlight-swatch,
-.stream-swatch {
+.particle-swatch,
+.path-swatch,
+.switch-swatch {
     display: inline-block;
     width: 18px;
     height: 4px;
@@ -256,12 +257,18 @@ input[type="range"] {
     background: var(--blue);
 }
 
-.highlight-swatch {
+.particle-swatch {
     background: var(--amber);
 }
 
-.stream-swatch {
+.path-swatch {
     background: var(--violet);
+}
+
+.switch-swatch {
+    width: 9px;
+    height: 9px;
+    background: var(--red);
 }
 
 canvas {

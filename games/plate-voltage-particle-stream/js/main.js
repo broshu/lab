@@ -10,9 +10,9 @@
         phaseReadout: document.getElementById("phaseReadout"),
         exitReadout: document.getElementById("exitReadout"),
         voltageReadout: document.getElementById("voltageReadout"),
-        countReadout: document.getElementById("countReadout"),
-        playBtn: document.getElementById("playBtn"),
-        clearBtn: document.getElementById("clearBtn"),
+        statusReadout: document.getElementById("statusReadout"),
+        releaseBtn: document.getElementById("releaseBtn"),
+        pauseBtn: document.getElementById("pauseBtn"),
         resetBtn: document.getElementById("resetBtn"),
         presetButtons: [...document.querySelectorAll(".preset-button")]
     };
@@ -23,19 +23,17 @@
         plateLength: 2,
         gap: 1,
         period: 1,
-        spawnInterval: 0.07,
         timeScale: 0.18,
-        maxParticles: 120,
         graphDuration: 2,
         grid: 40
     };
 
     const state = {
-        time: 0,
+        time: 0.25,
         selectedPhase: 0.25,
-        running: true,
-        particles: [],
-        nextSpawn: 0,
+        running: false,
+        paused: false,
+        particle: { trail: [] },
         lastFrame: 0
     };
 
@@ -124,76 +122,51 @@
         ui.phaseReadout.textContent = text;
         ui.exitReadout.textContent = exitText(exitYForPhase(state.selectedPhase));
         ui.voltageReadout.textContent = voltageSignAt(state.time) > 0 ? "+U0" : "-U0";
-        ui.countReadout.textContent = String(state.particles.length);
+        ui.statusReadout.textContent = statusText();
         ui.presetButtons.forEach((button) => {
             button.classList.toggle("active", Math.abs(Number(button.dataset.phase) - state.selectedPhase) < 0.004);
         });
         drawGraphs();
     }
 
-    function spawnParticle(release, highlighted = false) {
-        state.particles.push({
-            release,
-            highlighted,
-            trail: []
-        });
-        if (state.particles.length > C.maxParticles) {
-            state.particles.splice(0, state.particles.length - C.maxParticles);
-        }
+    function statusText() {
+        if (state.running && !state.paused) return "moving";
+        if (state.paused) return "paused";
+        if (state.time >= state.selectedPhase + 1) return "exited";
+        return "ready";
     }
 
-    function resetSimulation() {
-        state.time = 0;
-        state.nextSpawn = 0;
-        state.particles = [];
-        spawnParticle(state.selectedPhase, true);
+    function resetParticle() {
+        state.time = state.selectedPhase;
+        state.running = false;
+        state.paused = false;
+        state.particle = { trail: [] };
+        ui.pauseBtn.textContent = "Pause";
         syncLabels();
         drawMotion();
     }
 
-    function clearStream() {
-        state.particles = [];
-        state.nextSpawn = state.time;
-        spawnParticle(state.selectedPhase, true);
+    function releaseParticle() {
+        state.time = state.selectedPhase;
+        state.running = true;
+        state.paused = false;
+        state.particle = { trail: [] };
+        ui.pauseBtn.textContent = "Pause";
         syncLabels();
     }
 
     function update(dtSeconds) {
-        if (!state.running) return;
+        if (!state.running || state.paused) return;
         const dt = clamp(dtSeconds * C.timeScale, 0, 0.018);
         state.time += dt;
-        if (state.time > C.graphDuration) {
-            state.time = 0;
-            state.nextSpawn = 0;
-            state.particles = [];
-            spawnParticle(state.selectedPhase, true);
+        if (state.time >= state.selectedPhase + 1) {
+            state.time = state.selectedPhase + 1;
+            state.running = false;
         }
 
-        while (state.nextSpawn <= state.time) {
-            spawnParticle(state.nextSpawn, false);
-            state.nextSpawn += C.spawnInterval;
-        }
-
-        const highlightAge = state.time - state.selectedPhase;
-        const hasHighlight = state.particles.some((particle) => particle.highlighted);
-        if (!hasHighlight && highlightAge >= 0 && highlightAge <= 1.15) {
-            spawnParticle(state.selectedPhase, true);
-        }
-
-        for (const particle of state.particles) {
-            const age = state.time - particle.release;
-            if (age < 0 || age > 1.2) continue;
-            const pos = trajectoryAt(particle.release, Math.min(age, 1));
-            particle.trail.push({ x: pos.x, y: pos.y });
-            if (particle.trail.length > 36) {
-                particle.trail.shift();
-            }
-        }
-
-        state.particles = state.particles.filter((particle) => {
-            const age = state.time - particle.release;
-            return particle.highlighted || (age > -0.02 && age < 1.18);
-        });
+        const age = clamp(state.time - state.selectedPhase, 0, 1);
+        const pos = trajectoryAt(state.selectedPhase, age);
+        state.particle.trail.push({ x: pos.x, y: pos.y });
         syncLabels();
     }
 
@@ -303,42 +276,55 @@
     }
 
     function drawParticles(bounds) {
-        const ordered = [...state.particles].sort((a, b) => Number(a.highlighted) - Number(b.highlighted));
-        for (const particle of ordered) {
-            const age = state.time - particle.release;
-            if (age < 0 || age > 1.15) continue;
-            const pos = trajectoryAt(particle.release, Math.min(age, 1));
+        const age = clamp(state.time - state.selectedPhase, 0, 1);
+        const pos = trajectoryAt(state.selectedPhase, age);
+        const screen = worldToScreen(pos.x, pos.y, bounds);
+        drawTrail(bounds);
+        drawSwitchPoints(bounds);
+
+        const grad = mctx.createRadialGradient(screen.x, screen.y, 2, screen.x, screen.y, 24);
+        grad.addColorStop(0, "rgba(255, 249, 215, 0.98)");
+        grad.addColorStop(0.35, "rgba(230, 157, 40, 0.7)");
+        grad.addColorStop(1, "rgba(230, 157, 40, 0)");
+        mctx.fillStyle = grad;
+        mctx.beginPath();
+        mctx.arc(screen.x, screen.y, 24, 0, Math.PI * 2);
+        mctx.fill();
+
+        mctx.fillStyle = "#f7c44d";
+        mctx.strokeStyle = "#8f5d10";
+        mctx.lineWidth = 1.8;
+        mctx.beginPath();
+        mctx.arc(screen.x, screen.y, 9, 0, Math.PI * 2);
+        mctx.fill();
+        mctx.stroke();
+    }
+
+    function drawSwitchPoints(bounds) {
+        const start = state.selectedPhase;
+        const end = clamp(state.time, start, start + 1);
+        const firstSwitch = Math.ceil((start + 1e-9) / 0.5) * 0.5;
+        for (let t = firstSwitch; t <= end + 1e-9; t += 0.5) {
+            const age = t - start;
+            if (age < -1e-9 || age > 1 + 1e-9) continue;
+            const pos = trajectoryAt(start, age);
             const screen = worldToScreen(pos.x, pos.y, bounds);
-            if (screen.x < bounds.left - 8 || screen.x > bounds.right + 12) continue;
-
-            drawTrail(particle, bounds);
-            const radius = particle.highlighted ? 9 : 5;
-            const glow = particle.highlighted ? 24 : 13;
-            const grad = mctx.createRadialGradient(screen.x, screen.y, 2, screen.x, screen.y, glow);
-            grad.addColorStop(0, particle.highlighted ? "rgba(255, 249, 215, 0.98)" : "rgba(235, 241, 255, 0.95)");
-            grad.addColorStop(0.35, particle.highlighted ? "rgba(230, 157, 40, 0.7)" : "rgba(111, 91, 184, 0.45)");
-            grad.addColorStop(1, "rgba(111, 91, 184, 0)");
-            mctx.fillStyle = grad;
+            mctx.fillStyle = "#d64f62";
+            mctx.strokeStyle = "#ffffff";
+            mctx.lineWidth = 2;
             mctx.beginPath();
-            mctx.arc(screen.x, screen.y, glow, 0, Math.PI * 2);
-            mctx.fill();
-
-            mctx.fillStyle = particle.highlighted ? "#f7c44d" : "#6f5bb8";
-            mctx.strokeStyle = particle.highlighted ? "#8f5d10" : "#46347a";
-            mctx.lineWidth = 1.8;
-            mctx.beginPath();
-            mctx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
+            mctx.arc(screen.x, screen.y, 5.5, 0, Math.PI * 2);
             mctx.fill();
             mctx.stroke();
         }
     }
 
-    function drawTrail(particle, bounds) {
-        if (particle.trail.length < 2) return;
-        mctx.strokeStyle = particle.highlighted ? "rgba(230, 157, 40, 0.55)" : "rgba(111, 91, 184, 0.2)";
-        mctx.lineWidth = particle.highlighted ? 2.4 : 1.2;
+    function drawTrail(bounds) {
+        if (state.particle.trail.length < 2) return;
+        mctx.strokeStyle = "rgba(111, 91, 184, 0.55)";
+        mctx.lineWidth = 2.2;
         mctx.beginPath();
-        particle.trail.forEach((point, index) => {
+        state.particle.trail.forEach((point, index) => {
             const screen = worldToScreen(point.x, point.y, bounds);
             if (index === 0) mctx.moveTo(screen.x, screen.y);
             else mctx.lineTo(screen.x, screen.y);
@@ -531,10 +517,7 @@
 
     function onPhaseChange(value) {
         state.selectedPhase = Number(value);
-        state.particles = state.particles.filter((particle) => !particle.highlighted);
-        if (state.time >= state.selectedPhase && state.time <= state.selectedPhase + 1.15) {
-            spawnParticle(state.selectedPhase, true);
-        }
+        resetParticle();
         ui.phaseInput.value = String(state.selectedPhase);
         syncLabels();
         drawMotion();
@@ -553,12 +536,14 @@
     ui.presetButtons.forEach((button) => {
         button.addEventListener("click", () => onPhaseChange(button.dataset.phase));
     });
-    ui.playBtn.addEventListener("click", () => {
-        state.running = !state.running;
-        ui.playBtn.textContent = state.running ? "Pause" : "Play";
+    ui.releaseBtn.addEventListener("click", releaseParticle);
+    ui.pauseBtn.addEventListener("click", () => {
+        if (!state.running) return;
+        state.paused = !state.paused;
+        ui.pauseBtn.textContent = state.paused ? "Resume" : "Pause";
+        syncLabels();
     });
-    ui.clearBtn.addEventListener("click", clearStream);
-    ui.resetBtn.addEventListener("click", resetSimulation);
+    ui.resetBtn.addEventListener("click", resetParticle);
     window.addEventListener("resize", () => {
         resizeCanvas(motionCanvas, mctx);
         resizeCanvas(graphCanvas, gctx);
@@ -568,6 +553,6 @@
 
     resizeCanvas(motionCanvas, mctx);
     resizeCanvas(graphCanvas, gctx);
-    resetSimulation();
+    resetParticle();
     requestAnimationFrame(frame);
 })();
