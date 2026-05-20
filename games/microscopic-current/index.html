@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microscopic Current Simulation</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Microscopic Current Simulation</h1>
+            <p>Demonstrates the thermal motion of free electrons in a metal lattice and their directional drift under an external electric field.</p>
+        </header>
+        <main>
+            <div class="canvas-container">
+                <canvas id="simulationCanvas" width="800" height="400"></canvas>
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="electricField">External Electric Field: <span id="electricFieldValue">0</span> V/m</label>
+                    <input type="range" id="electricField" min="-10" max="10" step="0.5" value="0">
+                </div>
+                <div class="control-group">
+                    <label for="temperature">Temperature: <span id="temperatureValue">300</span> K</label>
+                    <input type="range" id="temperature" min="50" max="1000" step="50" value="300">
+                </div>
+                <div class="button-group">
+                    <button id="modeBtn" class="mode-btn">Switch to Realistic Mode</button>
+                    <button id="resetBtn">Reset</button>
+                </div>
+            </div>
+            <div id="modeDescription" class="mode-info">
+                <b>Exaggerated Mode:</b> Drift velocity is exaggerated to clearly show the directional movement of electrons.
+            </div>
+        </main>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>

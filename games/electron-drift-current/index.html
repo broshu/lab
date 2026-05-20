@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron Drift in a Copper Wire</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="top-bar">
+        <div>
+            <h1>Electron Drift in a Copper Wire</h1>
+            <p class="lede">A Drude-model view of conduction electrons inside a metal. Switch between an exaggerated demo and a quantitatively faithful copper simulation in SI units.</p>
+        </div>
+        <div class="readout">
+            <span>Active mode</span>
+            <strong id="modeReadout">Demo</strong>
+        </div>
+    </header>
+
+    <main class="layout">
+        <section class="panel controls-panel">
+            <div class="section-title">
+                <h2>Controls</h2>
+                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+            </div>
+
+            <div class="preset-group" aria-label="Simulation mode">
+                <span>Simulation mode</span>
+                <div class="segmented-control">
+                    <button class="mode-button active" type="button" data-mode="demo">Demo (visible drift)</button>
+                    <button class="mode-button" type="button" data-mode="real">Real copper (SI)</button>
+                </div>
+            </div>
+
+            <label class="slider-row" id="fieldRow">
+                <span>Electric field E</span>
+                <input id="fieldInput" type="range" min="-1" max="1" step="0.001" value="0.017">
+                <output id="fieldInputLabel">+17.0 mV/m</output>
+            </label>
+
+            <label class="slider-row" id="tempRow">
+                <span>Temperature T</span>
+                <input id="tempInput" type="range" min="4" max="600" step="1" value="293">
+                <output id="tempLabel">293 K</output>
+            </label>
+
+            <div class="toggles">
+                <label class="check-row">
+                    <input id="traceToggle" type="checkbox" checked>
+                    <span>Trace tagged electron</span>
+                </label>
+                <label class="check-row">
+                    <input id="fieldToggle" type="checkbox" checked>
+                    <span>Apply electric field</span>
+                </label>
+                <label class="check-row">
+                    <input id="pauseToggle" type="checkbox">
+                    <span>Pause animation</span>
+                </label>
+            </div>
+
+            <div class="formula-box">
+                <h3>Drude readouts (copper)</h3>
+                <p>Resistivity ρ(T)<strong id="rhoLabel">1.68 × 10⁻⁸ Ω·m</strong></p>
+                <p>Mean free time τ(T)<strong id="tauLabel">2.50 × 10⁻¹⁴ s</strong></p>
+                <p>Mean free path λ(T)<strong id="lambdaLabel">39.2 nm</strong></p>
+                <p>Fermi velocity v_F<strong id="fermiLabel">1.57 × 10⁶ m/s</strong></p>
+                <p>Drift velocity v_d<strong id="driftLabel">7.4 × 10⁻⁵ m/s</strong></p>
+                <p>Current density J<strong id="jLabel">1.00 × 10⁶ A/m²</strong></p>
+                <p>I in a 1 mm² wire<strong id="currentLabel">1.00 A</strong></p>
+            </div>
+
+            <div class="formula-box subtle">
+                <h3>Scale of view</h3>
+                <p>Window<strong id="windowWidthLabel">30 nm × 14 nm</strong></p>
+                <p>Atom spacing / radius<strong id="latticeLabel">0.256 / 0.128 nm</strong></p>
+                <p>Electrons shown / in slice<strong id="electronCountLabel">120 / ~9 100</strong></p>
+                <p>Animation time-scale<strong id="timeScaleLabel">1 s on screen ≈ 60 fs real</strong></p>
+                <p>Drift on screen per real second<strong id="driftPerSecLabel">−</strong></p>
+            </div>
+        </section>
+
+        <section class="panel wire-panel">
+            <div class="section-title">
+                <h2>Wire interior</h2>
+                <div class="legend">
+                    <span><i class="ion-swatch"></i>Cu atom (ion core)</span>
+                    <span><i class="electron-swatch"></i>Conduction electron</span>
+                    <span><i class="tagged-swatch"></i>Tagged electron</span>
+                    <span><i class="field-swatch"></i>E field direction</span>
+                </div>
+            </div>
+            <canvas id="wireCanvas" width="1100" height="520" aria-label="Conduction electrons drifting through a copper lattice"></canvas>
+            <p class="caption" id="caption">
+                Demo mode amplifies the drift so you can see net motion. Real mode runs with Drude parameters for copper at room temperature — drift is ~10¹⁰ times slower than the random Fermi motion.
+            </p>
+        </section>
+
+        <section class="panel chart-panel">
+            <div class="section-title">
+                <h2>Net charge flux through dashed cross-section</h2>
+                <div class="beam-readout">
+                    <span id="fluxLabel">N (right) − N (left) = 0</span>
+                </div>
+            </div>
+            <canvas id="chartCanvas" width="1100" height="220" aria-label="Cumulative electron crossings versus time"></canvas>
+        </section>
+    </main>
+
+    <footer>
+        <p>Physical constants used: electron charge e = 1.602 × 10⁻¹⁹ C, electron mass m = 9.109 × 10⁻³¹ kg, copper free-electron density n = 8.46 × 10²⁸ m⁻³, resistivity ρ(293 K) = 1.68 × 10⁻⁸ Ω·m. Temperature dependence is the Bloch–Grüneisen high-T limit: ρ(T) ≈ ρ_residual + (ρ₂₉₃ − ρ_residual)·T/293, with ρ_residual ≈ 1.5 × 10⁻¹¹ Ω·m for high-purity copper. Drift velocity from Drude: v_d = eEτ(T)/m. Random motion sampled at the Fermi speed v_F = √(2E_F/m) with E_F ≈ 7.00 eV — essentially T-independent because T ≪ T_F ≈ 8 × 10⁴ K. The (111) projection of fcc copper is shown with NN distance a = 0.256 nm and atoms drawn at the metallic radius a/2 = 0.128 nm, so nearest neighbours touch (2-D packing fraction ≈ 0.907). What is drawn is the Cu ion core, not the nucleus — the actual nucleus has r ≈ 1.2·A¹ᐟ³ fm ≈ 4.8 fm ≈ 5 × 10⁻⁶ nm, ~25 000 times smaller than a single pixel here and completely invisible at this scale.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
