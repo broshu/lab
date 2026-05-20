@@ -1,40 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microscopic Current Simulation</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>微观电流产生演示</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Microscopic Current Simulation</h1>
-            <p>Demonstrates the thermal motion of free electrons in a metal lattice and their directional drift under an external electric field.</p>
-        </header>
-        <main>
-            <div class="canvas-container">
-                <canvas id="simulationCanvas" width="800" height="400"></canvas>
-            </div>
-            <div class="controls">
-                <div class="control-group">
-                    <label for="electricField">External Electric Field: <span id="electricFieldValue">0</span> V/m</label>
-                    <input type="range" id="electricField" min="-10" max="10" step="0.5" value="0">
-                </div>
-                <div class="control-group">
-                    <label for="temperature">Temperature: <span id="temperatureValue">300</span> K</label>
-                    <input type="range" id="temperature" min="50" max="1000" step="50" value="300">
-                </div>
-                <div class="button-group">
-                    <button id="modeBtn" class="mode-btn">Switch to Realistic Mode</button>
-                    <button id="resetBtn">Reset</button>
-                </div>
-            </div>
-            <div id="modeDescription" class="mode-info">
-                <b>Exaggerated Mode:</b> Drift velocity is exaggerated to clearly show the directional movement of electrons.
-            </div>
-        </main>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Microscopic Current</p>
+      <h1>金属中电流怎样产生</h1>
+      <p class="lede">电子本来做无规则热运动；外加电场后，每个电子的高速乱运动上叠加很小的定向漂移，宏观上形成电流。</p>
     </div>
-    <script src="js/main.js"></script>
+    <a class="back-link" href="../../index.html">返回实验室</a>
+  </header>
+
+  <main class="app">
+    <section class="panel controls-panel">
+      <div class="mode-tabs" role="group" aria-label="演示模式">
+        <button class="mode-button active" id="diagramMode" type="button">示意图</button>
+        <button class="mode-button" id="realMode" type="button">实际情况</button>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>外加电场</h2>
+          <span class="status-pill" id="fieldStatus">未加电场</span>
+        </div>
+        <button class="field-switch" id="fieldToggle" type="button" aria-pressed="false">
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span id="fieldToggleText">接通电场</span>
+        </button>
+        <label class="slider-row">
+          <span>电场强度</span>
+          <input id="fieldStrength" type="range" min="0" max="100" value="55">
+          <strong id="fieldValue">55%</strong>
+        </label>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>观察控制</h2>
+          <span class="status-pill neutral" id="timeScaleText">时间 x1</span>
+        </div>
+        <label class="slider-row">
+          <span>电子数量</span>
+          <input id="electronCount" type="range" min="28" max="120" value="72">
+          <strong id="countValue">72</strong>
+        </label>
+        <label class="slider-row">
+          <span>时间倍率</span>
+          <input id="timeScale" type="range" min="0" max="4" step="1" value="1">
+          <strong id="timeValue">x3</strong>
+        </label>
+        <button class="secondary-button" id="resetButton" type="button">重新随机热运动</button>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <span>平均漂移速度</span>
+          <strong id="driftMetric">0.000 mm/s</strong>
+        </div>
+        <div class="metric">
+          <span>热运动速度</span>
+          <strong id="thermalMetric">约 1.6 x 10^6 m/s</strong>
+        </div>
+        <div class="metric">
+          <span>电流方向</span>
+          <strong id="currentMetric">无净电流</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage-panel">
+      <div class="stage-header">
+        <div>
+          <h2 id="stageTitle">示意图模式</h2>
+          <p id="stageSubtitle">电子被画大、速度被调慢，用来突出“随机运动 + 定向漂移”的关系。</p>
+        </div>
+        <div class="legend">
+          <span><i class="legend-dot nucleus"></i>金属离子</span>
+          <span><i class="legend-dot electron"></i>自由电子</span>
+          <span><i class="legend-line"></i>漂移方向</span>
+        </div>
+      </div>
+      <canvas id="currentCanvas" width="1100" height="650"></canvas>
+      <div class="readout-strip">
+        <span id="scaleReadout">示意图：尺寸和速度经过教学放大</span>
+        <span id="motionReadout">当前：只有无规则热运动</span>
+      </div>
+    </section>
+
+    <section class="panel explanation-panel">
+      <h2>课堂要点</h2>
+      <div class="concept-grid">
+        <div>
+          <h3>没加电场</h3>
+          <p>电子向各个方向高速运动，任意方向的平均速度约为 0，所以没有持续的宏观电流。</p>
+        </div>
+        <div>
+          <h3>加上电场</h3>
+          <p>电子仍然高速乱运动，但会叠加一个很小的反电场方向漂移速度；电流方向按正电荷运动方向定义，和电子漂移方向相反。</p>
+        </div>
+        <div>
+          <h3>实际情况模式</h3>
+          <p>采用铜的量级：原子半径约 128 pm，原子核半径约 4.8 fm，核半径只有原子半径的约 1/27000；漂移速度远小于热运动速度。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
 </body>
 </html>

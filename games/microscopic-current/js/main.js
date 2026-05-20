@@ -1,325 +1,520 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const canvas = document.getElementById('simulationCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    const electricFieldSlider = document.getElementById('electricField');
-    const electricFieldValue = document.getElementById('electricFieldValue');
-    const temperatureSlider = document.getElementById('temperature');
-    const temperatureValue = document.getElementById('temperatureValue');
-    const modeBtn = document.getElementById('modeBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const modeDescription = document.getElementById('modeDescription');
+const canvas = document.querySelector("#currentCanvas");
+const ctx = canvas.getContext("2d");
 
-    let animationId;
-    
-    // Simulation parameters
-    let electricField = 0; // V/m
-    let temperatureK = 300; // Kelvin
-    let isRealisticMode = false;
-    
-    const nuclei = [];
-    const electrons = [];
-    
-    // Configurations for the two modes
-    const CONFIG = {
-        exaggerated: {
-            spacing: 80,
-            nucleusRadius: 15,
-            electronRadius: 4,
-            q_over_m: 0.08,
-            numElectrons: 120,
-            classicalScattering: true,
-            speedFactor: 1,
-            description: `<b>Exaggerated Mode (Classical Drude Model):</b><br>
-                - <b>Drift Velocity:</b> Exaggerated to clearly show current.<br>
-                - <b>Scattering:</b> Electrons act as classical particles bouncing off "solid" nuclei.<br>
-                - <b>Size:</b> Nuclei are drawn small and widely spaced for visibility.`
-        },
-        realistic: {
-            // At this scale, 1 pixel is roughly 0.008 nm.
-            spacing: 32, // Copper lattice spacing is ~0.25 nm (32 pixels)
-            ionCoreRadius: 15, // Atoms are tightly packed, nearly touching
-            electronRadius: 2, // Approaching a point particle
-            q_over_m: 0.0000001, // Drift is near zero visually
-            numElectrons: 400, // More electrons because the lattice is denser
-            classicalScattering: false, // Quantum Bloch wave behavior
-            mfpPixels: 5000, // Mean Free Path is ~40 nm (5000 pixels)
-            speedFactor: 1.5,
-            description: `<b>Realistic Mode (Quantum & True Scale):</b><br>
-                - <b>Sizes:</b> The faint red areas are <b>Ion Cores</b> (~0.25nm), tightly packed. The bright red dots are the actual <b>Nuclei</b> (100,000x smaller in reality).<br>
-                - <b>Speeds:</b> Thermal speed (~1,000,000 m/s) completely dwarfs Drift speed (~0.1 mm/s at 10 Amps). The directional current is imperceptible.<br>
-                - <b>Scattering:</b> Electrons are quantum waves. They pass perfectly <i>through</i> the lattice without bouncing. They only scatter off thermal vibrations (phonons) every ~40nm (far off-screen).`
-        }
+const diagramModeButton = document.querySelector("#diagramMode");
+const realModeButton = document.querySelector("#realMode");
+const fieldToggle = document.querySelector("#fieldToggle");
+const fieldToggleText = document.querySelector("#fieldToggleText");
+const fieldStatus = document.querySelector("#fieldStatus");
+const fieldStrength = document.querySelector("#fieldStrength");
+const electronCount = document.querySelector("#electronCount");
+const timeScale = document.querySelector("#timeScale");
+const resetButton = document.querySelector("#resetButton");
+const fieldValue = document.querySelector("#fieldValue");
+const countValue = document.querySelector("#countValue");
+const timeValue = document.querySelector("#timeValue");
+const timeScaleText = document.querySelector("#timeScaleText");
+const driftMetric = document.querySelector("#driftMetric");
+const thermalMetric = document.querySelector("#thermalMetric");
+const currentMetric = document.querySelector("#currentMetric");
+const stageTitle = document.querySelector("#stageTitle");
+const stageSubtitle = document.querySelector("#stageSubtitle");
+const scaleReadout = document.querySelector("#scaleReadout");
+const motionReadout = document.querySelector("#motionReadout");
+
+const PHYSICS = {
+  atomRadiusM: 128e-12,
+  nucleusRadiusM: 4.8e-15,
+  thermalSpeed: 1.6e6,
+  maxDriftSpeed: 4e-3
+};
+
+const state = {
+  mode: "diagram",
+  fieldOn: false,
+  field: 0.55,
+  count: 72,
+  timeLevel: 1,
+  lastTime: performance.now(),
+  electrons: [],
+  ions: [],
+  driftAccumulator: 0,
+  scatterClock: 0
+};
+
+const timeMultipliers = [1, 3, 10, 30, 100];
+
+function rand(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function setCanvasSize() {
+  const rect = canvas.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(320, Math.floor(rect.width * ratio));
+  canvas.height = Math.max(320, Math.floor(rect.height * ratio));
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+}
+
+function stageBounds() {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    w: rect.width,
+    h: rect.height,
+    left: 38,
+    right: rect.width - 38,
+    top: 54,
+    bottom: rect.height - 42
+  };
+}
+
+function makeIons() {
+  const b = stageBounds();
+  const cols = state.mode === "diagram" ? 9 : 12;
+  const rows = state.mode === "diagram" ? 5 : 7;
+  const ions = [];
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) {
+      ions.push({
+        x: b.left + (x + 0.5) * ((b.right - b.left) / cols),
+        y: b.top + (y + 0.5) * ((b.bottom - b.top) / rows),
+        phase: rand(0, Math.PI * 2)
+      });
+    }
+  }
+  state.ions = ions;
+}
+
+function makeElectrons() {
+  const b = stageBounds();
+  const electrons = [];
+  for (let i = 0; i < state.count; i += 1) {
+    const angle = rand(0, Math.PI * 2);
+    electrons.push({
+      x: rand(b.left, b.right),
+      y: rand(b.top, b.bottom),
+      vx: Math.cos(angle),
+      vy: Math.sin(angle),
+      spin: rand(0, Math.PI * 2),
+      trail: []
+    });
+  }
+  state.electrons = electrons;
+  state.driftAccumulator = 0;
+}
+
+function resetSimulation() {
+  makeIons();
+  makeElectrons();
+}
+
+function actualDriftSpeed() {
+  return state.fieldOn ? PHYSICS.maxDriftSpeed * state.field : 0;
+}
+
+function visualSpeeds() {
+  if (state.mode === "diagram") {
+    return {
+      random: 58,
+      drift: state.fieldOn ? 42 * state.field : 0,
+      electronRadius: 4.2,
+      ionRadius: 13,
+      nucleusRadius: 6,
+      atomRadius: 24
     };
-    
-    let currentConfig = CONFIG.exaggerated;
-    
-    class Nucleus {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.baseX = x;
-            this.baseY = y;
-            this.phase = Math.random() * Math.PI * 2;
-        }
-        
-        update() {
-            // Thermal vibration (amplitude scales roughly with sqrt of Temperature)
-            const tempRatio = Math.sqrt(temperatureK / 300);
-            const vibrationAmp = 3 * tempRatio * (isRealisticMode ? 0.2 : 0.4);
-            this.x = this.baseX + Math.sin(this.phase) * vibrationAmp;
-            this.y = this.baseY + Math.cos(this.phase) * vibrationAmp;
-            this.phase += (isRealisticMode ? 0.4 : 0.2);
-        }
-        
-        draw(ctx) {
-            if (isRealisticMode) {
-                // Draw Ion Core (Electron cloud minus conduction electron)
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, currentConfig.ionCoreRadius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 100, 100, 0.15)';
-                ctx.fill();
-                
-                // Draw literal Nucleus (Extremely small)
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
-                ctx.fill();
-            } else {
-                // Draw classical exaggerated nucleus
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, currentConfig.nucleusRadius, 0, Math.PI * 2);
-                ctx.fillStyle = '#ff4d4d'; 
-                ctx.fill();
-                
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 18px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('+', this.x, this.y);
-            }
-        }
-    }
-    
-    class Electron {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.randomizeVelocity();
-            const brightness = Math.floor(180 + Math.random() * 75);
-            this.color = isRealisticMode ? `rgba(50, 150, ${brightness}, 0.7)` : `rgb(50, 150, ${brightness})`;
-        }
-        
-        randomizeVelocity() {
-            // Quantum Gas (Realistic): thermal speed is Fermi velocity, mostly constant vs T
-            // Classical Gas (Exaggerated): thermal speed proportional to sqrt(T)
-            const baseSpeed = isRealisticMode ? 3 : 3 * Math.sqrt(temperatureK / 300);
-            const speed = baseSpeed * currentConfig.speedFactor * (0.8 + Math.random() * 0.4);
-            const angle = Math.random() * Math.PI * 2;
-            this.vx = Math.cos(angle) * speed;
-            this.vy = Math.sin(angle) * speed;
-        }
-        
-        update() {
-            const ax = -electricField * currentConfig.q_over_m; 
-            
-            this.vx += ax;
-            this.x += this.vx;
-            this.y += this.vy;
-            
-            // Boundary collision
-            if (this.x < 0) {
-                this.x += canvas.width;
-            } else if (this.x > canvas.width) {
-                this.x -= canvas.width;
-            }
-            
-            if (this.y < 0) {
-                this.y = 0;
-                this.vy *= -1;
-            } else if (this.y > canvas.height) {
-                this.y = canvas.height;
-                this.vy *= -1;
-            }
-            
-            if (currentConfig.classicalScattering) {
-                // Classical billiard-ball collision
-                for (let n of nuclei) {
-                    const dx = this.x - n.x;
-                    const dy = this.y - n.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist < currentConfig.nucleusRadius + currentConfig.electronRadius) {
-                        this.randomizeVelocity();
-                        this.x = n.x + (dx / dist) * (currentConfig.nucleusRadius + currentConfig.electronRadius + 1);
-                        this.y = n.y + (dy / dist) * (currentConfig.nucleusRadius + currentConfig.electronRadius + 1);
-                    }
-                }
-            } else {
-                // Quantum Mean Free Path (MFP) scattering
-                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                // MFP is roughly inversely proportional to Temperature (phonon scattering)
-                const currentMFP = currentConfig.mfpPixels * (300 / temperatureK);
-                // Probability of scattering in this frame = Distance traveled / MFP
-                const scatterProb = speed / currentMFP; 
-                
-                if (Math.random() < scatterProb) {
-                    this.randomizeVelocity();
-                }
-            }
-        }
-        
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, currentConfig.electronRadius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            
-            if (!isRealisticMode) {
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 10px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('-', this.x, this.y);
-            }
-        }
-    }
-    
-    function init() {
-        nuclei.length = 0;
-        electrons.length = 0;
-        
-        // Create nuclei lattice
-        for (let x = currentConfig.spacing / 2; x < canvas.width; x += currentConfig.spacing) {
-            for (let y = currentConfig.spacing / 2; y < canvas.height; y += currentConfig.spacing) {
-                nuclei.push(new Nucleus(x, y));
-            }
-        }
-        
-        // Create electrons
-        for (let i = 0; i < currentConfig.numElectrons; i++) {
-            const x = Math.random() * canvas.width;
-            const y = Math.random() * canvas.height;
-            electrons.push(new Electron(x, y));
-        }
-        
-        if (!animationId) {
-            animate();
-        }
-    }
-    
-    function animate() {
-        // Clear background
-        ctx.fillStyle = isRealisticMode ? '#f0f0f0' : 'rgba(20, 20, 20, 0.4)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        for (let n of nuclei) {
-            n.update();
-            n.draw(ctx);
-        }
-        
-        for (let e of electrons) {
-            e.update();
-            e.draw(ctx);
-        }
-        
-        if (Math.abs(electricField) > 0.1) {
-            drawElectricFieldIndicator();
-        }
-        
-        animationId = requestAnimationFrame(animate);
-    }
-    
-    function drawElectricFieldIndicator() {
-        ctx.save();
-        ctx.fillStyle = isRealisticMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.5)';
-        ctx.font = '20px Arial';
-        ctx.textAlign = 'center';
-        
-        const arrowLength = Math.min(Math.abs(electricField) * 15, 150);
-        const startX = canvas.width / 2 - (electricField > 0 ? arrowLength/2 : -arrowLength/2);
-        const endX = canvas.width / 2 + (electricField > 0 ? arrowLength/2 : -arrowLength/2);
-        const y = 30;
-        
-        ctx.beginPath();
-        ctx.moveTo(startX, y);
-        ctx.lineTo(endX, y);
-        ctx.strokeStyle = isRealisticMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.7)';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        
-        ctx.beginPath();
-        if (electricField > 0) {
-            ctx.moveTo(endX, y);
-            ctx.lineTo(endX - 10, y - 5);
-            ctx.lineTo(endX - 10, y + 5);
-        } else {
-            ctx.moveTo(endX, y);
-            ctx.lineTo(endX + 10, y - 5);
-            ctx.lineTo(endX + 10, y + 5);
-        }
-        ctx.fill();
-        
-        ctx.fillText(`Electric Field E`, canvas.width / 2, y + 25);
-        ctx.restore();
-    }
-    
-    // Event listeners
-    electricFieldSlider.addEventListener('input', (e) => {
-        electricField = parseFloat(e.target.value);
-        electricFieldValue.textContent = electricField;
-    });
-    
-    temperatureSlider.addEventListener('input', (e) => {
-        const oldTemp = temperatureK;
-        temperatureK = parseFloat(e.target.value);
-        temperatureValue.textContent = temperatureK;
-        
-        if (!isRealisticMode) {
-            // Classical mode: adjust current electron speeds
-            const ratio = Math.sqrt(temperatureK / oldTemp);
-            for(let electron of electrons) {
-                 electron.vx *= ratio;
-                 electron.vy *= ratio;
-            }
-        }
-    });
+  }
 
-    modeBtn.addEventListener('click', () => {
-        isRealisticMode = !isRealisticMode;
-        currentConfig = isRealisticMode ? CONFIG.realistic : CONFIG.exaggerated;
-        
-        if (isRealisticMode) {
-            modeBtn.textContent = "Switch to Exaggerated Mode";
-            modeBtn.style.backgroundColor = "#ffc107"; // Yellow for warning
-            modeBtn.style.color = "#212529";
-        } else {
-            modeBtn.textContent = "Switch to Realistic Mode";
-            modeBtn.style.backgroundColor = "#28a745"; // Green for safe
-            modeBtn.style.color = "white";
-        }
-        
-        modeDescription.innerHTML = currentConfig.description;
-        
-        // Re-initialize to apply new spatial scales and electron counts
-        init();
-    });
-    
-    resetBtn.addEventListener('click', () => {
-        electricFieldSlider.value = 0;
-        temperatureSlider.value = 300;
-        electricField = 0;
-        temperatureK = 300;
-        electricFieldValue.textContent = "0";
-        temperatureValue.textContent = "300";
-        if (isRealisticMode) {
-            modeBtn.click(); // Reset mode too
-        } else {
-            init(); // Just reset positions
-        }
-    });
-    
-    // Start simulation
-    modeDescription.innerHTML = currentConfig.description;
-    init();
+  const driftRatio = actualDriftSpeed() / PHYSICS.thermalSpeed;
+  return {
+    random: 105,
+    drift: 105 * driftRatio,
+    electronRadius: 2.4,
+    ionRadius: 18,
+    nucleusRadius: 18 * (PHYSICS.nucleusRadiusM / PHYSICS.atomRadiusM),
+    atomRadius: 18
+  };
+}
+
+function updateControls() {
+  fieldValue.textContent = `${Math.round(state.field * 100)}%`;
+  countValue.textContent = String(state.count);
+  const multiplier = timeMultipliers[state.timeLevel];
+  timeValue.textContent = `x${multiplier}`;
+  timeScaleText.textContent = `时间 x${multiplier}`;
+
+  fieldToggle.classList.toggle("active", state.fieldOn);
+  fieldToggle.setAttribute("aria-pressed", String(state.fieldOn));
+  fieldToggleText.textContent = state.fieldOn ? "断开电场" : "接通电场";
+  fieldStatus.textContent = state.fieldOn ? "已加电场" : "未加电场";
+  fieldStatus.classList.toggle("on", state.fieldOn);
+
+  diagramModeButton.classList.toggle("active", state.mode === "diagram");
+  realModeButton.classList.toggle("active", state.mode === "real");
+
+  const drift = actualDriftSpeed();
+  driftMetric.textContent = `${(drift * 1000).toFixed(3)} mm/s`;
+  thermalMetric.textContent = state.mode === "real" ? "约 1.6 x 10^6 m/s" : "教学慢放显示";
+  currentMetric.textContent = state.fieldOn ? "向右（电子向左漂移）" : "无净电流";
+
+  if (state.mode === "diagram") {
+    stageTitle.textContent = "示意图模式";
+    stageSubtitle.textContent = "电子、原子和漂移速度都被教学放大，便于直接看出电子在随机运动中叠加了定向移动。";
+    scaleReadout.textContent = "示意图：尺寸和速度经过教学放大";
+  } else {
+    const ratio = Math.round(PHYSICS.atomRadiusM / PHYSICS.nucleusRadiusM);
+    stageTitle.textContent = "实际情况模式";
+    stageSubtitle.textContent = "按铜的数量级保留半径比例和速度比例：核极小、电子热运动极快、漂移速度极慢。";
+    scaleReadout.textContent = `真实比例：原子半径 128 pm，核半径 4.8 fm，半径比约 ${ratio}:1`;
+  }
+  motionReadout.textContent = state.fieldOn
+    ? "当前：无规则热运动上叠加极小的电子定向漂移"
+    : "当前：只有无规则热运动，平均速度约为 0";
+}
+
+function scatterElectrons(dt) {
+  state.scatterClock += dt;
+  const interval = state.mode === "diagram" ? 0.8 : 0.18;
+  if (state.scatterClock < interval) {
+    return;
+  }
+  state.scatterClock = 0;
+  const chance = state.mode === "diagram" ? 0.18 : 0.35;
+  state.electrons.forEach((electron) => {
+    if (Math.random() < chance) {
+      const angle = rand(0, Math.PI * 2);
+      electron.vx = Math.cos(angle);
+      electron.vy = Math.sin(angle);
+    }
+  });
+}
+
+function updateElectrons(dt) {
+  const b = stageBounds();
+  const speeds = visualSpeeds();
+  const multiplier = timeMultipliers[state.timeLevel];
+  const effectiveDt = Math.min(dt, 0.04) * multiplier;
+  scatterElectrons(effectiveDt);
+
+  const driftDirection = -1;
+  state.driftAccumulator += speeds.drift * effectiveDt * driftDirection;
+
+  state.electrons.forEach((electron) => {
+    electron.x += electron.vx * speeds.random * effectiveDt + driftDirection * speeds.drift * effectiveDt;
+    electron.y += electron.vy * speeds.random * effectiveDt;
+    electron.spin += effectiveDt * 5;
+
+    if (electron.x < b.left) electron.x = b.right;
+    if (electron.x > b.right) electron.x = b.left;
+    if (electron.y < b.top) electron.y = b.bottom;
+    if (electron.y > b.bottom) electron.y = b.top;
+
+    electron.trail.push({ x: electron.x, y: electron.y });
+    const trailLength = state.mode === "diagram" ? 14 : 7;
+    if (electron.trail.length > trailLength) {
+      electron.trail.shift();
+    }
+  });
+}
+
+function clear() {
+  const b = stageBounds();
+  ctx.clearRect(0, 0, b.w, b.h);
+  ctx.fillStyle = "#f9fbfd";
+  ctx.fillRect(0, 0, b.w, b.h);
+}
+
+function drawGrid() {
+  const b = stageBounds();
+  ctx.save();
+  ctx.strokeStyle = "#dfe6ee";
+  ctx.lineWidth = 1;
+  for (let x = b.left; x <= b.right; x += 48) {
+    ctx.beginPath();
+    ctx.moveTo(x, b.top);
+    ctx.lineTo(x, b.bottom);
+    ctx.stroke();
+  }
+  for (let y = b.top; y <= b.bottom; y += 48) {
+    ctx.beginPath();
+    ctx.moveTo(b.left, y);
+    ctx.lineTo(b.right, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function arrow(x1, y1, x2, y2, color, label) {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 12 * Math.cos(angle - 0.45), y2 - 12 * Math.sin(angle - 0.45));
+  ctx.lineTo(x2 - 12 * Math.cos(angle + 0.45), y2 - 12 * Math.sin(angle + 0.45));
+  ctx.closePath();
+  ctx.fill();
+  ctx.font = "700 13px Inter, sans-serif";
+  ctx.fillText(label, x1, y1 - 10);
+  ctx.restore();
+}
+
+function drawField() {
+  const b = stageBounds();
+  ctx.save();
+  if (state.fieldOn) {
+    const alpha = 0.15 + state.field * 0.18;
+    ctx.fillStyle = `rgba(210, 71, 59, ${alpha})`;
+    ctx.fillRect(b.left, b.top, b.right - b.left, b.bottom - b.top);
+    for (let y = b.top + 30; y < b.bottom; y += 58) {
+      arrow(b.left + 16, y, b.left + 92 + state.field * 42, y, "#d2473b", y === b.top + 30 ? "E" : "");
+    }
+    arrow(b.right - 190, b.bottom + 18, b.right - 64, b.bottom + 18, "#14936f", "电流方向");
+    arrow(b.right - 64, b.bottom + 34, b.right - 190, b.bottom + 34, "#2576d6", "电子漂移");
+  } else {
+    ctx.fillStyle = "rgba(128, 135, 146, 0.05)";
+    ctx.fillRect(b.left, b.top, b.right - b.left, b.bottom - b.top);
+  }
+  ctx.strokeStyle = "#cfd8e4";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(b.left, b.top, b.right - b.left, b.bottom - b.top);
+  ctx.restore();
+}
+
+function drawIons() {
+  const speeds = visualSpeeds();
+  ctx.save();
+  state.ions.forEach((ion) => {
+    const wobble = state.mode === "diagram" ? Math.sin(performance.now() / 400 + ion.phase) * 1.2 : 0;
+    const x = ion.x + wobble;
+    const y = ion.y - wobble;
+
+    if (state.mode === "real") {
+      ctx.strokeStyle = "rgba(184, 135, 31, 0.28)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x, y, speeds.atomRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = state.mode === "real" ? "rgba(194, 74, 90, 0.85)" : "#c24a5a";
+    ctx.beginPath();
+    ctx.arc(x, y, state.mode === "real" ? 0.9 : speeds.nucleusRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (state.mode === "diagram") {
+      ctx.strokeStyle = "rgba(194, 74, 90, 0.24)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, speeds.ionRadius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 13px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("+", x, y + 0.5);
+    }
+  });
+  ctx.restore();
+}
+
+function drawElectrons() {
+  const speeds = visualSpeeds();
+  ctx.save();
+  state.electrons.forEach((electron) => {
+    if (electron.trail.length > 1) {
+      ctx.beginPath();
+      electron.trail.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.strokeStyle = state.mode === "diagram" ? "rgba(37, 118, 214, 0.24)" : "rgba(37, 118, 214, 0.16)";
+      ctx.lineWidth = state.mode === "diagram" ? 2 : 1;
+      ctx.stroke();
+    }
+
+    const radius = speeds.electronRadius;
+    ctx.fillStyle = "#2576d6";
+    ctx.beginPath();
+    ctx.arc(electron.x, electron.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (state.mode === "diagram") {
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(electron.x - radius * 0.55, electron.y);
+      ctx.lineTo(electron.x + radius * 0.55, electron.y);
+      ctx.stroke();
+    }
+  });
+  ctx.restore();
+}
+
+function drawActualMagnifier() {
+  if (state.mode !== "real") {
+    return;
+  }
+
+  const b = stageBounds();
+  const cx = b.left + 136;
+  const cy = b.top + 112;
+  const outer = 76;
+  const nucleusVisible = outer * (PHYSICS.nucleusRadiusM / PHYSICS.atomRadiusM);
+
+  ctx.save();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+  ctx.strokeStyle = "#bfc9d6";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, outer, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(184, 135, 31, 0.5)";
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.arc(cx, cy, outer * 0.74, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = "#c24a5a";
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(0.35, nucleusVisible), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#203247";
+  ctx.font = "800 13px Inter, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("原子半径", cx, cy + outer + 22);
+  ctx.fillStyle = "#647084";
+  ctx.font = "700 12px Inter, sans-serif";
+  ctx.fillText("中心核小于 1 像素", cx, cy + outer + 39);
+  ctx.restore();
+}
+
+function drawDriftMeter() {
+  const b = stageBounds();
+  const x = b.left + 22;
+  const y = b.bottom - 82;
+  const width = 210;
+  const height = 44;
+  const drift = actualDriftSpeed();
+  const ratio = drift / PHYSICS.thermalSpeed;
+
+  ctx.save();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.strokeStyle = "#d1dae5";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(x, y, width, height, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#647084";
+  ctx.font = "700 12px Inter, sans-serif";
+  ctx.fillText("漂移/热运动速度比", x + 12, y + 17);
+  ctx.fillStyle = "#17212f";
+  ctx.font = "800 13px Inter, sans-serif";
+  const ratioText = state.fieldOn ? `约 1 : ${Math.round(1 / Math.max(ratio, 1e-12)).toLocaleString("en-US")}` : "0";
+  ctx.fillText(ratioText, x + 12, y + 34);
+  ctx.restore();
+}
+
+function drawCaption() {
+  const b = stageBounds();
+  ctx.save();
+  ctx.fillStyle = "#223247";
+  ctx.font = "800 15px Inter, sans-serif";
+  ctx.fillText(state.fieldOn ? "接通电场：电子整体缓慢向左漂移" : "未加电场：电子只有无规则热运动", b.left, 30);
+  ctx.fillStyle = "#65758a";
+  ctx.font = "700 12px Inter, sans-serif";
+  const text = state.mode === "real"
+    ? "蓝点是电子位置标记；电子半径不按比例绘制，因为电子在本模型中视为点粒子。"
+    : "示意图中电子和离子被画大，便于观察方向关系。";
+  ctx.fillText(text, b.left, 48);
+  ctx.restore();
+}
+
+function render() {
+  clear();
+  drawGrid();
+  drawField();
+  drawIons();
+  drawElectrons();
+  drawActualMagnifier();
+  drawDriftMeter();
+  drawCaption();
+}
+
+function frame(now) {
+  const dt = (now - state.lastTime) / 1000;
+  state.lastTime = now;
+  updateElectrons(dt);
+  render();
+  requestAnimationFrame(frame);
+}
+
+diagramModeButton.addEventListener("click", () => {
+  state.mode = "diagram";
+  updateControls();
+  resetSimulation();
 });
+
+realModeButton.addEventListener("click", () => {
+  state.mode = "real";
+  updateControls();
+  resetSimulation();
+});
+
+fieldToggle.addEventListener("click", () => {
+  state.fieldOn = !state.fieldOn;
+  updateControls();
+});
+
+fieldStrength.addEventListener("input", (event) => {
+  state.field = Number(event.target.value) / 100;
+  updateControls();
+});
+
+electronCount.addEventListener("input", (event) => {
+  state.count = Number(event.target.value);
+  updateControls();
+  makeElectrons();
+});
+
+timeScale.addEventListener("input", (event) => {
+  state.timeLevel = Number(event.target.value);
+  updateControls();
+});
+
+resetButton.addEventListener("click", resetSimulation);
+
+window.addEventListener("resize", () => {
+  setCanvasSize();
+  resetSimulation();
+});
+
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function roundRect(x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height / 2);
+    this.beginPath();
+    this.moveTo(x + r, y);
+    this.arcTo(x + width, y, x + width, y + height, r);
+    this.arcTo(x + width, y + height, x, y + height, r);
+    this.arcTo(x, y + height, x, y, r);
+    this.arcTo(x, y, x + width, y, r);
+    this.closePath();
+    return this;
+  };
+}
+
+setCanvasSize();
+updateControls();
+resetSimulation();
+requestAnimationFrame(frame);
