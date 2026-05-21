@@ -9,10 +9,12 @@ const fieldStatus = document.querySelector("#fieldStatus");
 const fieldStrength = document.querySelector("#fieldStrength");
 const electronCount = document.querySelector("#electronCount");
 const timeScale = document.querySelector("#timeScale");
+const temperatureControl = document.querySelector("#temperatureControl");
 const resetButton = document.querySelector("#resetButton");
 const fieldValue = document.querySelector("#fieldValue");
 const countValue = document.querySelector("#countValue");
 const timeValue = document.querySelector("#timeValue");
+const temperatureValue = document.querySelector("#temperatureValue");
 const timeScaleText = document.querySelector("#timeScaleText");
 const driftMetric = document.querySelector("#driftMetric");
 const thermalMetric = document.querySelector("#thermalMetric");
@@ -25,6 +27,7 @@ const motionReadout = document.querySelector("#motionReadout");
 const PHYSICS = {
   atomRadiusM: 128e-12,
   nucleusRadiusM: 4.8e-15,
+  referenceTemperatureK: 300,
   thermalSpeed: 1.6e6,
   maxDriftSpeed: 4e-3
 };
@@ -41,6 +44,7 @@ const state = {
   fieldOn: false,
   field: 0.55,
   count: 72,
+  temperatureK: 300,
   timeLevel: 1,
   lastTime: performance.now(),
   electrons: [],
@@ -119,10 +123,23 @@ function actualDriftSpeed() {
   return state.fieldOn ? PHYSICS.maxDriftSpeed * state.field : 0;
 }
 
+function temperatureFactor() {
+  return Math.sqrt(state.temperatureK / PHYSICS.referenceTemperatureK);
+}
+
+function actualThermalSpeed() {
+  return PHYSICS.thermalSpeed * temperatureFactor();
+}
+
+function formatThermalSpeed(speed) {
+  return `about ${(speed / 1e6).toFixed(2)} x 10^6 m/s`;
+}
+
 function visualSpeeds() {
+  const thermalFactor = temperatureFactor();
   if (state.mode === "diagram") {
     return {
-      random: 58,
+      random: 58 * thermalFactor,
       drift: state.fieldOn ? 42 * state.field : 0,
       electronRadius: 4.2,
       ionRadius: 13,
@@ -131,10 +148,10 @@ function visualSpeeds() {
     };
   }
 
-  const driftRatio = actualDriftSpeed() / PHYSICS.thermalSpeed;
+  const driftRatio = actualDriftSpeed() / actualThermalSpeed();
   return {
-    random: 105,
-    drift: 105 * driftRatio,
+    random: 105 * thermalFactor,
+    drift: 105 * thermalFactor * driftRatio,
     electronRadius: 2.4,
     ionRadius: 18,
     nucleusRadius: 18 * (PHYSICS.nucleusRadiusM / PHYSICS.atomRadiusM),
@@ -148,6 +165,7 @@ function updateControls() {
   const multiplier = timeMultipliers[state.timeLevel];
   timeValue.textContent = `x${multiplier}`;
   timeScaleText.textContent = `Time x${multiplier}`;
+  temperatureValue.textContent = `${state.temperatureK} K`;
 
   fieldToggle.classList.toggle("active", state.fieldOn);
   fieldToggle.setAttribute("aria-pressed", String(state.fieldOn));
@@ -160,12 +178,12 @@ function updateControls() {
 
   const drift = actualDriftSpeed();
   driftMetric.textContent = `${(drift * 1000).toFixed(3)} mm/s`;
-  thermalMetric.textContent = state.mode === "real" ? "about 1.6 x 10^6 m/s" : "slowed for teaching";
+  thermalMetric.textContent = formatThermalSpeed(actualThermalSpeed());
   currentMetric.textContent = state.fieldOn ? "Right; electrons drift left" : "No net current";
 
   if (state.mode === "diagram") {
     stageTitle.textContent = "Diagram Mode";
-    stageSubtitle.textContent = "Electrons, atoms, and drift speed are exaggerated so the directed drift can be seen on top of random motion.";
+    stageSubtitle.textContent = "Electrons, atoms, and drift speed are exaggerated so directed drift and temperature-driven thermal motion are visible.";
     scaleReadout.textContent = "Diagram: size and speed are exaggerated for teaching";
   } else {
     const ratio = Math.round(PHYSICS.atomRadiusM / PHYSICS.nucleusRadiusM);
@@ -174,13 +192,13 @@ function updateControls() {
     scaleReadout.textContent = `Real scale: atomic radius ${REAL_SCALE.atomRadius}; nuclear radius ${REAL_SCALE.nucleusRadius}; radius ratio about ${ratio.toLocaleString("en-US")}:1`;
   }
   motionReadout.textContent = state.fieldOn
-    ? "Current state: random thermal motion plus a tiny directed electron drift"
-    : "Current state: random thermal motion only; average velocity is about 0";
+    ? `Current state: random thermal motion at ${state.temperatureK} K plus a tiny directed electron drift`
+    : `Current state: random thermal motion at ${state.temperatureK} K; average velocity is about 0`;
 }
 
 function scatterElectrons(dt) {
   state.scatterClock += dt;
-  const interval = state.mode === "diagram" ? 0.8 : 0.18;
+  const interval = (state.mode === "diagram" ? 0.8 : 0.18) / Math.max(0.65, temperatureFactor());
   if (state.scatterClock < interval) {
     return;
   }
@@ -459,7 +477,7 @@ function drawDriftMeter() {
   const width = 210;
   const height = 44;
   const drift = actualDriftSpeed();
-  const ratio = drift / PHYSICS.thermalSpeed;
+  const ratio = drift / actualThermalSpeed();
 
   ctx.save();
   ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
@@ -510,7 +528,7 @@ function drawRealScaleData() {
   ctx.fillText(`Atomic radius: ${REAL_SCALE.atomRadius}`, x + 12, y + 42);
   ctx.fillText(`Nuclear radius: ${REAL_SCALE.nucleusRadius}`, x + 12, y + 60);
   ctx.fillText(`Nuclear diameter: ${REAL_SCALE.nucleusDiameter}`, x + 12, y + 78);
-  ctx.fillText("Blue electron dots are position markers, not size-scaled.", x + 12, y + 96);
+  ctx.fillText(`Temperature: ${state.temperatureK} K`, x + 12, y + 96);
   ctx.restore();
 }
 
@@ -579,6 +597,11 @@ electronCount.addEventListener("input", (event) => {
 
 timeScale.addEventListener("input", (event) => {
   state.timeLevel = Number(event.target.value);
+  updateControls();
+});
+
+temperatureControl.addEventListener("input", (event) => {
+  state.temperatureK = Number(event.target.value);
   updateControls();
 });
 

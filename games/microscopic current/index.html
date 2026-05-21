@@ -54,6 +54,11 @@
           <input id="timeScale" type="range" min="0" max="4" step="1" value="1">
           <strong id="timeValue">x3</strong>
         </label>
+        <label class="slider-row">
+          <span>Temperature</span>
+          <input id="temperatureControl" type="range" min="80" max="900" step="10" value="300">
+          <strong id="temperatureValue">300 K</strong>
+        </label>
         <button class="secondary-button" id="resetButton" type="button">Randomize Thermal Motion</button>
       </div>
 
@@ -97,7 +102,7 @@
       <div class="concept-grid">
         <div>
           <h3>No electric field</h3>
-          <p>Electrons move rapidly in every direction. Their average velocity in any direction is about zero, so there is no sustained macroscopic current.</p>
+          <p>Electrons move rapidly in every direction. Higher temperature increases this random thermal speed, but the average velocity in any direction is still about zero.</p>
         </div>
         <div>
           <h3>With an electric field</h3>
