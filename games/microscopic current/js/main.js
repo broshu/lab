@@ -7,12 +7,10 @@ const fieldToggle = document.querySelector("#fieldToggle");
 const fieldToggleText = document.querySelector("#fieldToggleText");
 const fieldStatus = document.querySelector("#fieldStatus");
 const fieldStrength = document.querySelector("#fieldStrength");
-const electronCount = document.querySelector("#electronCount");
 const timeScale = document.querySelector("#timeScale");
 const temperatureControl = document.querySelector("#temperatureControl");
 const resetButton = document.querySelector("#resetButton");
 const fieldValue = document.querySelector("#fieldValue");
-const countValue = document.querySelector("#countValue");
 const timeValue = document.querySelector("#timeValue");
 const temperatureValue = document.querySelector("#temperatureValue");
 const timeScaleText = document.querySelector("#timeScaleText");
@@ -161,7 +159,6 @@ function visualSpeeds() {
 
 function updateControls() {
   fieldValue.textContent = `${Math.round(state.field * 100)}%`;
-  countValue.textContent = String(state.count);
   const multiplier = timeMultipliers[state.timeLevel];
   timeValue.textContent = `x${multiplier}`;
   timeScaleText.textContent = `Time x${multiplier}`;
@@ -587,12 +584,6 @@ fieldToggle.addEventListener("click", () => {
 fieldStrength.addEventListener("input", (event) => {
   state.field = Number(event.target.value) / 100;
   updateControls();
-});
-
-electronCount.addEventListener("input", (event) => {
-  state.count = Number(event.target.value);
-  updateControls();
-  makeElectrons();
 });
 
 timeScale.addEventListener("input", (event) => {
