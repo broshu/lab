@@ -29,6 +29,13 @@ const PHYSICS = {
   maxDriftSpeed: 4e-3
 };
 
+const REAL_SCALE = {
+  atomRadius: "1.28 x 10^-10 m",
+  nucleusRadius: "4.8 x 10^-15 m",
+  nucleusDiameter: "9.6 x 10^-15 m",
+  ratioLabel: "26,667:1"
+};
+
 const state = {
   mode: "diagram",
   fieldOn: false,
@@ -140,12 +147,12 @@ function updateControls() {
   countValue.textContent = String(state.count);
   const multiplier = timeMultipliers[state.timeLevel];
   timeValue.textContent = `x${multiplier}`;
-  timeScaleText.textContent = `时间 x${multiplier}`;
+  timeScaleText.textContent = `Time x${multiplier}`;
 
   fieldToggle.classList.toggle("active", state.fieldOn);
   fieldToggle.setAttribute("aria-pressed", String(state.fieldOn));
-  fieldToggleText.textContent = state.fieldOn ? "断开电场" : "接通电场";
-  fieldStatus.textContent = state.fieldOn ? "已加电场" : "未加电场";
+  fieldToggleText.textContent = state.fieldOn ? "Turn Field Off" : "Turn Field On";
+  fieldStatus.textContent = state.fieldOn ? "Field On" : "Field Off";
   fieldStatus.classList.toggle("on", state.fieldOn);
 
   diagramModeButton.classList.toggle("active", state.mode === "diagram");
@@ -153,22 +160,22 @@ function updateControls() {
 
   const drift = actualDriftSpeed();
   driftMetric.textContent = `${(drift * 1000).toFixed(3)} mm/s`;
-  thermalMetric.textContent = state.mode === "real" ? "约 1.6 x 10^6 m/s" : "教学慢放显示";
-  currentMetric.textContent = state.fieldOn ? "向右（电子向左漂移）" : "无净电流";
+  thermalMetric.textContent = state.mode === "real" ? "about 1.6 x 10^6 m/s" : "slowed for teaching";
+  currentMetric.textContent = state.fieldOn ? "Right; electrons drift left" : "No net current";
 
   if (state.mode === "diagram") {
-    stageTitle.textContent = "示意图模式";
-    stageSubtitle.textContent = "电子、原子和漂移速度都被教学放大，便于直接看出电子在随机运动中叠加了定向移动。";
-    scaleReadout.textContent = "示意图：尺寸和速度经过教学放大";
+    stageTitle.textContent = "Diagram Mode";
+    stageSubtitle.textContent = "Electrons, atoms, and drift speed are exaggerated so the directed drift can be seen on top of random motion.";
+    scaleReadout.textContent = "Diagram: size and speed are exaggerated for teaching";
   } else {
     const ratio = Math.round(PHYSICS.atomRadiusM / PHYSICS.nucleusRadiusM);
-    stageTitle.textContent = "实际情况模式";
-    stageSubtitle.textContent = "按铜的数量级保留半径比例和速度比例：核极小、电子热运动极快、漂移速度极慢。";
-    scaleReadout.textContent = `真实比例：原子半径 128 pm，核半径 4.8 fm，半径比约 ${ratio}:1`;
+    stageTitle.textContent = "Real-Scale Mode";
+    stageSubtitle.textContent = "Copper-like radius and speed ratios are preserved: the nucleus is tiny, thermal motion is very fast, and drift is extremely slow.";
+    scaleReadout.textContent = `Real scale: atomic radius ${REAL_SCALE.atomRadius}; nuclear radius ${REAL_SCALE.nucleusRadius}; radius ratio about ${ratio.toLocaleString("en-US")}:1`;
   }
   motionReadout.textContent = state.fieldOn
-    ? "当前：无规则热运动上叠加极小的电子定向漂移"
-    : "当前：只有无规则热运动，平均速度约为 0";
+    ? "Current state: random thermal motion plus a tiny directed electron drift"
+    : "Current state: random thermal motion only; average velocity is about 0";
 }
 
 function scatterElectrons(dt) {
@@ -203,11 +210,27 @@ function updateElectrons(dt) {
     electron.y += electron.vy * speeds.random * effectiveDt;
     electron.spin += effectiveDt * 5;
 
-    if (electron.x < b.left) electron.x = b.right;
-    if (electron.x > b.right) electron.x = b.left;
-    if (electron.y < b.top) electron.y = b.bottom;
-    if (electron.y > b.bottom) electron.y = b.top;
+    let wrapped = false;
+    if (electron.x < b.left) {
+      electron.x = b.right;
+      wrapped = true;
+    }
+    if (electron.x > b.right) {
+      electron.x = b.left;
+      wrapped = true;
+    }
+    if (electron.y < b.top) {
+      electron.y = b.bottom;
+      wrapped = true;
+    }
+    if (electron.y > b.bottom) {
+      electron.y = b.top;
+      wrapped = true;
+    }
 
+    if (wrapped) {
+      electron.trail = [];
+    }
     electron.trail.push({ x: electron.x, y: electron.y });
     const trailLength = state.mode === "diagram" ? 14 : 7;
     if (electron.trail.length > trailLength) {
@@ -274,8 +297,8 @@ function drawField() {
     for (let y = b.top + 30; y < b.bottom; y += 58) {
       arrow(b.left + 16, y, b.left + 92 + state.field * 42, y, "#d2473b", y === b.top + 30 ? "E" : "");
     }
-    arrow(b.right - 190, b.bottom + 18, b.right - 64, b.bottom + 18, "#14936f", "电流方向");
-    arrow(b.right - 64, b.bottom + 34, b.right - 190, b.bottom + 34, "#2576d6", "电子漂移");
+    arrow(b.right - 190, b.bottom + 18, b.right - 64, b.bottom + 18, "#14936f", "Conventional current");
+    arrow(b.right - 64, b.bottom + 34, b.right - 190, b.bottom + 34, "#2576d6", "Electron drift");
   } else {
     ctx.fillStyle = "rgba(128, 135, 146, 0.05)";
     ctx.fillRect(b.left, b.top, b.right - b.left, b.bottom - b.top);
@@ -362,26 +385,51 @@ function drawActualMagnifier() {
   }
 
   const b = stageBounds();
-  const cx = b.left + 136;
-  const cy = b.top + 112;
+  const panelX = b.left + 42;
+  const panelY = b.top + 22;
+  const panelW = 260;
+  const panelH = 252;
+  const cx = panelX + panelW / 2;
+  const cy = panelY + 96;
   const outer = 76;
   const nucleusVisible = outer * (PHYSICS.nucleusRadiusM / PHYSICS.atomRadiusM);
+  const atomRing = outer * 0.74;
 
   ctx.save();
   ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
   ctx.strokeStyle = "#bfc9d6";
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(panelX, panelY, panelW, panelH, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.strokeStyle = "#bfc9d6";
+  ctx.lineWidth = 1.25;
   ctx.beginPath();
   ctx.arc(cx, cy, outer, 0, Math.PI * 2);
-  ctx.fill();
   ctx.stroke();
 
   ctx.strokeStyle = "rgba(184, 135, 31, 0.5)";
   ctx.setLineDash([5, 5]);
   ctx.beginPath();
-  ctx.arc(cx, cy, outer * 0.74, 0, Math.PI * 2);
+  ctx.arc(cx, cy, atomRing, 0, Math.PI * 2);
   ctx.stroke();
   ctx.setLineDash([]);
+
+  ctx.strokeStyle = "#b8871f";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + atomRing, cy);
+  ctx.stroke();
+
+  ctx.strokeStyle = "#c24a5a";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - 10, cy - 10);
+  ctx.lineTo(cx + 30, cy - 48);
+  ctx.stroke();
 
   ctx.fillStyle = "#c24a5a";
   ctx.beginPath();
@@ -389,12 +437,18 @@ function drawActualMagnifier() {
   ctx.fill();
 
   ctx.fillStyle = "#203247";
-  ctx.font = "800 13px Inter, sans-serif";
+  ctx.font = "800 12px Inter, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("原子半径", cx, cy + outer + 22);
+  ctx.fillText(`Atomic radius = ${REAL_SCALE.atomRadius}`, cx, panelY + 198);
   ctx.fillStyle = "#647084";
-  ctx.font = "700 12px Inter, sans-serif";
-  ctx.fillText("中心核小于 1 像素", cx, cy + outer + 39);
+  ctx.font = "700 11px Inter, sans-serif";
+  ctx.fillText(`Nuclear radius = ${REAL_SCALE.nucleusRadius}`, cx, panelY + 216);
+  ctx.fillText(`Radius ratio ~ ${REAL_SCALE.ratioLabel}`, cx, panelY + 234);
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#c24a5a";
+  ctx.font = "800 11px Inter, sans-serif";
+  ctx.fillText("nucleus", cx + 34, cy - 52);
   ctx.restore();
 }
 
@@ -418,11 +472,45 @@ function drawDriftMeter() {
 
   ctx.fillStyle = "#647084";
   ctx.font = "700 12px Inter, sans-serif";
-  ctx.fillText("漂移/热运动速度比", x + 12, y + 17);
+  ctx.fillText("Drift / thermal speed", x + 12, y + 17);
   ctx.fillStyle = "#17212f";
   ctx.font = "800 13px Inter, sans-serif";
-  const ratioText = state.fieldOn ? `约 1 : ${Math.round(1 / Math.max(ratio, 1e-12)).toLocaleString("en-US")}` : "0";
+  const ratioText = state.fieldOn ? `about 1 : ${Math.round(1 / Math.max(ratio, 1e-12)).toLocaleString("en-US")}` : "0";
   ctx.fillText(ratioText, x + 12, y + 34);
+  ctx.restore();
+}
+
+function drawRealScaleData() {
+  if (state.mode !== "real") {
+    return;
+  }
+
+  const b = stageBounds();
+  const x = Math.max(b.left + 292, b.right - 348);
+  const y = b.top + 22;
+  const width = Math.min(326, b.right - x - 16);
+  if (width < 220) {
+    return;
+  }
+
+  ctx.save();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+  ctx.strokeStyle = "#d1dae5";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(x, y, width, 102, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#17212f";
+  ctx.font = "800 12px Inter, sans-serif";
+  ctx.fillText("Actual size data", x + 12, y + 20);
+  ctx.fillStyle = "#4f6075";
+  ctx.font = "700 11px Inter, sans-serif";
+  ctx.fillText(`Atomic radius: ${REAL_SCALE.atomRadius}`, x + 12, y + 42);
+  ctx.fillText(`Nuclear radius: ${REAL_SCALE.nucleusRadius}`, x + 12, y + 60);
+  ctx.fillText(`Nuclear diameter: ${REAL_SCALE.nucleusDiameter}`, x + 12, y + 78);
+  ctx.fillText("Blue electron dots are position markers, not size-scaled.", x + 12, y + 96);
   ctx.restore();
 }
 
@@ -431,12 +519,12 @@ function drawCaption() {
   ctx.save();
   ctx.fillStyle = "#223247";
   ctx.font = "800 15px Inter, sans-serif";
-  ctx.fillText(state.fieldOn ? "接通电场：电子整体缓慢向左漂移" : "未加电场：电子只有无规则热运动", b.left, 30);
+  ctx.fillText(state.fieldOn ? "Field on: electrons drift slowly to the left overall" : "Field off: electrons have random thermal motion only", b.left, 30);
   ctx.fillStyle = "#65758a";
   ctx.font = "700 12px Inter, sans-serif";
   const text = state.mode === "real"
-    ? "蓝点是电子位置标记；电子半径不按比例绘制，因为电子在本模型中视为点粒子。"
-    : "示意图中电子和离子被画大，便于观察方向关系。";
+    ? "Blue dots are electron position markers; electron size is not drawn to scale."
+    : "Electron and ion symbols are enlarged so direction relationships are visible.";
   ctx.fillText(text, b.left, 48);
   ctx.restore();
 }
@@ -448,6 +536,7 @@ function render() {
   drawIons();
   drawElectrons();
   drawActualMagnifier();
+  drawRealScaleData();
   drawDriftMeter();
   drawCaption();
 }

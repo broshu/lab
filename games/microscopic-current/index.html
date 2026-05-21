@@ -1,39 +1,39 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>微观电流产生演示</title>
+  <title>Microscopic Current Demonstration</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="topbar">
     <div>
       <p class="eyebrow">Microscopic Current</p>
-      <h1>金属中电流怎样产生</h1>
-      <p class="lede">电子本来做无规则热运动；外加电场后，每个电子的高速乱运动上叠加很小的定向漂移，宏观上形成电流。</p>
+      <h1>How Current Forms in a Metal</h1>
+      <p class="lede">Electrons already move randomly at high speed. When an electric field is applied, a tiny drift velocity is added to that random motion, producing a macroscopic current.</p>
     </div>
-    <a class="back-link" href="../../index.html">返回实验室</a>
+    <a class="back-link" href="../../index.html">Back to Lab</a>
   </header>
 
   <main class="app">
     <section class="panel controls-panel">
-      <div class="mode-tabs" role="group" aria-label="演示模式">
-        <button class="mode-button active" id="diagramMode" type="button">示意图</button>
-        <button class="mode-button" id="realMode" type="button">实际情况</button>
+      <div class="mode-tabs" role="group" aria-label="Display mode">
+        <button class="mode-button active" id="diagramMode" type="button">Diagram</button>
+        <button class="mode-button" id="realMode" type="button">Real Scale</button>
       </div>
 
       <div class="control-block">
         <div class="block-heading">
-          <h2>外加电场</h2>
-          <span class="status-pill" id="fieldStatus">未加电场</span>
+          <h2>Electric Field</h2>
+          <span class="status-pill" id="fieldStatus">Field Off</span>
         </div>
         <button class="field-switch" id="fieldToggle" type="button" aria-pressed="false">
           <span class="switch-track"><span class="switch-thumb"></span></span>
-          <span id="fieldToggleText">接通电场</span>
+          <span id="fieldToggleText">Turn Field On</span>
         </button>
         <label class="slider-row">
-          <span>电场强度</span>
+          <span>Field strength</span>
           <input id="fieldStrength" type="range" min="0" max="100" value="55">
           <strong id="fieldValue">55%</strong>
         </label>
@@ -41,34 +41,34 @@
 
       <div class="control-block">
         <div class="block-heading">
-          <h2>观察控制</h2>
-          <span class="status-pill neutral" id="timeScaleText">时间 x1</span>
+          <h2>Observation</h2>
+          <span class="status-pill neutral" id="timeScaleText">Time x1</span>
         </div>
         <label class="slider-row">
-          <span>电子数量</span>
+          <span>Electrons</span>
           <input id="electronCount" type="range" min="28" max="120" value="72">
           <strong id="countValue">72</strong>
         </label>
         <label class="slider-row">
-          <span>时间倍率</span>
+          <span>Time scale</span>
           <input id="timeScale" type="range" min="0" max="4" step="1" value="1">
           <strong id="timeValue">x3</strong>
         </label>
-        <button class="secondary-button" id="resetButton" type="button">重新随机热运动</button>
+        <button class="secondary-button" id="resetButton" type="button">Randomize Thermal Motion</button>
       </div>
 
       <div class="metrics">
         <div class="metric">
-          <span>平均漂移速度</span>
+          <span>Average drift speed</span>
           <strong id="driftMetric">0.000 mm/s</strong>
         </div>
         <div class="metric">
-          <span>热运动速度</span>
-          <strong id="thermalMetric">约 1.6 x 10^6 m/s</strong>
+          <span>Thermal speed</span>
+          <strong id="thermalMetric">about 1.6 x 10^6 m/s</strong>
         </div>
         <div class="metric">
-          <span>电流方向</span>
-          <strong id="currentMetric">无净电流</strong>
+          <span>Current direction</span>
+          <strong id="currentMetric">No net current</strong>
         </div>
       </div>
     </section>
@@ -76,36 +76,36 @@
     <section class="stage-panel">
       <div class="stage-header">
         <div>
-          <h2 id="stageTitle">示意图模式</h2>
-          <p id="stageSubtitle">电子被画大、速度被调慢，用来突出“随机运动 + 定向漂移”的关系。</p>
+          <h2 id="stageTitle">Diagram Mode</h2>
+          <p id="stageSubtitle">Electrons, atoms, and drift speed are exaggerated so the relationship between random motion and directed drift is visible.</p>
         </div>
         <div class="legend">
-          <span><i class="legend-dot nucleus"></i>金属离子</span>
-          <span><i class="legend-dot electron"></i>自由电子</span>
-          <span><i class="legend-line"></i>漂移方向</span>
+          <span><i class="legend-dot nucleus"></i>Metal ions</span>
+          <span><i class="legend-dot electron"></i>Free electrons</span>
+          <span><i class="legend-line"></i>Drift direction</span>
         </div>
       </div>
       <canvas id="currentCanvas" width="1100" height="650"></canvas>
       <div class="readout-strip">
-        <span id="scaleReadout">示意图：尺寸和速度经过教学放大</span>
-        <span id="motionReadout">当前：只有无规则热运动</span>
+        <span id="scaleReadout">Diagram: size and speed are exaggerated for teaching</span>
+        <span id="motionReadout">Current state: random thermal motion only</span>
       </div>
     </section>
 
     <section class="panel explanation-panel">
-      <h2>课堂要点</h2>
+      <h2>Key Ideas</h2>
       <div class="concept-grid">
         <div>
-          <h3>没加电场</h3>
-          <p>电子向各个方向高速运动，任意方向的平均速度约为 0，所以没有持续的宏观电流。</p>
+          <h3>No electric field</h3>
+          <p>Electrons move rapidly in every direction. Their average velocity in any direction is about zero, so there is no sustained macroscopic current.</p>
         </div>
         <div>
-          <h3>加上电场</h3>
-          <p>电子仍然高速乱运动，但会叠加一个很小的反电场方向漂移速度；电流方向按正电荷运动方向定义，和电子漂移方向相反。</p>
+          <h3>With an electric field</h3>
+          <p>Electrons still move randomly, but a very small drift velocity is added opposite the field. Conventional current points opposite electron drift.</p>
         </div>
         <div>
-          <h3>实际情况模式</h3>
-          <p>采用铜的量级：原子半径约 128 pm，原子核半径约 4.8 fm，核半径只有原子半径的约 1/27000；漂移速度远小于热运动速度。</p>
+          <h3>Real-scale mode</h3>
+          <p>The scale uses copper-like values: atomic radius about 1.28 x 10^-10 m and nuclear radius about 4.8 x 10^-15 m, so the nucleus radius is about 1/27,000 of the atomic radius.</p>
         </div>
       </div>
     </section>

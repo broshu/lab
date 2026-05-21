@@ -1,9 +1,9 @@
-# 微观电流产生演示
+# Microscopic Current Demonstration
 
-一个用于课堂演示的交互小游戏：
+A small interactive classroom demonstration:
 
-- 示意图模式：放大电子、金属离子和漂移速度，直观看到电子从无规则运动变为叠加定向漂移。
-- 实际情况模式：用铜的数量级展示原子半径、原子核半径和电子速度比例，让学生看到真实比例下漂移速度极小。
-- 控件支持切换电场、调节电场强度、电子数量和时间倍率。
+- Diagram mode: enlarges electrons, metal ions, and drift speed so the change from random motion to random motion plus directed drift is easy to see.
+- Real-scale mode: uses copper-like values for atomic radius, nuclear radius, and electron speed ratios, showing how tiny drift speed is at real scale.
+- Controls support electric field toggling, field strength, electron count, and time scale.
 
-打开 `index.html` 即可运行。
+Open `index.html` to run it.

@@ -226,7 +226,7 @@ h1 {
 
 .slider-row {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr) 54px;
+  grid-template-columns: 112px minmax(0, 1fr) 64px;
   align-items: center;
   gap: 10px;
   color: #324258;
