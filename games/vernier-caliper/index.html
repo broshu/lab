@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vernier Caliper Reading</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="top-bar">
+        <div>
+            <h1>Vernier Caliper Reading</h1>
+        </div>
+        <div class="preset-group" aria-label="Vernier type">
+            <div class="segmented-control" id="modeControl">
+                <button class="mode-button active" type="button" data-mode="10">
+                    10 div<small>0.1 mm</small>
+                </button>
+                <button class="mode-button" type="button" data-mode="20">
+                    20 div<small>0.05 mm</small>
+                </button>
+                <button class="mode-button" type="button" data-mode="50">
+                    50 div<small>0.02 mm</small>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="layout">
+        <section class="panel stage-panel">
+            <div class="stage">
+                <canvas id="caliper" width="1140" height="500"
+                        tabindex="0" aria-label="Draggable vernier caliper"></canvas>
+            </div>
+        </section>
+
+        <section class="panel readout-panel">
+            <div class="readout">
+                <div class="read-card">
+                    <span class="read-label">Main scale</span>
+                    <strong id="rMain">0 mm</strong>
+                </div>
+                <div class="read-op">+</div>
+                <div class="read-card">
+                    <span class="read-label">Vernier</span>
+                    <strong id="rVern">0 &times; 0.10 = 0.00 mm</strong>
+                </div>
+                <div class="read-op">=</div>
+                <div class="read-card total">
+                    <span class="read-label">Reading</span>
+                    <strong id="rTotal">0.00 mm</strong>
+                </div>
+            </div>
+            <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>Drag the slider or the block &mdash; or use the &larr; &rarr; arrow keys &mdash; to take a measurement.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
