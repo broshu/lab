@@ -35,6 +35,7 @@
 
     let modeKey = 10;
     let steps = 324;           // measurement = steps / full  (exact integer math)
+    let revealed = true;       // whether the reading is shown (class use: hide / show)
 
     function M()        { return MODES[modeKey]; }
     function full()     { return M().full; }
@@ -340,10 +341,22 @@
         const r = reading();
         const d = M().decimals;
         const vern = r.k * r.prec;
-        document.getElementById("rMain").textContent = r.mainMM + " mm";
-        document.getElementById("rVern").innerHTML =
-            r.k + " &times; " + r.prec.toFixed(2) + " = " + vern.toFixed(d) + " mm";
-        document.getElementById("rTotal").textContent = r.total.toFixed(d) + " mm";
+        const elMain = document.getElementById("rMain");
+        const elVern = document.getElementById("rVern");
+        const elTotal = document.getElementById("rTotal");
+        if (revealed) {
+            elMain.textContent = r.mainMM + " mm";
+            elVern.innerHTML =
+                r.k + " &times; " + r.prec.toFixed(2) + " = " + vern.toFixed(d) + " mm";
+            elTotal.textContent = r.total.toFixed(d) + " mm";
+        } else {
+            elMain.textContent = "? mm";
+            elVern.innerHTML = "?";
+            elTotal.textContent = "? mm";
+        }
+        [elMain, elVern, elTotal].forEach(function (e) {
+            e.classList.toggle("masked", !revealed);
+        });
     }
 
     /* ---------- interaction ---------- */
@@ -422,8 +435,16 @@
         draw();
     });
 
+    const revealBtn = document.getElementById("revealBtn");
+    revealBtn.addEventListener("click", function () {
+        revealed = !revealed;
+        revealBtn.textContent = revealed ? "Hide answer" : "Show answer";
+        revealBtn.classList.toggle("hidden-state", !revealed);
+        updateReadout();
+    });
+
     document.getElementById("resetBtn").addEventListener("click", function () {
-        steps = Math.round(0 * full());
+        steps = 0;
         draw();
     });
 

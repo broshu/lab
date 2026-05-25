@@ -182,6 +182,12 @@ canvas#caliper {
     font-size: 1.6rem;
 }
 
+.actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 .ghost-button {
     border: 1px solid var(--line);
     background: #ffffff;
@@ -196,6 +202,33 @@ canvas#caliper {
 
 .ghost-button:hover {
     background: #eef4f9;
+}
+
+.reveal-button {
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, #235f9c, #2bb7bf);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+.reveal-button:hover {
+    filter: brightness(1.07);
+}
+
+.reveal-button.hidden-state {
+    background: #ffffff;
+    color: var(--amber);
+    border-color: var(--amber);
+}
+
+.read-card strong.masked {
+    color: var(--muted);
+    letter-spacing: 0.12em;
 }
 
 footer {
