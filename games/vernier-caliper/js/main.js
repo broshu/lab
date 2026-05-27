@@ -4,7 +4,7 @@
     /* ---------- canvas setup ---------- */
     const canvas = document.getElementById("caliper");
     const ctx = canvas.getContext("2d");
-    const W = 1140, H = 500;
+    const W = 1620, H = 500;
     const DPR = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = W * DPR;
     canvas.height = H * DPR;
@@ -14,17 +14,19 @@
 
     /* ---------- geometry ---------- */
     const PPM = 10;            // pixels per millimetre (main view)
-    const X0 = 70;             // x of the 0 mm main-scale mark
+    const X0 = 72;             // x of the 0 mm main-scale mark
     const MAIN_MM = 100;       // length of the main scale (mm)
     const MAX_VALUE = 50;      // largest measurement (mm)
 
-    const Y_DIV = 322;         // line dividing main scale (above) / vernier (below)
-    const BEAM_TOP = 272;
+    const BEAM_TOP = 268;
+    const Y_DIV = 320;         // line dividing main scale (above) / vernier (below)
     const VERN_BOT = 376;
-    const JAW_BOT = 478;
-    const BLOCK_TOP = 396, BLOCK_BOT = 456;
+    const JAW_BOT = 488;
+    const BLOCK_TOP = 396, BLOCK_BOT = 444;
+    const BEAM_R = X0 + MAIN_MM * PPM + 16;     // right end of the beam
+    const ROD_Y = (BEAM_TOP + Y_DIV) / 2;       // depth-rod centre line
 
-    const MAG = { x: 366, y: 20, w: 408, h: 160, ppm: 40 };
+    const MAG = { x: 600, y: 14, w: 440, h: 168, ppm: 44 };
 
     /* ---------- vernier modes ---------- */
     const MODES = {
@@ -67,113 +69,179 @@
         return g;
     }
 
-    const STEEL_L = "#f1f4f7", STEEL_D = "#c4ccd4", EDGE = "#8c98a4";
-    const SLIDER_L = "#dfe7ef", SLIDER_D = "#aab6c3";
+    const STEEL_L = "#fbfcfd", STEEL_M = "#dde2e7", STEEL_D = "#bdc6ce";
+    const EDGE = "#8a95a0";
+    const SLIDER_L = "#eef2f5", SLIDER_M = "#cdd5dc", SLIDER_D = "#a9b4bf";
+    const SLIDER_E = "#7f8b97";
     const INK = "#14212f", BLUE = "#235f9c", RED = "#df5b5b", MUTED = "#7c8794";
 
-    /* ---------- main caliper ---------- */
-    function drawBeam() {
-        // fixed beam
-        ctx.fillStyle = vGrad(0, BEAM_TOP, BEAM_BOT_H(), STEEL_L, STEEL_D);
-        roundRect(X0 - 36, BEAM_TOP, MAIN_MM * PPM + 96, Y_DIV - BEAM_TOP, 6);
+    /* ---------- depth rod (thin blade from the right end) ---------- */
+    function drawDepthRod() {
+        const len = value() * PPM;
+        if (len < 1) return;
+        ctx.fillStyle = vGrad(BEAM_R, ROD_Y - 4, 8, "#dde3e8", "#aab4bd");
+        roundRect(BEAM_R - 12, ROD_Y - 4, len + 14, 8, 2);
         ctx.fill();
         ctx.strokeStyle = EDGE;
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-
-        // fixed (left) jaw
-        ctx.fillStyle = vGrad(X0 - 40, BEAM_TOP, JAW_BOT - BEAM_TOP, STEEL_L, "#aeb8c1");
-        ctx.beginPath();
-        ctx.moveTo(X0 - 40, BEAM_TOP + 4);
-        ctx.lineTo(X0, BEAM_TOP + 4);
-        ctx.lineTo(X0, JAW_BOT);
-        ctx.lineTo(X0 - 14, JAW_BOT);
-        ctx.lineTo(X0 - 40, JAW_BOT - 70);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // fixed upper (internal) jaw
-        ctx.beginPath();
-        ctx.moveTo(X0 - 2, BEAM_TOP);
-        ctx.lineTo(X0 - 2, BEAM_TOP - 56);
-        ctx.lineTo(X0 - 18, BEAM_TOP - 56);
-        ctx.lineTo(X0 - 18, BEAM_TOP);
-        ctx.closePath();
-        ctx.fill();
+        ctx.lineWidth = 1;
         ctx.stroke();
     }
-    function BEAM_BOT_H() { return Y_DIV - BEAM_TOP; }
 
+    /* ---------- fixed frame: beam + fixed jaws ---------- */
+    function drawBeam() {
+        // main beam
+        ctx.fillStyle = vGrad(0, BEAM_TOP, Y_DIV - BEAM_TOP, STEEL_L, STEEL_M);
+        roundRect(X0 - 56, BEAM_TOP, BEAM_R - (X0 - 56), Y_DIV - BEAM_TOP, 5);
+        ctx.fill();
+        ctx.strokeStyle = EDGE;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // fixed external jaw (lower, blocky, measuring face at x = X0)
+        ctx.fillStyle = vGrad(X0 - 56, BEAM_TOP, JAW_BOT - BEAM_TOP, STEEL_L, STEEL_D);
+        ctx.beginPath();
+        ctx.moveTo(X0, BEAM_TOP);
+        ctx.lineTo(X0, JAW_BOT - 9);                      // inner measuring face
+        ctx.lineTo(X0 - 11, JAW_BOT);                     // inner-bottom chamfer
+        ctx.lineTo(X0 - 44, JAW_BOT);                     // flat bottom
+        ctx.lineTo(X0 - 56, JAW_BOT - 26);                // outer-bottom chamfer
+        ctx.lineTo(X0 - 56, BEAM_TOP);                    // outer face
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // fixed internal jaw (upper tapered knife edge, measuring face at x = X0)
+        ctx.fillStyle = vGrad(X0, BEAM_TOP - 72, 76, STEEL_L, STEEL_D);
+        ctx.beginPath();
+        ctx.moveTo(X0, BEAM_TOP);
+        ctx.lineTo(X0, BEAM_TOP - 58);
+        ctx.lineTo(X0 + 5, BEAM_TOP - 70);                // pointed tip
+        ctx.lineTo(X0 + 21, BEAM_TOP - 26);               // tapered inner edge
+        ctx.lineTo(X0 + 21, BEAM_TOP);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // small rivets on the fixed frame
+        ctx.fillStyle = "#aeb8c1";
+        ctx.strokeStyle = EDGE;
+        ctx.lineWidth = 1;
+        [[X0 - 30, BEAM_TOP + 26], [X0 - 30, JAW_BOT - 70]].forEach(function (p) {
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], 4.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        });
+    }
+
+    /* ---------- measured block ---------- */
     function drawBlock() {
         const w = value() * PPM;
         if (w < 1.5) return;
-        const x = X0;
-        ctx.fillStyle = vGrad(x, BLOCK_TOP, BLOCK_BOT - BLOCK_TOP, "#f3c777", "#d99a2f");
-        roundRect(x, BLOCK_TOP, w, BLOCK_BOT - BLOCK_TOP, 3);
+        ctx.fillStyle = vGrad(X0, BLOCK_TOP, BLOCK_BOT - BLOCK_TOP, "#f4ca7c", "#d9992c");
+        roundRect(X0, BLOCK_TOP, w, BLOCK_BOT - BLOCK_TOP, 3);
         ctx.fill();
         ctx.strokeStyle = "#b9831f";
         ctx.lineWidth = 1.2;
         ctx.stroke();
     }
 
+    /* ---------- sliding assembly ---------- */
     function drawSlider() {
         const xv = X0 + value() * PPM;                 // vernier-zero / sliding-jaw face
-        const plateR = xv + verSpan() * PPM + 16;
+        const sliderL = xv - 24;
+        const plateR = xv + verSpan() * PPM + 24;
+        const winTop = 297;                            // main-scale window: winTop..Y_DIV
 
-        // sliding jaw (drops below the vernier plate)
-        ctx.fillStyle = vGrad(xv, VERN_BOT - 30, JAW_BOT - VERN_BOT + 30, SLIDER_L, SLIDER_D);
-        ctx.strokeStyle = EDGE;
-        ctx.lineWidth = 1.4;
+        // fine-feed thumb roller (behind the vernier plate)
+        const rx = xv + 74, ry = VERN_BOT + 3, rr = 18;
+        ctx.fillStyle = vGrad(rx - rr, ry - rr, 2 * rr, "#c6cdd5", "#8c97a3");
         ctx.beginPath();
-        ctx.moveTo(xv, VERN_BOT - 30);
-        ctx.lineTo(xv, JAW_BOT);
-        ctx.lineTo(xv + 16, JAW_BOT);
-        ctx.lineTo(xv + 40, JAW_BOT - 70);
-        ctx.lineTo(xv + 40, VERN_BOT - 30);
-        ctx.closePath();
+        ctx.arc(rx, ry, rr, 0, Math.PI * 2);
         ctx.fill();
+        ctx.strokeStyle = "#737e8a";
+        ctx.lineWidth = 1.3;
         ctx.stroke();
-
-        // vernier plate
-        ctx.fillStyle = vGrad(xv, Y_DIV - 4, VERN_BOT - Y_DIV + 4, SLIDER_L, SLIDER_D);
-        roundRect(xv - 16, Y_DIV - 4, plateR - (xv - 16), VERN_BOT - Y_DIV + 4, 6);
-        ctx.fill();
-        ctx.stroke();
-
-        // upper grip riding on the beam
-        ctx.fillStyle = vGrad(xv - 16, BEAM_TOP - 26, 44, SLIDER_L, SLIDER_D);
-        roundRect(xv - 16, BEAM_TOP - 26, 86, 44, 7);
-        ctx.fill();
-        ctx.stroke();
-
-        // upper (internal) sliding jaw
-        ctx.fillStyle = vGrad(xv, BEAM_TOP - 56, 56, SLIDER_L, SLIDER_D);
-        ctx.beginPath();
-        ctx.moveTo(xv + 2, BEAM_TOP);
-        ctx.lineTo(xv + 2, BEAM_TOP - 56);
-        ctx.lineTo(xv + 18, BEAM_TOP - 56);
-        ctx.lineTo(xv + 18, BEAM_TOP);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // thumb wheel
-        ctx.beginPath();
-        ctx.arc(xv + 40, BEAM_TOP - 4, 12, 0, Math.PI * 2);
-        ctx.fillStyle = "#9aa6b2";
-        ctx.fill();
-        ctx.strokeStyle = "#6f7a86";
-        ctx.stroke();
-        for (let a = 0; a < 12; a++) {
-            const ang = (a / 12) * Math.PI * 2;
+        ctx.lineWidth = 1;
+        for (let a = 0; a < 24; a++) {
+            const ang = (a / 24) * Math.PI * 2;
             ctx.beginPath();
-            ctx.moveTo(xv + 40 + Math.cos(ang) * 6, BEAM_TOP - 4 + Math.sin(ang) * 6);
-            ctx.lineTo(xv + 40 + Math.cos(ang) * 11, BEAM_TOP - 4 + Math.sin(ang) * 11);
+            ctx.moveTo(rx + Math.cos(ang) * (rr - 5), ry + Math.sin(ang) * (rr - 5));
+            ctx.lineTo(rx + Math.cos(ang) * (rr - 1), ry + Math.sin(ang) * (rr - 1));
             ctx.stroke();
         }
+
+        ctx.strokeStyle = SLIDER_E;
+        ctx.lineWidth = 1.5;
+
+        // movable external jaw (lower, blocky, measuring face at x = xv)
+        ctx.fillStyle = vGrad(xv, VERN_BOT - 20, JAW_BOT - VERN_BOT + 20, SLIDER_L, SLIDER_D);
+        ctx.beginPath();
+        ctx.moveTo(xv, VERN_BOT - 20);
+        ctx.lineTo(xv, JAW_BOT - 9);                      // inner measuring face
+        ctx.lineTo(xv + 11, JAW_BOT);                     // inner-bottom chamfer
+        ctx.lineTo(xv + 44, JAW_BOT);                     // flat bottom
+        ctx.lineTo(xv + 56, JAW_BOT - 26);                // outer-bottom chamfer
+        ctx.lineTo(xv + 56, VERN_BOT - 20);               // outer face
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // vernier plate (lower lip of the slider, carries the vernier scale)
+        ctx.fillStyle = vGrad(xv, Y_DIV, VERN_BOT - Y_DIV, SLIDER_L, SLIDER_M);
+        roundRect(sliderL, Y_DIV, plateR - sliderL, VERN_BOT - Y_DIV, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // side rails framing the main-scale window
+        ctx.fillStyle = vGrad(sliderL, winTop, Y_DIV - winTop, SLIDER_M, SLIDER_D);
+        ctx.fillRect(sliderL, winTop - 2, 15, Y_DIV - winTop + 4);
+        ctx.strokeRect(sliderL, winTop - 2, 15, Y_DIV - winTop + 4);
+        ctx.fillRect(plateR - 15, winTop - 2, 15, Y_DIV - winTop + 4);
+        ctx.strokeRect(plateR - 15, winTop - 2, 15, Y_DIV - winTop + 4);
+
+        // upper body (rides on top of the beam)
+        ctx.fillStyle = vGrad(sliderL, BEAM_TOP - 16, winTop - (BEAM_TOP - 16), SLIDER_L, SLIDER_M);
+        roundRect(sliderL, BEAM_TOP - 16, plateR - sliderL, winTop - (BEAM_TOP - 16), 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // movable internal jaw (upper tapered knife edge, measuring face at x = xv)
+        ctx.fillStyle = vGrad(xv, BEAM_TOP - 72, 76, SLIDER_L, SLIDER_D);
+        ctx.beginPath();
+        ctx.moveTo(xv, BEAM_TOP);
+        ctx.lineTo(xv, BEAM_TOP - 58);
+        ctx.lineTo(xv - 5, BEAM_TOP - 70);                // pointed tip
+        ctx.lineTo(xv - 23, BEAM_TOP - 26);               // tapered inner edge
+        ctx.lineTo(xv - 23, BEAM_TOP);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // knurled thumb screw rising from the upper body
+        const sx = xv + 34, screwBase = BEAM_TOP - 16, screwTop = screwBase - 24;
+        ctx.fillStyle = vGrad(sx - 12, screwTop, 26, "#c8d0d8", "#9aa5b0");
+        roundRect(sx - 12, screwTop, 24, screwBase - screwTop + 2, 4);
+        ctx.fill();
+        ctx.strokeStyle = "#737e8a";
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 6; i++) {
+            const lx = sx - 9 + i * 3.6;
+            ctx.beginPath();
+            ctx.moveTo(lx, screwTop + 4);
+            ctx.lineTo(lx, screwBase - 3);
+            ctx.stroke();
+        }
+        ctx.fillStyle = "#aab4bf";
+        roundRect(sx - 13, screwTop - 6, 26, 9, 3);
+        ctx.fill();
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
     }
 
+    /* ---------- main scale (on the beam) ---------- */
     function drawMainScale() {
         ctx.strokeStyle = INK;
         ctx.fillStyle = INK;
@@ -182,24 +250,20 @@
             const x = X0 + mm * PPM;
             let len = 9;
             if (mm % 5 === 0) len = 15;
-            if (mm % 10 === 0) len = 21;
-            ctx.lineWidth = mm % 10 === 0 ? 1.6 : 1;
+            if (mm % 10 === 0) len = 22;
+            ctx.lineWidth = mm % 10 === 0 ? 1.7 : 1;
             ctx.beginPath();
             ctx.moveTo(x, Y_DIV);
             ctx.lineTo(x, Y_DIV - len);
             ctx.stroke();
             if (mm % 10 === 0) {
                 ctx.font = "600 12px 'Avenir Next', sans-serif";
-                ctx.fillText(String(mm), x, Y_DIV - len - 7);
+                ctx.fillText(String(mm), x, Y_DIV - len - 6);
             }
         }
-        // unit hint
-        ctx.font = "600 11px 'Avenir Next', sans-serif";
-        ctx.fillStyle = MUTED;
-        ctx.textAlign = "left";
-        ctx.fillText("mm", X0 + MAIN_MM * PPM + 12, Y_DIV - 8);
     }
 
+    /* ---------- vernier scale (on the slider) ---------- */
     function drawVernierScale() {
         const f = full();
         const r = reading();
@@ -211,14 +275,13 @@
             const aligned = i === r.k;
             let len = 11;
             if (i % sparse === 0) len = 17;
-            if (aligned) len = 22;
+            if (aligned) len = 23;
             ctx.strokeStyle = aligned ? RED : INK;
-            ctx.lineWidth = aligned ? 2.2 : 1;
+            ctx.lineWidth = aligned ? 2.3 : 1;
             ctx.beginPath();
             ctx.moveTo(x, Y_DIV);
             ctx.lineTo(x, Y_DIV + len);
             ctx.stroke();
-
             if (i % sparse === 0 || aligned) {
                 ctx.fillStyle = aligned ? RED : INK;
                 ctx.font = (aligned ? "700 " : "600 ") + "12px 'Avenir Next', sans-serif";
@@ -230,7 +293,7 @@
         ctx.fillStyle = MUTED;
         ctx.font = "600 11px 'Avenir Next', sans-serif";
         ctx.textAlign = "left";
-        ctx.fillText(M().prec.toFixed(2) + " mm", xv - 13, VERN_BOT - 6);
+        ctx.fillText(M().prec.toFixed(2) + " mm", xv - 14, VERN_BOT - 7);
     }
 
     function drawAlignGuide() {
@@ -241,8 +304,8 @@
         ctx.lineWidth = 1.4;
         ctx.setLineDash([5, 4]);
         ctx.beginPath();
-        ctx.moveTo(x, Y_DIV - 26);
-        ctx.lineTo(x, Y_DIV + 30);
+        ctx.moveTo(x, Y_DIV - 28);
+        ctx.lineTo(x, Y_DIV + 32);
         ctx.stroke();
         ctx.restore();
     }
@@ -256,7 +319,6 @@
         const yDiv = MAG.y + MAG.h * 0.52;
         const z = MAG.ppm;
 
-        // panel
         ctx.save();
         ctx.fillStyle = "#f6f9fc";
         roundRect(MAG.x, MAG.y, MAG.w, MAG.h, 12);
@@ -266,7 +328,6 @@
         ctx.stroke();
         ctx.clip();
 
-        // faint bands: beam (top) and vernier plate (bottom)
         ctx.fillStyle = "#eef2f6";
         ctx.fillRect(MAG.x, MAG.y, MAG.w, yDiv - MAG.y);
         ctx.fillStyle = "#e3ecf4";
@@ -283,7 +344,7 @@
             const hit = mm === centerMM;
             ctx.strokeStyle = hit ? RED : INK;
             ctx.lineWidth = hit ? 2.4 : (major ? 1.8 : 1.1);
-            const len = major ? 34 : (mm % 5 === 0 ? 26 : 18);
+            const len = major ? 36 : (mm % 5 === 0 ? 27 : 19);
             ctx.beginPath();
             ctx.moveTo(x, yDiv);
             ctx.lineTo(x, yDiv - len);
@@ -301,7 +362,7 @@
             const hit = i === r.k;
             ctx.strokeStyle = hit ? RED : INK;
             ctx.lineWidth = hit ? 2.4 : 1.1;
-            const len = hit ? 34 : 20;
+            const len = hit ? 36 : 21;
             ctx.beginPath();
             ctx.moveTo(x, yDiv);
             ctx.lineTo(x, yDiv + len);
@@ -327,11 +388,12 @@
     function draw() {
         ctx.clearRect(0, 0, W, H);
         drawMagnifier();
+        drawDepthRod();
         drawBeam();
+        drawMainScale();
         drawBlock();
         drawSlider();
         drawAlignGuide();
-        drawMainScale();
         drawVernierScale();
         updateReadout();
     }
@@ -375,10 +437,11 @@
     }
     function inGrabZone(p) {
         const xv = X0 + value() * PPM;
-        const onSlider = p.x >= xv - 22 && p.x <= xv + verSpan() * PPM + 22 &&
-                         p.y >= BEAM_TOP - 30 && p.y <= JAW_BOT;
+        const right = xv + Math.max(verSpan() * PPM + 24, 76);
+        const onSlider = p.x >= xv - 26 && p.x <= right &&
+                         p.y >= BEAM_TOP - 78 && p.y <= JAW_BOT;
         const onBlock = p.x >= X0 && p.x <= xv &&
-                        p.y >= BLOCK_TOP - 6 && p.y <= BLOCK_BOT + 6;
+                        p.y >= BLOCK_TOP - 8 && p.y <= BLOCK_BOT + 8;
         return onSlider || onBlock;
     }
 
@@ -430,8 +493,7 @@
         document.querySelectorAll(".mode-button").forEach(function (b) {
             b.classList.toggle("active", b === btn);
         });
-        steps = Math.round(v * full());          // keep the physical measurement
-        steps = Math.max(0, Math.min(MAX_VALUE * full(), steps));
+        steps = Math.max(0, Math.min(MAX_VALUE * full(), Math.round(v * full())));
         draw();
     });
 
