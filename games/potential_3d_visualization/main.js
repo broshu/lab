@@ -10,8 +10,11 @@ const WORLD = { min: -10, max: 10 };
 const WORLD_SIZE = WORLD.max - WORLD.min;
 const K = 4.0;             // Coulomb constant (scaled)
 const SOFT = 0.35;         // softening radius (avoid singularity)
-const V_CLAMP = 8;         // clamp for color/height
-const HEIGHT_SCALE = 0.35; // 3D height scale
+const SURFACE_SOFT = 0.16; // smaller visual softening keeps charge locations pointy
+const COLOR_V_CLAMP = 8;   // clamp for potential colors
+const HEIGHT_V_CLAMP = 64; // wider clamp so larger charges make higher peaks
+const HEIGHT_SCALE = 0.09; // 3D height scale
+const BASE_PLANE_Y = -HEIGHT_V_CLAMP * HEIGHT_SCALE - 0.45;
 const GRAVITY = 1.0;
 const DT = 1/120;
 const SUBSTEPS = 2;
@@ -40,14 +43,20 @@ const state = {
 };
 
 // ---------------------- Physics ----------------------
-function potential(x, y) {
+function potentialWithSoftening(x, y, soft) {
   let V = 0;
   for (const c of state.charges) {
     const dx = x - c.x, dy = y - c.y;
-    const r = Math.sqrt(dx*dx + dy*dy + SOFT*SOFT);
+    const r = Math.sqrt(dx*dx + dy*dy + soft*soft);
     V += K * c.q / r;
   }
   return V;
+}
+function potential(x, y) {
+  return potentialWithSoftening(x, y, SOFT);
+}
+function surfacePotential(x, y) {
+  return potentialWithSoftening(x, y, SURFACE_SOFT);
 }
 function field(x, y) {
   let Ex = 0, Ey = 0;
@@ -61,7 +70,10 @@ function field(x, y) {
   }
   return [Ex, Ey];
 }
-function clampV(v) { return Math.max(-V_CLAMP, Math.min(V_CLAMP, v)); }
+function clampTo(v, limit) { return Math.max(-limit, Math.min(limit, v)); }
+function clampV(v) { return clampTo(v, COLOR_V_CLAMP); }
+function clampHeightV(v) { return clampTo(v, HEIGHT_V_CLAMP); }
+function surfaceHeight(x, y) { return clampHeightV(surfacePotential(x, y)) * HEIGHT_SCALE; }
 
 // ---------------------- Explosions ----------------------
 function spawnExplosion(x, y) {
@@ -162,7 +174,7 @@ function renderPotentialField() {
       const sy = (j + 0.5) * (h / sh);
       const [wx, wy] = screenToWorld(sx, sy);
       const v = potential(wx, wy);
-      const t = Math.max(-1, Math.min(1, v / V_CLAMP));
+      const t = Math.max(-1, Math.min(1, v / COLOR_V_CLAMP));
       const boost = Math.sign(t) * Math.pow(Math.abs(t), 0.55);
       // light theme: white background, tint toward red (+) or blue (−)
       let r, g, b;
@@ -579,7 +591,7 @@ let surfaceMesh, surfaceGeom, surfaceMat, wireframeMesh;
 const chargeMeshes = [];
 const particleMeshes = [];
 const trailLines = [];
-const SURF_N = 72;
+const SURF_N = 120;
 let surfaceDirty = false;   // coalesce rebuildSurface() calls to once per frame
 
 function clearTrailLine(tl) {
@@ -667,12 +679,12 @@ function init3D() {
   basePlaneGeom.rotateX(-Math.PI/2);
   const basePlaneMat = new THREE.MeshBasicMaterial({color: 0xe1e6f3, transparent: true, opacity: 0.6, side: THREE.DoubleSide});
   const basePlane = new THREE.Mesh(basePlaneGeom, basePlaneMat);
-  basePlane.position.y = -5;
+  basePlane.position.y = BASE_PLANE_Y;
   scene.add(basePlane);
 
   // grid on base plane
   const gridHelper = new THREE.GridHelper(WORLD_SIZE, 10, 0xb6c0d8, 0xd8def0);
-  gridHelper.position.y = -4.99;
+  gridHelper.position.y = BASE_PLANE_Y + 0.01;
   scene.add(gridHelper);
 
   rebuildSurface();
@@ -690,9 +702,11 @@ function rebuildSurface() {
     const x = pos.getX(i);
     const z = pos.getZ(i);
     const worldY2D = -z;
-    const V = clampV(potential(x, worldY2D));
-    pos.setY(i, V * HEIGHT_SCALE);
-    const t = V / V_CLAMP;
+    const rawV = surfacePotential(x, worldY2D);
+    const heightV = clampHeightV(rawV);
+    pos.setY(i, heightV * HEIGHT_SCALE);
+    const colorV = clampV(rawV);
+    const t = colorV / COLOR_V_CLAMP;
     const boost = Math.sign(t) * Math.pow(Math.abs(t), 0.55);
     // light-theme surface colors (white→red, white→blue)
     let r, g, b;
@@ -724,8 +738,8 @@ function refreshChargeMeshes() {
     const color = c.q > 0 ? 0xd44056 : 0x3873d4;
     const mat = new THREE.MeshPhongMaterial({color, emissive: color, emissiveIntensity: 0.25, shininess: 60});
     const mesh = new THREE.Mesh(geom, mat);
-    const V = clampV(potential(c.x, c.y));
-    mesh.position.set(c.x, V * HEIGHT_SCALE + (c.q > 0 ? radius*1.2 : -radius*1.2), -c.y);
+    const y3d = surfaceHeight(c.x, c.y);
+    mesh.position.set(c.x, y3d + (c.q > 0 ? radius*1.2 : -radius*1.2), -c.y);
     scene.add(mesh);
     chargeMeshes.push({mesh, charge: c});
   }
@@ -768,16 +782,15 @@ function ensureParticleMeshes() {
   }
   for (let i = 0; i < state.particles.length; i++) {
     const p = state.particles[i];
-    const V = clampV(potential(p.x, p.y));
-    particleMeshes[i].position.set(p.x, V*HEIGHT_SCALE + 0.28, -p.y);
+    const y3d = surfaceHeight(p.x, p.y) + 0.28;
+    particleMeshes[i].position.set(p.x, y3d, -p.y);
   }
 }
 
 function updateParticleMeshes() {
   for (let i = 0; i < state.particles.length; i++) {
     const p = state.particles[i];
-    const V = clampV(potential(p.x, p.y));
-    const y3d = V * HEIGHT_SCALE + 0.28;
+    const y3d = surfaceHeight(p.x, p.y) + 0.28;
     particleMeshes[i].position.set(p.x, y3d, -p.y);
     if (state.showTrail) {
       const tl = trailLines[i];
