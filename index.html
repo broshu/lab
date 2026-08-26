@@ -220,9 +220,10 @@
 
   <script src="library-data.js?v=html-folder-order"></script>
   <script>
-    const questionCard = {
-      title: "Question",
-      href: "https://forms.cloud.microsoft/r/Lg4N3RAWZR"
+    const tutorCard = {
+      title: "AI tutor",
+      mark: "解析",
+      href: "tutor/"
     };
 
     const cardsRoot = document.querySelector("#cards");
@@ -300,16 +301,14 @@
       return section;
     }
 
-    function renderQuestionCard() {
-      const section = createElement("section", "card question-card");
+    function renderTutorCard() {
+      const section = createElement("section", "card tutor-card");
       const header = createElement("div", "card-header");
-      header.append(createElement("span", "card-title", questionCard.title));
+      header.append(createElement("span", "card-title", tutorCard.title));
 
       const link = createElement("a", "ask-link");
-      link.href = questionCard.href;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.append(createElement("span", "ask-mark", "Ask"));
+      link.href = tutorCard.href;
+      link.append(createElement("span", "ask-mark", tutorCard.mark));
 
       section.append(header, link);
       return section;
@@ -317,7 +316,7 @@
 
     async function init() {
       const data = await window.loadLabData();
-      cardsRoot.replaceChildren(...data.map(renderCard), renderQuestionCard());
+      cardsRoot.replaceChildren(...data.map(renderCard), renderTutorCard());
     }
 
     init();

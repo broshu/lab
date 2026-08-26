@@ -13,6 +13,7 @@ on:
       - "ppt/**"
       - "games/**"
       - "resources/**"
+      - "tutor/**"
       - "scripts/build-manifest.mjs"
       - ".github/workflows/update-manifest.yml"
   workflow_dispatch:
@@ -46,6 +47,8 @@ jobs:
           mkdir _site
           cp index.html library.html library-data.js icon.png CNAME manifest.json _site/
           cp -R ppt games resources _site/
+          mkdir -p _site/tutor
+          cp tutor/index.html tutor/data.js _site/tutor/
 
       - uses: actions/configure-pages@v5
 
