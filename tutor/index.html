@@ -109,6 +109,9 @@
 
     .hint { margin: 18px 2px 0; color: var(--muted); font-size: 14px; }
 
+    /* 显示题库构建时间：一眼就能看出浏览器是不是在用旧缓存 */
+    .built { margin: 10px 2px 0; color: #a0a09a; font-size: 12px; }
+
     .answer-card {
       margin-top: 18px;
       border: 1px solid var(--line);
@@ -403,6 +406,7 @@
     </section>
 
     <p class="hint" id="hint">先选作业，再选章节和题号。</p>
+    <p class="built" id="built"></p>
 
     <article class="answer-card" id="answer" hidden>
       <div class="answer-head">
@@ -431,7 +435,7 @@
     </section>
   </main>
 
-  <script src="data.js"></script>
+  <script src="data.js?v=036307f2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -831,6 +835,9 @@
     });
 
     function boot() {
+      const ready = data.books.reduce((n, b) => n + b.chapters.filter((c) => c.ready).length, 0);
+      el("built").textContent = `题库更新于 ${data.built || "未知"} · 已整理 ${ready} 个章节`;
+
       const params = new URLSearchParams(location.search);
       const book = data.books.find((b) => b.id === params.get("b")) || data.books[0] || null;
       state.book = book ? book.id : null;

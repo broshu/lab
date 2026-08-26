@@ -7,15 +7,18 @@
 只依赖标准库。md 里的 $...$ / $$...$$ 原样保留，交给页面上的 KaTeX 渲染。
 """
 
+import hashlib
 import html
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 TOPICS = ROOT / "content" / "topics"
 CHAPTERS = ROOT / "content" / "chapters.txt"
 OUT = ROOT / "data.js"
+PAGE = ROOT / "index.html"
 
 BOOK_ID = "summer2026"
 BOOK_TITLE = "暑假作业"
@@ -173,7 +176,8 @@ def main():
         if cid not in dict(order):
             raise SystemExit(f"{cid} 不在 chapters.txt 里，请先补上章节清单")
 
-    data = {"books": [{"id": BOOK_ID, "title": BOOK_TITLE, "chapters": chapters}]}
+    built = datetime.now().strftime("%Y-%m-%d %H:%M")
+    data = {"built": built, "books": [{"id": BOOK_ID, "title": BOOK_TITLE, "chapters": chapters}]}
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     OUT.write_text(
         "/* 由 build.py 自动生成，请勿直接编辑；改题目请改 content/topics/*.md */\n"
@@ -181,9 +185,23 @@ def main():
         encoding="utf8",
     )
 
+    # 给 data.js 打指纹，并写进 index.html 的 script 标签。
+    # 不这么做的话，浏览器会一直用缓存里的旧 data.js，新加的章节死活出不来。
+    stamp = hashlib.md5(payload.encode("utf8")).hexdigest()[:8]
+    page = PAGE.read_text(encoding="utf8")
+    page, n = re.subn(
+        r'<script src="data\.js(?:\?v=[0-9a-f]+)?"></script>',
+        f'<script src="data.js?v={stamp}"></script>',
+        page,
+    )
+    if n != 1:
+        raise SystemExit("index.html 里没找到唯一的 data.js script 标签，缓存指纹没写进去")
+    PAGE.write_text(page, encoding="utf8")
+
     done = sum(1 for c in chapters if c["ready"])
     total = sum(len(c["questions"]) for c in chapters)
     print(f"已写入 {OUT.name}：{done}/{len(chapters)} 个章节，共 {total} 题")
+    print(f"index.html 已更新为 data.js?v={stamp}（构建时间 {built}）")
 
 
 if __name__ == "__main__":
