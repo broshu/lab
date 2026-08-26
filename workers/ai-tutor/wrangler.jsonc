@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "p-ai-tutor",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-26",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "TUTOR_DB",
+      "database_name": "p-ai-tutor-records",
+      "database_id": "__REPLACE_AFTER_D1_CREATE__",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "AI_BASE_URL": "https://api.deepseek.com",
+    "AI_MODEL": "deepseek-v4-pro",
+    "ALLOWED_ORIGINS": "https://p.phylab.uk",
+    "RETENTION_DAYS": "30"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    }
+  }
+}

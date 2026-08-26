@@ -42,11 +42,40 @@
       margin-bottom: 22px;
     }
 
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
     h1 {
       margin: 0;
       font-size: 20px;
       font-weight: 600;
       letter-spacing: 0;
+    }
+
+    /* A deliberately quiet, password-protected teacher entry. */
+    .admin-entry {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      color: var(--muted);
+      opacity: .32;
+      text-decoration: none;
+      transition: opacity .16s ease, background .16s ease, color .16s ease;
+    }
+
+    .admin-entry:hover,
+    .admin-entry:focus-visible {
+      color: var(--ink);
+      background: #ececea;
+      opacity: 1;
+      outline: none;
     }
 
     .home {
@@ -386,7 +415,10 @@
 <body>
   <main>
     <div class="topbar">
-      <h1>AI tutor</h1>
+      <div class="title-wrap">
+        <h1>AI tutor</h1>
+        <a class="admin-entry" href="https://p-ai-tutor.dgxwmk9dbm.workers.dev/admin" target="_blank" rel="noopener" aria-label="打开教师后台" title="教师后台"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></a>
+      </div>
       <a class="home" href="../">← Physics Lab</a>
     </div>
 
@@ -605,11 +637,9 @@
 
     /* =================== 问 AI =================== */
 
-    // 内部使用的接口，直接写在前端。要换模型或换 key 改这三行即可。
+    // 密钥仅保存在 Cloudflare Worker。浏览器只和本站的 AI Tutor 接口通信。
     const AI = {
-      endpoint: "https://api.deepseek.com/chat/completions",
-      key: "sk-cb56fc7e44d9488ea7f1ed91fcaabdda",
-      model: "deepseek-v4-pro" // 想更快更便宜可改成 deepseek-v4-flash
+      endpoint: "https://p-ai-tutor.dgxwmk9dbm.workers.dev/api/chat"
     };
 
     const QUICK_ASKS = [
@@ -622,6 +652,26 @@
     const histories = new Map();   // 每道题一份对话记录
     let chatKey = null;
     let inflight = null;           // 当前请求的 AbortController
+
+    const SESSION_STORAGE_KEY = "p-ai-tutor-session";
+    const SESSION_ID_RE = /^[A-Za-z0-9_-]{8,80}$/;
+
+    function fallbackSessionId() {
+      return "tutor-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 14);
+    }
+
+    function getSessionId() {
+      let value = "";
+      try { value = sessionStorage.getItem(SESSION_STORAGE_KEY) || ""; } catch {}
+      if (!SESSION_ID_RE.test(value)) {
+        value = crypto.randomUUID ? crypto.randomUUID() : fallbackSessionId();
+        if (!SESSION_ID_RE.test(value)) value = fallbackSessionId();
+        try { sessionStorage.setItem(SESSION_STORAGE_KEY, value); } catch {}
+      }
+      return value;
+    }
+
+    const sessionId = getSessionId();
 
     // 极简 markdown：段落、**粗体**、无序/有序列表、$$块级公式$$
     function mdLite(text) {
@@ -730,54 +780,39 @@
       let answer = "";
 
       try {
+        const book = currentBook();
         const res = await fetch(AI.endpoint, {
           method: "POST",
           signal: inflight.signal,
           headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + AI.key
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: AI.model,
-            stream: true,
+            question: text.trim(),
+            sessionId,
+            context: {
+              bookId: book?.id || "",
+              bookTitle: book?.title || "",
+              chapterId: ch.id,
+              chapterTitle: ch.title,
+              questionNo: q.no,
+              questionType: q.type || ""
+            },
             messages: [{ role: "system", content: systemPrompt(ch, q) }, ...hist]
           })
         });
 
-        if (!res.ok) throw new Error(`接口返回 ${res.status}`);
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop();
-
-          for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
-            const payload = line.slice(5).trim();
-            if (!payload || payload === "[DONE]") continue;
-            let delta;
-            try { delta = JSON.parse(payload).choices[0].delta; } catch { continue; }
-            // deepseek-v4-pro 会先吐 reasoning_content（思考过程），只显示正式回答
-            if (delta && delta.content) {
-              answer += delta.content;
-              const dots = bubble.querySelector(".thinking");
-              if (dots) dots.remove();
-              body.textContent = answer;   // 流式阶段先显示纯文本
-              bubble.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            }
-          }
-        }
+        let payload;
+        try { payload = await res.json(); } catch { throw new Error("AI 返回了无法读取的内容"); }
+        if (!res.ok) throw new Error(payload?.error || `接口返回 ${res.status}`);
+        answer = typeof payload?.answer === "string" ? payload.answer : "";
 
         if (askedFor !== chatKey) return;   // 学生中途换题了
 
         if (answer.trim()) {
           hist.push({ role: "assistant", content: answer });
+          const dots = bubble.querySelector(".thinking");
+          if (dots) dots.remove();
           body.innerHTML = mdLite(answer);  // 结束后再排版公式
           typeset(body);
         } else {

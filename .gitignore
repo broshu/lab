@@ -2,3 +2,5 @@ manifest.json
 files.json
 _site/
 .DS_Store
+workers/ai-tutor/.dev.vars
+workers/ai-tutor/.wrangler/
