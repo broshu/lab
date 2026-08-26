@@ -147,6 +147,25 @@
 
     .answer-key b { font-size: 19px; letter-spacing: .06em; }
 
+    .answer-key[hidden] { display: none; }
+
+    .answer-block {
+      margin: 16px 0 4px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fafaf8;
+      font-size: 15px;
+      overflow-x: auto;
+    }
+
+    .answer-block .tag {
+      margin-right: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
     .solution { padding: 4px 22px 22px; font-size: 15.5px; }
     .solution p { margin: 13px 0; }
     .solution strong { font-weight: 600; }
@@ -185,6 +204,152 @@
     }
 
     .solution th { background: #fafaf8; font-weight: 600; }
+
+    /* ---------- 问 AI ---------- */
+
+    .chat {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .chat[hidden] { display: none; }
+
+    .chat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--soft-line);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .chat-clear {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    .chat-clear:hover { color: var(--ink); text-decoration: underline; }
+    .chat-clear[hidden] { display: none; }
+
+    .chat-log { padding: 6px 22px; }
+    .chat-log:empty { display: none; }
+
+    .msg { margin: 14px 0; font-size: 15px; }
+    .msg p { margin: 9px 0; }
+    .msg p:first-child { margin-top: 0; }
+    .msg p:last-child { margin-bottom: 0; }
+    .msg ul, .msg ol { margin: 9px 0; padding-left: 22px; }
+    .msg .math-block { margin: 12px 0; text-align: center; overflow-x: auto; }
+
+    .msg.me {
+      margin-left: auto;
+      max-width: 86%;
+      width: fit-content;
+      padding: 9px 14px;
+      border-radius: 14px 14px 3px 14px;
+      background: #ececea;
+      white-space: pre-wrap;
+    }
+
+    .msg.ai { color: #1a1a1a; }
+
+    .msg.ai .who {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .msg.err { color: #a3341f; font-size: 14px; }
+
+    .thinking { color: var(--muted); font-size: 14px; }
+
+    .thinking::after {
+      content: "";
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ""; }
+      25% { content: "·"; }
+      50% { content: "··"; }
+      75% { content: "···"; }
+    }
+
+    .quick {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 22px 0;
+    }
+
+    .quick[hidden] { display: none; }
+
+    .quick button {
+      padding: 5px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .quick button:hover { border-color: var(--ink); color: var(--ink); }
+
+    .chat-input {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      padding: 14px 22px 18px;
+    }
+
+    .chat-input textarea {
+      flex: 1;
+      min-height: 40px;
+      max-height: 160px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+    }
+
+    .chat-input textarea:focus { border-color: var(--ink); outline: none; }
+
+    .chat-input button {
+      padding: 9px 18px;
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      background: var(--ink);
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .chat-input button:disabled {
+      border-color: var(--line);
+      background: var(--line);
+      color: #fff;
+      cursor: not-allowed;
+    }
 
     .nav {
       display: flex;
@@ -251,6 +416,19 @@
         <button type="button" id="next">下一题</button>
       </div>
     </article>
+
+    <section class="chat" id="chat" hidden>
+      <div class="chat-head">
+        <span>没看懂？问问 AI</span>
+        <button type="button" class="chat-clear" id="chat-clear" hidden>清空对话</button>
+      </div>
+      <div class="chat-log" id="chat-log"></div>
+      <div class="quick" id="quick"></div>
+      <form class="chat-input" id="chat-form">
+        <textarea id="chat-text" rows="1" placeholder="比如：第三步为什么要用等势面？"></textarea>
+        <button type="submit" id="chat-send">发送</button>
+      </form>
+    </section>
   </main>
 
   <script src="data.js"></script>
@@ -344,6 +522,7 @@
 
       if (!q) {
         card.hidden = true;
+        el("chat").hidden = true;
         el("hint").hidden = false;
         el("hint").textContent = ch ? "选一个题号，看这题的解析。"
           : (currentBook() ? "再选一个章节。" : "先选作业，再选章节和题号。");
@@ -357,15 +536,28 @@
       const tag = [q.type, q.section].filter(Boolean).join(" · ");
       badge.textContent = tag;
       badge.hidden = !tag;
-      el("key").textContent = q.answer;
+
+      // 选择题答案短，直接放标题栏；计算题答案是一串公式，放正文顶部的方框里。
+      const inHead = q.answer.length <= 14 && !q.answer.includes("$");
+      const keyWrap = document.querySelector(".answer-key");
+      keyWrap.hidden = !inHead;
+      el("key").textContent = inHead ? q.answer : "";
 
       const box = el("solution");
       box.innerHTML = q.html;
-      typeset(box);
+      if (!inHead) {
+        const block = document.createElement("div");
+        block.className = "answer-block";
+        block.innerHTML = '<span class="tag">答案</span>' + q.answer;
+        box.prepend(block);
+      }
+      typeset(el("answer"));
 
       const index = ch.questions.findIndex((item) => item.no === q.no);
       el("prev").disabled = index <= 0;
       el("next").disabled = index >= ch.questions.length - 1;
+
+      mountChat(ch, q);
     }
 
     function syncUrl() {
@@ -407,6 +599,237 @@
     el("prev").addEventListener("click", () => step(-1));
     el("next").addEventListener("click", () => step(1));
 
+    /* =================== 问 AI =================== */
+
+    // 内部使用的接口，直接写在前端。要换模型或换 key 改这三行即可。
+    const AI = {
+      endpoint: "https://api.deepseek.com/chat/completions",
+      key: "sk-cb56fc7e44d9488ea7f1ed91fcaabdda",
+      model: "deepseek-v4-pro" // 想更快更便宜可改成 deepseek-v4-flash
+    };
+
+    const QUICK_ASKS = [
+      "为什么是这个答案？",
+      "这题的突破口在哪？",
+      "有没有更快的做法？",
+      "我选了别的，错在哪？"
+    ];
+
+    const histories = new Map();   // 每道题一份对话记录
+    let chatKey = null;
+    let inflight = null;           // 当前请求的 AbortController
+
+    // 极简 markdown：段落、**粗体**、无序/有序列表、$$块级公式$$
+    function mdLite(text) {
+      const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      return text.trim().split(/\n\s*\n/).map((block) => {
+        const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+        if (!lines.length) return "";
+        const body = esc(block.trim());
+        if (body.startsWith("$$") && body.endsWith("$$")) {
+          return `<p class="math-block">${body}</p>`;
+        }
+        const bold = (s) => s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        if (lines.every((l) => /^[-*]\s+/.test(l))) {
+          return "<ul>" + lines.map((l) => `<li>${bold(esc(l.replace(/^[-*]\s+/, "")))}</li>`).join("") + "</ul>";
+        }
+        if (lines.every((l) => /^\d+[.、)]\s*/.test(l))) {
+          return "<ol>" + lines.map((l) => `<li>${bold(esc(l.replace(/^\d+[.、)]\s*/, "")))}</li>`).join("") + "</ol>";
+        }
+        return `<p>${bold(esc(lines.join("\n"))).replace(/\n/g, "<br>")}</p>`;
+      }).join("");
+    }
+
+    function systemPrompt(ch, q) {
+      return [
+        "你是一位耐心的高中物理老师，正在给一名中国高二学生讲解一道他刚做过的题。",
+        "",
+        "下面是这道题的全部信息，包括题干、选项、标准答案和详细解析：",
+        "",
+        "<题目资料>",
+        `所属章节：${ch.title}`,
+        `题号：第 ${q.no} 题${q.type ? "（" + q.type + "）" : ""}`,
+        q.section ? `考点分类：${q.section}` : "",
+        "",
+        q.source,
+        "</题目资料>",
+        "",
+        "回答时请遵守：",
+        "1. 学生手上有纸质作业本，题目和插图他都看得到，不要复述题干，直接回答他问的点。",
+        "2. 以上面这份解析为准。学生的疑问如果超出解析范围，你可以补充，但结论不能和标准答案矛盾。",
+        "3. 上面的资料里没有插图。如果某个问题必须看图才能说清，就让学生描述一下图里的关键信息，不要凭空猜测图的样子。",
+        "4. 用中文口语化地讲，像当面辅导。一次讲清一个点就够了，不要把整道题从头到尾重讲一遍。",
+        "5. 公式一律用 LaTeX：行内写成 $E=mc^2$，独立成行写成 $$E=mc^2$$。不要用其他记法。",
+        "6. 学生问「为什么选 X」时，先给结论，再解释理由。",
+        "7. 学生说自己选了别的选项时，先指出他那个选项错在哪一步，这比重复正确答案更有用。",
+        "8. 拿不准就说拿不准，不要编造数据或结论。"
+      ].filter(Boolean).join("\n");
+    }
+
+    function addMsg(cls, html) {
+      const div = document.createElement("div");
+      div.className = "msg " + cls;
+      div.innerHTML = html;
+      el("chat-log").append(div);
+      return div;
+    }
+
+    function refreshQuick() {
+      const hist = histories.get(chatKey) || [];
+      el("quick").hidden = hist.length > 0;
+      el("chat-clear").hidden = hist.length === 0;
+    }
+
+    function drawHistory() {
+      const log = el("chat-log");
+      log.replaceChildren();
+      for (const m of histories.get(chatKey) || []) {
+        if (m.role === "user") {
+          addMsg("me", mdLite(m.content));
+        } else {
+          addMsg("ai", '<span class="who">AI</span>' + mdLite(m.content));
+        }
+      }
+      typeset(log);
+      refreshQuick();
+    }
+
+    function mountChat(ch, q) {
+      const key = `${ch.id}#${q.no}`;
+      el("chat").hidden = false;
+      if (key === chatKey) return;
+      if (inflight) { inflight.abort(); inflight = null; }
+      chatKey = key;
+      el("chat-text").value = "";
+      drawHistory();
+    }
+
+    async function ask(text) {
+      const ch = currentChapter();
+      const q = ch && ch.questions.find((item) => item.no === state.question);
+      if (!q || !text.trim() || inflight) return;
+
+      const hist = histories.get(chatKey) || [];
+      histories.set(chatKey, hist);
+      hist.push({ role: "user", content: text.trim() });
+
+      addMsg("me", mdLite(text.trim()));
+      refreshQuick();
+
+      const bubble = addMsg("ai", '<span class="who">AI</span><span class="thinking">思考中</span>');
+      const body = bubble.appendChild(document.createElement("div"));
+      bubble.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+      el("chat-send").disabled = true;
+      inflight = new AbortController();
+      const askedFor = chatKey;
+      let answer = "";
+
+      try {
+        const res = await fetch(AI.endpoint, {
+          method: "POST",
+          signal: inflight.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + AI.key
+          },
+          body: JSON.stringify({
+            model: AI.model,
+            stream: true,
+            messages: [{ role: "system", content: systemPrompt(ch, q) }, ...hist]
+          })
+        });
+
+        if (!res.ok) throw new Error(`接口返回 ${res.status}`);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith("data:")) continue;
+            const payload = line.slice(5).trim();
+            if (!payload || payload === "[DONE]") continue;
+            let delta;
+            try { delta = JSON.parse(payload).choices[0].delta; } catch { continue; }
+            // deepseek-v4-pro 会先吐 reasoning_content（思考过程），只显示正式回答
+            if (delta && delta.content) {
+              answer += delta.content;
+              const dots = bubble.querySelector(".thinking");
+              if (dots) dots.remove();
+              body.textContent = answer;   // 流式阶段先显示纯文本
+              bubble.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+          }
+        }
+
+        if (askedFor !== chatKey) return;   // 学生中途换题了
+
+        if (answer.trim()) {
+          hist.push({ role: "assistant", content: answer });
+          body.innerHTML = mdLite(answer);  // 结束后再排版公式
+          typeset(body);
+        } else {
+          bubble.remove();
+          addMsg("err", "没有收到回复，再问一次试试。");
+        }
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        bubble.remove();
+        addMsg("err", "没连上 AI：" + err.message + "。检查一下网络，稍后再试。");
+        hist.pop();   // 这轮没成功，别把提问留在记录里
+      } finally {
+        if (askedFor === chatKey) {
+          inflight = null;
+          el("chat-send").disabled = false;
+          refreshQuick();
+        }
+      }
+    }
+
+    el("quick").replaceChildren(...QUICK_ASKS.map((text) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = text;
+      b.addEventListener("click", () => ask(text));
+      return b;
+    }));
+
+    el("chat-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const box = el("chat-text");
+      const text = box.value;
+      box.value = "";
+      box.style.height = "auto";
+      ask(text);
+    });
+
+    el("chat-text").addEventListener("input", (e) => {
+      e.target.style.height = "auto";
+      e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
+    });
+
+    el("chat-text").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        el("chat-form").requestSubmit();
+      }
+    });
+
+    el("chat-clear").addEventListener("click", () => {
+      if (inflight) { inflight.abort(); inflight = null; }
+      histories.delete(chatKey);
+      el("chat-send").disabled = false;
+      drawHistory();
+    });
+
     function boot() {
       const params = new URLSearchParams(location.search);
       const book = data.books.find((b) => b.id === params.get("b")) || data.books[0] || null;
@@ -423,7 +846,7 @@
 
     boot();
     // KaTeX 是 defer 加载的，脚本就位后再补渲染一次。
-    window.addEventListener("load", () => typeset(el("solution")));
+    window.addEventListener("load", () => typeset(el("answer")));
   </script>
 </body>
 </html>

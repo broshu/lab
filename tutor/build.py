@@ -129,8 +129,12 @@ def parse_topic(path):
             "no": int(h.group(1)),
             "type": (h.group(2) or "").strip(),
             "section": (h.group(3) or "").strip(),
-            "answer": a.group(1).strip(),
+            # 计算题的答案本身含 LaTeX，会以 innerHTML 插入页面，这里先转义
+            "answer": html.escape(a.group(1).strip(), quote=False),
             "html": md_to_html(after),
+            # 原始 markdown（题干+选项+答案+解析），页面上不显示，
+            # 只作为上下文发给 AI —— 学生问问题时它才知道题目是什么。
+            "source": body.strip(),
         })
 
     return meta, questions
