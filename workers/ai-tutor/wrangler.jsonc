@@ -8,7 +8,7 @@
     {
       "binding": "TUTOR_DB",
       "database_name": "p-ai-tutor-records",
-      "database_id": "__REPLACE_AFTER_D1_CREATE__",
+      "database_id": "a4ed244e-3ef9-40ac-af89-c9acd28573c1",
       "migrations_dir": "migrations"
     }
   ],

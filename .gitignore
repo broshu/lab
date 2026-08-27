@@ -4,3 +4,6 @@ _site/
 .DS_Store
 workers/ai-tutor/.dev.vars
 workers/ai-tutor/.wrangler/
+node_modules/
+.pnpm-store/
+workers/ai-tutor/pnpm-workspace.yaml
