@@ -7,6 +7,9 @@ const MAX_HISTORY_MESSAGES = 12;
 const MAX_RESPONSE_BYTES = 96 * 1024;
 const PAGE_SIZE = 25;
 const DEFAULT_RETENTION_DAYS = 30;
+const ADMIN_SESSION_MAX_AGE_SECONDS = 24 * 60 * 60;
+const ADMIN_SESSION_BUCKET_MS = ADMIN_SESSION_MAX_AGE_SECONDS * 1_000;
+const ADMIN_SESSION_COOKIE = 'p_ai_tutor_admin';
 
 const SECURITY_HEADERS = Object.freeze({
   'Cache-Control': 'no-store',
@@ -16,7 +19,7 @@ const SECURITY_HEADERS = Object.freeze({
 });
 
 const ADMIN_CSP =
-  "default-src 'none'; connect-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+  "default-src 'none'; connect-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
 class HttpError extends Error {
   /** @param {number} status @param {string} message */
@@ -162,23 +165,53 @@ async function secureEqual(provided, expected) {
   return difference === 0;
 }
 
+/** @param {Request} request @param {string} name */
+function cookieValue(request, name) {
+  const cookies = request.headers.get('Cookie') || '';
+  for (const item of cookies.split(';')) {
+    const [key, ...parts] = item.trim().split('=');
+    if (key === name) return parts.join('=');
+  }
+  return '';
+}
+
+/** @param {string} value @param {string} secret */
+async function signAdminSession(value, secret) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(value)));
+  let binary = '';
+  for (const byte of signature) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/** @param {Env} env @param {number} bucket */
+async function createAdminSession(env, bucket) {
+  const payload = `v1.${bucket}`;
+  return `${payload}.${await signAdminSession(payload, env.ADMIN_SESSION_SECRET)}`;
+}
+
 /** @param {Request} request @param {Env} env */
 async function isAdmin(request, env) {
-  if (!env.ADMIN_PASSWORD) return false;
-  const authorization = request.headers.get('Authorization') || '';
-  if (!authorization.startsWith('Basic ')) return false;
-
-  let credentials = '';
-  try { credentials = atob(authorization.slice(6)); } catch { return false; }
-  const separator = credentials.indexOf(':');
-  if (separator === -1) return false;
-  const username = credentials.slice(0, separator);
-  const password = credentials.slice(separator + 1);
-  const [validName, validPassword] = await Promise.all([
-    secureEqual(username, 'admin'),
-    secureEqual(password, env.ADMIN_PASSWORD),
+  if (!env.ADMIN_PASSWORD || !env.ADMIN_SESSION_SECRET) return false;
+  const provided = cookieValue(request, ADMIN_SESSION_COOKIE);
+  if (!provided) return false;
+  const currentBucket = Math.floor(Date.now() / ADMIN_SESSION_BUCKET_MS);
+  const [current, previous] = await Promise.all([
+    createAdminSession(env, currentBucket),
+    createAdminSession(env, currentBucket - 1),
   ]);
-  return validName && validPassword;
+  const [currentMatch, previousMatch] = await Promise.all([
+    secureEqual(provided, current),
+    secureEqual(provided, previous),
+  ]);
+  return currentMatch || previousMatch;
 }
 
 /** @param {Env} env */
@@ -293,6 +326,43 @@ async function listQuestions(db, requestedPage, retentionDays) {
   };
 }
 
+function adminLoginPage(showError = false) {
+  return String.raw`<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Tutor · 后台登录</title>
+  <style>
+    :root { color-scheme: light dark; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; display: grid; place-items: center; margin: 0; background: #f7f7f5; color: #111; }
+    main { width: min(390px, calc(100% - 32px)); padding: 28px; border: 1px solid #d9d9d4; border-radius: 10px; background: #fff; }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    p { margin: 0; color: #646464; line-height: 1.6; }
+    form { display: grid; gap: 12px; margin-top: 22px; }
+    label { font-size: 14px; font-weight: 650; }
+    input, button { min-height: 42px; border: 1px solid #b8b8b1; border-radius: 6px; padding: 8px 10px; font: inherit; }
+    button { border-color: #111; background: #111; color: #fff; cursor: pointer; }
+    .error { margin-top: 16px; color: #a61b1b; font-size: 14px; }
+    @media (prefers-color-scheme: dark) { body { background: #161616; color: #eee; } main { border-color: #3a3a38; background: #20201f; } p { color: #b8b8b1; } input { border-color: #555; background: #171717; color: #fff; } button { border-color: #e8e8e1; background: #e8e8e1; color: #151515; } .error { color: #ffb4ab; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>AI Tutor 后台</h1>
+    <p>输入访问密码即可查看学生提问记录。</p>
+    ${showError ? '<p class="error">密码不正确，请重试。</p>' : ''}
+    <form action="/admin/login" method="post">
+      <label for="password">访问密码</label>
+      <input id="password" name="password" type="password" inputmode="text" autocomplete="current-password" required autofocus>
+      <button type="submit">进入后台</button>
+    </form>
+  </main>
+</body>
+</html>`;
+}
+
 const ADMIN_PAGE = String.raw`<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -329,7 +399,7 @@ const ADMIN_PAGE = String.raw`<!doctype html>
       <h1>AI Tutor 提问记录</h1>
       <p class="muted">仅保存匿名会话编号、题目位置、学生提问和 AI 回答；不保存姓名、IP 地址或浏览器指纹。原文保留 <span id="retention">—</span> 天。</p>
     </header>
-    <section class="toolbar"><p id="status" aria-live="polite">正在读取…</p><button id="refresh" type="button">刷新</button></section>
+    <section class="toolbar"><p id="status" aria-live="polite">正在读取…</p><div><button id="refresh" type="button">刷新</button><form action="/admin/logout" method="post" style="display:inline"><button type="submit">退出</button></form></div></section>
     <section id="records" aria-live="polite"></section>
     <nav class="pager" aria-label="记录分页"><button id="previous" type="button">上一页</button><span id="page">第 1 页</span><button id="next" type="button">下一页</button></nav>
   </main>
@@ -381,11 +451,17 @@ const ADMIN_PAGE = String.raw`<!doctype html>
 </body>
 </html>`;
 
-/** @param {Request} request */
-function adminUnauthorized(request) {
-  return new Response('Authentication required.', {
-    status: 401,
-    headers: { ...SECURITY_HEADERS, 'WWW-Authenticate': 'Basic realm="AI Tutor admin", charset="UTF-8"' },
+/** @param {string} content @param {number} [status] @param {HeadersInit} [headers] */
+function adminHtml(content, status = 200, headers = {}) {
+  return new Response(content, {
+    status,
+    headers: {
+      ...SECURITY_HEADERS,
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Security-Policy': ADMIN_CSP,
+      'X-Robots-Tag': 'noindex, nofollow, noarchive',
+      ...headers,
+    },
   });
 }
 
@@ -397,7 +473,7 @@ export default {
     const config = settings(env);
     try {
       if (url.pathname === '/health' && request.method === 'GET') {
-        return json({ ok: true, service: 'p-ai-tutor', configured: Boolean(env.DEEPSEEK_API_KEY && env.ADMIN_PASSWORD) });
+        return json({ ok: true, service: 'p-ai-tutor', configured: Boolean(env.DEEPSEEK_API_KEY && env.ADMIN_PASSWORD && env.ADMIN_SESSION_SECRET) });
       }
 
       if (url.pathname === '/api/chat' && request.method === 'OPTIONS') {
@@ -435,10 +511,45 @@ export default {
         }
       }
 
+      if (url.pathname === '/admin/login' && request.method === 'POST') {
+        const contentType = request.headers.get('Content-Type') || '';
+        if (!contentType.toLowerCase().startsWith('application/x-www-form-urlencoded')) {
+          return adminHtml(adminLoginPage(true), 415);
+        }
+        const body = await readLimitedText(request.body, 4_096);
+        const password = new URLSearchParams(body).get('password') || '';
+        if (!env.ADMIN_PASSWORD || !env.ADMIN_SESSION_SECRET || !(await secureEqual(password, env.ADMIN_PASSWORD))) {
+          return adminHtml(adminLoginPage(true), 401);
+        }
+        const bucket = Math.floor(Date.now() / ADMIN_SESSION_BUCKET_MS);
+        const session = await createAdminSession(env, bucket);
+        return new Response(null, {
+          status: 303,
+          headers: {
+            ...SECURITY_HEADERS,
+            Location: '/admin',
+            'Set-Cookie': `${ADMIN_SESSION_COOKIE}=${session}; Max-Age=${ADMIN_SESSION_MAX_AGE_SECONDS}; Path=/admin; HttpOnly; Secure; SameSite=Strict`,
+          },
+        });
+      }
+
+      if (url.pathname === '/admin/logout' && request.method === 'POST') {
+        return new Response(null, {
+          status: 303,
+          headers: {
+            ...SECURITY_HEADERS,
+            Location: '/admin',
+            'Set-Cookie': `${ADMIN_SESSION_COOKIE}=; Max-Age=0; Path=/admin; HttpOnly; Secure; SameSite=Strict`,
+          },
+        });
+      }
+
       if ((url.pathname === '/admin' || url.pathname === '/admin/questions') && request.method === 'GET') {
-        if (!(await isAdmin(request, env))) return adminUnauthorized(request);
+        if (!(await isAdmin(request, env))) {
+          return url.pathname === '/admin' ? adminHtml(adminLoginPage(), 401) : json({ error: 'Authentication required.' }, 401);
+        }
         if (url.pathname === '/admin') {
-          return new Response(ADMIN_PAGE, { headers: { ...SECURITY_HEADERS, 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': ADMIN_CSP, 'X-Robots-Tag': 'noindex, nofollow, noarchive' } });
+          return adminHtml(ADMIN_PAGE);
         }
         const page = Number.parseInt(url.searchParams.get('page') || '1', 10);
         return json(await listQuestions(env.TUTOR_DB, page, config.retentionDays), 200, { 'X-Robots-Tag': 'noindex, nofollow, noarchive' });
