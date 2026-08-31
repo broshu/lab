@@ -196,7 +196,9 @@ def main():
     data = {"built": built, "books": books}
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     OUT.write_text(
-        "/* 由 build.py 自动生成，请勿直接编辑；改题目请改 content/**/topics/*.md */\n"
+        # 注意：注释里不能出现 content/**/topics —— 那个 */ 会提前关掉块注释，
+        # 整个 data.js 直接变成语法错误，页面就白屏了。
+        "/* 由 build.py 自动生成，请勿直接编辑；改题目请改各书 content 目录下的 topics 里的 md */\n"
         f"window.TUTOR_DATA = {payload};\n",
         encoding="utf8",
     )
