@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把 content/topics/*.md 编译成前端用的 data.js。
+"""把 content/**/topics/*.md 编译成前端用的 data.js（每本书一个内容目录，见 BOOKS）。
 
 用法：
     python3 tutor/build.py
@@ -15,13 +15,16 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-TOPICS = ROOT / "content" / "topics"
-CHAPTERS = ROOT / "content" / "chapters.txt"
 OUT = ROOT / "data.js"
 PAGE = ROOT / "index.html"
 
-BOOK_ID = "summer2026"
-BOOK_TITLE = "暑假作业"
+# 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
+# chat=False 表示这本书的 md 里没有题干，只有解析，页面上不显示「问问 AI」
+# —— 没有题目原文，AI 只能瞎猜，不如不给。
+BOOKS = [
+    {"id": "summer2026", "title": "暑假作业", "dir": "content", "chat": True},
+    {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3", "chat": False},
+]
 
 # ---------------------------------------------------------------- markdown
 
@@ -143,26 +146,32 @@ def parse_topic(path):
     return meta, questions
 
 
-def main():
+def build_book(book):
+    """编译一本书：读 chapters.txt 定顺序，再把 topics/*.md 填进去。"""
+    root = ROOT / book["dir"]
     order = []
-    for line in CHAPTERS.read_text(encoding="utf8").splitlines():
+    for line in (root / "chapters.txt").read_text(encoding="utf8").splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
         cid, title = [p.strip() for p in line.split("|", 1)]
         order.append((cid, title))
 
-    built = {}
-    for path in sorted(TOPICS.glob("*.md")):
+    ready = {}
+    for path in sorted((root / "topics").glob("*.md")):
         meta, questions = parse_topic(path)
         cid = meta.get("id") or path.stem.split("-")[0]
-        built[cid] = (meta, questions)
-        print(f"  {path.name}: {len(questions)} 题")
+        if not book["chat"]:
+            # 没有题干可给 AI，就别把半截资料塞进 data.js
+            for q in questions:
+                q["source"] = ""
+        ready[cid] = (meta, questions)
+        print(f"  [{book['id']}] {path.name}: {len(questions)} 题")
 
     chapters = []
     for cid, title in order:
-        if cid in built:
-            meta, questions = built[cid]
+        if cid in ready:
+            meta, questions = ready[cid]
             chapters.append({
                 "id": cid,
                 "title": meta.get("title") or title,
@@ -172,15 +181,22 @@ def main():
         else:
             chapters.append({"id": cid, "title": title, "ready": False, "questions": []})
 
-    for cid in built:
+    for cid in ready:
         if cid not in dict(order):
-            raise SystemExit(f"{cid} 不在 chapters.txt 里，请先补上章节清单")
+            raise SystemExit(f"{book['id']}：{cid} 不在 chapters.txt 里，请先补上章节清单")
+
+    return {"id": book["id"], "title": book["title"], "chapters": chapters}
+
+
+def main():
+    books = [build_book(b) for b in BOOKS]
+    chapters = [c for b in books for c in b["chapters"]]
 
     built = datetime.now().strftime("%Y-%m-%d %H:%M")
-    data = {"built": built, "books": [{"id": BOOK_ID, "title": BOOK_TITLE, "chapters": chapters}]}
+    data = {"built": built, "books": books}
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     OUT.write_text(
-        "/* 由 build.py 自动生成，请勿直接编辑；改题目请改 content/topics/*.md */\n"
+        "/* 由 build.py 自动生成，请勿直接编辑；改题目请改 content/**/topics/*.md */\n"
         f"window.TUTOR_DATA = {payload};\n",
         encoding="utf8",
     )

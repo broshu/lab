@@ -467,7 +467,7 @@
     </section>
   </main>
 
-  <script src="data.js?v=036307f2"></script>
+  <script src="data.js?v=88bbe58d"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -749,6 +749,13 @@
     }
 
     function mountChat(ch, q) {
+      // 有的作业本只录了解析、没有题干。没有题目原文，AI 只能瞎猜，干脆不显示。
+      if (!q.source) {
+        if (inflight) { inflight.abort(); inflight = null; }
+        chatKey = null;
+        el("chat").hidden = true;
+        return;
+      }
       const key = `${ch.id}#${q.no}`;
       el("chat").hidden = false;
       if (key === chatKey) return;
