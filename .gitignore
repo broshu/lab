@@ -7,3 +7,4 @@ workers/ai-tutor/.wrangler/
 node_modules/
 .pnpm-store/
 workers/ai-tutor/pnpm-workspace.yaml
+~$*
