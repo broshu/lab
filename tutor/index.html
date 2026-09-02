@@ -319,28 +319,6 @@
       75% { content: "···"; }
     }
 
-    .quick {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 22px 0;
-    }
-
-    .quick[hidden] { display: none; }
-
-    .quick button {
-      padding: 5px 11px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--card);
-      color: var(--muted);
-      font-family: inherit;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .quick button:hover { border-color: var(--ink); color: var(--ink); }
-
     .chat-input {
       display: flex;
       gap: 10px;
@@ -459,15 +437,14 @@
         <button type="button" class="chat-clear" id="chat-clear" hidden>清空对话</button>
       </div>
       <div class="chat-log" id="chat-log"></div>
-      <div class="quick" id="quick"></div>
       <form class="chat-input" id="chat-form">
-        <textarea id="chat-text" rows="1" placeholder="比如：第三步为什么要用等势面？"></textarea>
+        <textarea id="chat-text" rows="1"></textarea>
         <button type="submit" id="chat-send">发送</button>
       </form>
     </section>
   </main>
 
-  <script src="data.js?v=8ced0af7"></script>
+  <script src="data.js?v=88651b2c"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -642,13 +619,6 @@
       endpoint: "https://p-ai-tutor.dgxwmk9dbm.workers.dev/api/chat"
     };
 
-    const QUICK_ASKS = [
-      "为什么是这个答案？",
-      "这题的突破口在哪？",
-      "有没有更快的做法？",
-      "我选了别的，错在哪？"
-    ];
-
     const histories = new Map();   // 每道题一份对话记录
     let chatKey = null;
     let inflight = null;           // 当前请求的 AbortController
@@ -730,9 +700,9 @@
       return div;
     }
 
-    function refreshQuick() {
+    // 有对话记录时才显示「清空对话」
+    function refreshClear() {
       const hist = histories.get(chatKey) || [];
-      el("quick").hidden = hist.length > 0;
       el("chat-clear").hidden = hist.length === 0;
     }
 
@@ -747,7 +717,7 @@
         }
       }
       typeset(log);
-      refreshQuick();
+      refreshClear();
     }
 
     function mountChat(ch, q) {
@@ -777,7 +747,7 @@
       hist.push({ role: "user", content: text.trim() });
 
       addMsg("me", mdLite(text.trim()));
-      refreshQuick();
+      refreshClear();
 
       const bubble = addMsg("ai", '<span class="who">AI</span><span class="thinking">思考中</span>');
       const body = bubble.appendChild(document.createElement("div"));
@@ -837,18 +807,10 @@
         if (askedFor === chatKey) {
           inflight = null;
           el("chat-send").disabled = false;
-          refreshQuick();
+          refreshClear();
         }
       }
     }
-
-    el("quick").replaceChildren(...QUICK_ASKS.map((text) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = text;
-      b.addEventListener("click", () => ask(text));
-      return b;
-    }));
 
     el("chat-form").addEventListener("submit", (e) => {
       e.preventDefault();
