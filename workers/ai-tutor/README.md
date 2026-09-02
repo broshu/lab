@@ -42,7 +42,15 @@ Nothing in `tutor/` needs to change — the key only ever lives in the Worker.
 
 ## Updating an existing deployment
 
-Migrations first, then deploy — `0002` adds the `failure_reason` column that the new code inserts into:
+Pushing any change under `workers/ai-tutor/**` to `main` deploys the Worker through
+`.github/workflows/deploy-worker.yml`. It needs one repository secret,
+`CLOUDFLARE_API_TOKEN`, created from Cloudflare's **Edit Cloudflare Workers** template.
+
+Migrations are not part of that automatic run. To apply them, trigger the workflow
+manually from the Actions tab with the **migrate** box ticked — it applies migrations
+first, then deploys.
+
+Locally (needs Node installed):
 
 ```
 npx wrangler d1 migrations apply p-ai-tutor-records --remote

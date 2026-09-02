@@ -1,0 +1,61 @@
+name: Deploy AI tutor Worker
+
+# 改动 workers/ai-tutor/** 推到 main 就自动部署；也可以在 Actions 页面手动触发。
+# 需要仓库 Secret：CLOUDFLARE_API_TOKEN（用 "Edit Cloudflare Workers" 模板创建）。
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "workers/ai-tutor/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch:
+    inputs:
+      migrate:
+        description: "同时把 D1 migrations 应用到远端"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-ai-tutor
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/ai-tutor
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: workers/ai-tutor/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Syntax check
+        run: pnpm run check
+
+      # 迁移默认不跑：手动触发时勾选 migrate 才执行，避免每次改代码都动数据库。
+      - name: Apply D1 migrations
+        if: inputs.migrate
+        run: pnpm exec wrangler d1 migrations apply p-ai-tutor-records --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy
+        run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
