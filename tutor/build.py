@@ -22,9 +22,9 @@ PAGE = ROOT / "index.html"
 # chat=False 表示这本书的 md 里没有题干，只有解析，页面上不显示「问问 AI」
 # —— 没有题目原文，AI 只能瞎猜，不如不给。
 BOOKS = [
-    {"id": "summer2026", "title": "暑假作业", "dir": "content", "chat": True},
     {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1", "chat": True},
     {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3", "chat": False},
+    {"id": "summer2026", "title": "高二暑假作业", "dir": "content", "chat": True},
 ]
 
 # ---------------------------------------------------------------- markdown
