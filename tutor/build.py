@@ -23,6 +23,7 @@ PAGE = ROOT / "index.html"
 # —— 没有题目原文，AI 只能瞎猜，不如不给。
 BOOKS = [
     {"id": "summer2026", "title": "暑假作业", "dir": "content", "chat": True},
+    {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1", "chat": True},
     {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3", "chat": False},
 ]
 

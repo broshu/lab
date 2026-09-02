@@ -467,7 +467,7 @@
     </section>
   </main>
 
-  <script src="data.js?v=41b59a00"></script>
+  <script src="data.js?v=8ced0af7"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -695,12 +695,14 @@
     }
 
     function systemPrompt(ch, q) {
+      const book = currentBook();
       return [
-        "你是一位耐心的高中物理老师，正在给一名中国高二学生讲解一道他刚做过的题。",
+        "你是一位耐心的高中物理老师，正在给一名中国高中学生讲解一道他刚做过的题。",
         "",
         "下面是这道题的全部信息，包括题干、选项、标准答案和详细解析：",
         "",
         "<题目资料>",
+        book ? `所属作业本：${book.title}` : "",
         `所属章节：${ch.title}`,
         `题号：第 ${q.no} 题${q.type ? "（" + q.type + "）" : ""}`,
         q.section ? `考点分类：${q.section}` : "",
@@ -711,7 +713,7 @@
         "回答时请遵守：",
         "1. 学生手上有纸质作业本，题目和插图他都看得到，不要复述题干，直接回答他问的点。",
         "2. 以上面这份解析为准。学生的疑问如果超出解析范围，你可以补充，但结论不能和标准答案矛盾。",
-        "3. 上面的资料里没有插图。如果某个问题必须看图才能说清，就让学生描述一下图里的关键信息，不要凭空猜测图的样子。",
+        "3. 上面的资料里没有插图，只有少数题给了「图示说明」这样的文字描述。如果某个问题必须看图才能说清，而资料里又没有对应的文字描述，就让学生描述一下图里的关键信息，不要凭空猜测图的样子。",
         "4. 用中文口语化地讲，像当面辅导。一次讲清一个点就够了，不要把整道题从头到尾重讲一遍。",
         "5. 公式一律用 LaTeX：行内写成 $E=mc^2$，独立成行写成 $$E=mc^2$$。不要用其他记法。",
         "6. 学生问「为什么选 X」时，先给结论，再解释理由。",
