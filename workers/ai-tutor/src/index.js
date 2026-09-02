@@ -22,11 +22,34 @@ const ADMIN_CSP =
   "default-src 'none'; connect-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
 class HttpError extends Error {
-  /** @param {number} status @param {string} message */
-  constructor(status, message) {
+  /** @param {number} status @param {string} message @param {string | null} [reason] 写进 D1 的失败原因代号 */
+  constructor(status, message, reason = null) {
     super(message);
     this.status = status;
+    this.reason = reason;
   }
+}
+
+// 上游返回非 2xx 时，把状态码翻译成「学生看得懂 + 老师能定位」的一句话。
+// reason 会连同上游状态码一起写进 D1，后台列表直接显示，不用再去翻 Worker 日志。
+/** @param {number} status */
+function providerFailure(status) {
+  if (status === 401 || status === 403) {
+    return { status: 503, reason: 'auth', message: 'AI 暂时用不了：接口密钥失效了，请把这句话告诉老师。' };
+  }
+  if (status === 402) {
+    return { status: 503, reason: 'balance', message: 'AI 暂时用不了：接口账户余额不足，请把这句话告诉老师。' };
+  }
+  if (status === 429) {
+    return { status: 429, reason: 'rate_limit', message: '同时问的人有点多，等十几秒再发一次就好。' };
+  }
+  if (status === 400 || status === 404 || status === 422) {
+    return { status: 503, reason: 'bad_request', message: 'AI 暂时用不了：接口参数或模型名有问题，请把这句话告诉老师。' };
+  }
+  if (status >= 500) {
+    return { status: 503, reason: 'upstream_down', message: 'AI 服务商那边暂时故障，过几分钟再试。' };
+  }
+  return { status: 503, reason: 'unknown', message: 'AI 暂时用不了，稍后再试；一直这样就告诉老师。' };
 }
 
 /** @param {unknown} value @param {number} [limit] */
@@ -234,7 +257,7 @@ function settings(env) {
 
 /** @param {ReturnType<typeof normalizeRequest>} input @param {ReturnType<typeof settings>} config @param {Env} env */
 async function askProvider(input, config, env) {
-  if (!env.DEEPSEEK_API_KEY) throw new HttpError(503, 'AI service is not configured.');
+  if (!env.DEEPSEEK_API_KEY) throw new HttpError(503, 'AI 还没配置好接口密钥，请告诉老师。', 'not_configured');
   let response;
   try {
     response = await fetch(`${config.apiBaseUrl}/chat/completions`, {
@@ -247,8 +270,13 @@ async function askProvider(input, config, env) {
       signal: AbortSignal.timeout(30_000),
     });
   } catch (error) {
-    console.error(JSON.stringify({ event: 'provider_fetch_failed', error: error instanceof Error ? error.name : 'Unknown' }));
-    throw new HttpError(503, 'AI service is temporarily unavailable.');
+    const name = error instanceof Error ? error.name : 'Unknown';
+    console.error(JSON.stringify({ event: 'provider_fetch_failed', error: name }));
+    // TimeoutError 是我们自己的 30 s 上限，和「压根连不上」要分开说。
+    if (name === 'TimeoutError') {
+      throw new HttpError(504, 'AI 想太久超时了，换个更具体的问法或稍后再试。', 'timeout');
+    }
+    throw new HttpError(503, '连不上 AI 服务，检查一下网络，稍后再试。', 'network');
   }
 
   let responseText = '';
@@ -256,11 +284,13 @@ async function askProvider(input, config, env) {
     responseText = await readLimitedText(response.body, MAX_RESPONSE_BYTES);
   } catch {
     console.error(JSON.stringify({ event: 'provider_response_too_large' }));
-    throw new HttpError(502, 'AI service returned an invalid response.');
+    throw new HttpError(502, 'AI 返回的内容异常，再问一次试试。', 'response_too_large');
   }
   if (!response.ok) {
-    console.error(JSON.stringify({ event: 'provider_error', status: response.status }));
-    throw new HttpError(503, 'AI service is temporarily unavailable.');
+    const failure = providerFailure(response.status);
+    console.error(JSON.stringify({ event: 'provider_error', status: response.status, reason: failure.reason }));
+    // 上游状态码也记进 reason，后台一眼能分清 401 和 403。
+    throw new HttpError(failure.status, failure.message, `${failure.reason}:${response.status}`);
   }
 
   try {
@@ -270,17 +300,17 @@ async function askProvider(input, config, env) {
     return answer;
   } catch {
     console.error(JSON.stringify({ event: 'provider_response_invalid' }));
-    throw new HttpError(502, 'AI service returned an invalid response.');
+    throw new HttpError(502, 'AI 返回的内容异常，再问一次试试。', 'invalid_response');
   }
 }
 
-/** @param {D1Database} db @param {ReturnType<typeof normalizeRequest>} input @param {ReturnType<typeof settings>} config @param {string | null} answer @param {'answered' | 'failed'} status */
-async function recordQuestion(db, input, config, answer, status) {
+/** @param {D1Database} db @param {ReturnType<typeof normalizeRequest>} input @param {ReturnType<typeof settings>} config @param {string | null} answer @param {'answered' | 'failed'} status @param {string | null} [failureReason] */
+async function recordQuestion(db, input, config, answer, status, failureReason = null) {
   const record = await db
     .prepare(
       'INSERT INTO tutor_questions (' +
-        'id, session_id, book_id, book_title, chapter_id, chapter_title, question_no, question_type, question, answer, model, status' +
-        ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'id, session_id, book_id, book_title, chapter_id, chapter_title, question_no, question_type, question, answer, model, status, failure_reason' +
+        ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
     .bind(
       crypto.randomUUID(),
@@ -295,6 +325,7 @@ async function recordQuestion(db, input, config, answer, status) {
       answer,
       config.model,
       status,
+      status === 'failed' ? failureReason : null,
     )
     .run();
   if (!record.success) throw new Error('Question record insert failed.');
@@ -313,7 +344,8 @@ async function listQuestions(db, requestedPage, retentionDays) {
     db.prepare('SELECT COUNT(*) AS total FROM tutor_questions'),
     db.prepare(
       'SELECT id, created_at AS createdAt, book_title AS bookTitle, chapter_title AS chapterTitle, ' +
-        'question_no AS questionNo, question_type AS questionType, question, answer, model, status ' +
+        'question_no AS questionNo, question_type AS questionType, question, answer, model, status, ' +
+        'failure_reason AS failureReason ' +
         'FROM tutor_questions ORDER BY created_at DESC LIMIT ? OFFSET ?',
     ).bind(PAGE_SIZE, offset),
   ]);
@@ -419,7 +451,12 @@ const ADMIN_PAGE = String.raw`<!doctype html>
       const card = document.createElement('article'); card.className = 'record';
       const time = new Date(record.createdAt);
       const questionRef = record.questionNo == null ? '' : '第 ' + record.questionNo + ' 题';
-      const meta = [Number.isNaN(time.getTime()) ? record.createdAt : time.toLocaleString(), record.bookTitle, record.chapterTitle, questionRef, record.questionType, record.status === 'answered' ? '已回答' : '回答失败'].filter(Boolean).join(' · ');
+      const reasons = { auth: '密钥失效', balance: '余额不足', rate_limit: '被限流', bad_request: '参数或模型名有误', upstream_down: '服务商故障', network: '连不上服务商', timeout: '超时', not_configured: '未配置密钥', invalid_response: '返回内容异常', response_too_large: '返回内容过长' };
+      const raw = record.failureReason || '';
+      const code = raw.split(':')[0];
+      const why = raw ? (reasons[code] || code) + (raw.includes(':') ? '（上游 ' + raw.split(':')[1] + '）' : '') : '';
+      const outcome = record.status === 'answered' ? '已回答' : ('回答失败' + (why ? '：' + why : ''));
+      const meta = [Number.isNaN(time.getTime()) ? record.createdAt : time.toLocaleString(), record.bookTitle, record.chapterTitle, questionRef, record.questionType, outcome].filter(Boolean).join(' · ');
       card.append(text('meta', meta), text('label', '学生提问'), text('question', record.question));
       if (record.answer) card.append(text('label', 'AI 回答'), text('answer', record.answer));
       return card;
@@ -473,7 +510,7 @@ export default {
     const config = settings(env);
     try {
       if (url.pathname === '/health' && request.method === 'GET') {
-        return json({ ok: true, service: 'p-ai-tutor', configured: Boolean(env.DEEPSEEK_API_KEY && env.ADMIN_PASSWORD && env.ADMIN_SESSION_SECRET) });
+        return json({ ok: true, service: 'p-ai-tutor', configured: Boolean(env.DEEPSEEK_API_KEY && env.ADMIN_PASSWORD && env.ADMIN_SESSION_SECRET), model: config.model });
       }
 
       if (url.pathname === '/api/chat' && request.method === 'OPTIONS') {
@@ -505,8 +542,9 @@ export default {
           return json({ answer }, 200, cors);
         } catch (error) {
           const status = error instanceof HttpError ? error.status : 502;
-          const message = error instanceof HttpError ? error.message : 'AI service is temporarily unavailable.';
-          ctx.waitUntil(recordQuestion(env.TUTOR_DB, input, config, null, 'failed').catch((writeError) => console.error(JSON.stringify({ event: 'failed_question_record_failed', error: writeError instanceof Error ? writeError.name : 'Unknown' }))));
+          const message = error instanceof HttpError ? error.message : 'AI 暂时用不了，稍后再试；一直这样就告诉老师。';
+          const reason = error instanceof HttpError ? error.reason : 'unhandled';
+          ctx.waitUntil(recordQuestion(env.TUTOR_DB, input, config, null, 'failed', reason).catch((writeError) => console.error(JSON.stringify({ event: 'failed_question_record_failed', error: writeError instanceof Error ? writeError.name : 'Unknown' }))));
           return json({ error: message }, status, cors);
         }
       }

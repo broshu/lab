@@ -760,7 +760,9 @@
 
       try {
         const book = currentBook();
-        const res = await fetch(AI.endpoint, {
+        let res;
+        try {
+          res = await fetch(AI.endpoint, {
           method: "POST",
           signal: inflight.signal,
           headers: {
@@ -779,10 +781,15 @@
             },
             messages: [{ role: "system", content: systemPrompt(ch, q) }, ...hist]
           })
-        });
+          });
+        } catch (netErr) {
+          // 只有连不上（断网、接口挂了）才会走到这里；AbortError 交给外层处理。
+          if (netErr.name === "AbortError") throw netErr;
+          throw new Error("连不上 AI，检查一下网络，稍后再试。");
+        }
 
         let payload;
-        try { payload = await res.json(); } catch { throw new Error("AI 返回了无法读取的内容"); }
+        try { payload = await res.json(); } catch { throw new Error("AI 返回了无法读取的内容，再问一次试试。"); }
         if (!res.ok) throw new Error(payload?.error || `接口返回 ${res.status}`);
         answer = typeof payload?.answer === "string" ? payload.answer : "";
 
@@ -801,7 +808,9 @@
       } catch (err) {
         if (err.name === "AbortError") return;
         bubble.remove();
-        addMsg("err", "没连上 AI：" + err.message + "。检查一下网络，稍后再试。");
+        // 接口已经会给出具体原因（密钥失效／余额不足／限流…），照原样显示即可，
+        // 再拼一句「检查网络」反而会把真正的原因盖掉。
+        addMsg("err", err.message || "AI 暂时用不了，稍后再试。");
         hist.pop();   // 这轮没成功，别把提问留在记录里
       } finally {
         if (askedFor === chatKey) {
