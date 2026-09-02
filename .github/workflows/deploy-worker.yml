@@ -36,9 +36,10 @@ jobs:
         with:
           version: 10
 
+      # wrangler 4 要求 Node ≥ 22，用 20 会在 deploy 那步直接报错退出。
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
           cache-dependency-path: workers/ai-tutor/pnpm-lock.yaml
 
