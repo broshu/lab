@@ -176,6 +176,21 @@ table.dt .obj{color:var(--ink);font-weight:500}
 .cover h1::after{content:"";position:absolute;left:-1.4cqw;right:-5cqw;bottom:-1.6cqw;
   height:.2cqw;background:var(--teal)}
 
+/* ---- 时间轴版课程安排 ---- */
+.tl{display:grid;grid-template-columns:9fr 9fr 7fr;grid-template-rows:auto 1fr auto auto;
+  grid-auto-flow:column;column-gap:1.6cqw;row-gap:.8cqw;align-content:center;
+  flex:1;min-height:0;padding:0 1cqw}
+.tl u{font-family:var(--mono);font-size:1.16cqw;letter-spacing:.16em;
+  color:var(--teal);text-decoration:none}
+.tl b{align-self:end;font-size:2cqw;font-weight:500;line-height:1.34;text-wrap:balance}
+.tl i{position:relative;height:.9cqw;border-radius:.45cqw;background:var(--teal);font-style:normal}
+.tl i::before{content:"";position:absolute;left:0;top:50%;width:1.7cqw;height:1.7cqw;
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:var(--surface);border:.3cqw solid var(--teal)}
+.tl i.end::after{content:"";position:absolute;right:0;top:50%;width:1.7cqw;height:1.7cqw;
+  transform:translate(50%,-50%);border-radius:50%;background:var(--teal)}
+.tl span{font-family:var(--mono);font-size:1.3cqw;color:var(--ink-3);letter-spacing:.04em}
+
 .todo{display:flex;flex-direction:column;gap:.5cqw;flex:1;min-height:0}
 .trow{display:grid;grid-template-columns:6.2cqw 1fr auto;gap:1.1cqw;align-items:baseline;
   padding:.6cqw 0;border-bottom:.09cqw solid var(--line-soft)}
@@ -684,64 +699,21 @@ table.dt .obj{color:var(--ink);font-weight:500}
           <div class="kicker">稳定性 ／ 不后退、不翻倒</div>
         </div>
 
-        <div class="exlist" style="grid-template-columns:1fr 1fr">
-          <div class="ex">
-            <u>程稼夫《力学篇》 练习 3-4 · p97 ／ 习题 3-16 · p140</u>
-            <p>水平桌面上放置一顶角为 θ 的楔形块，在它的斜面上放一物体，物体与楔形块质量均为 m，各接触面间摩擦系数均为 μ。<br>1）若物体下滑时楔形块不后退，μ 与 θ 应满足什么关系？<br>2）若 μ = 1/5，满足上述关系的 θ 在什么范围内？</p>
-            <q>答案是两段不等式，中间还有一个 tanθ &gt; μ 的补充条件</q>
+        <div class="exlist" style="grid-template-columns:1fr;align-content:stretch;gap:1.5cqw">
+          <div class="ex" style="justify-content:center;padding:1.3cqw 1.7cqw;gap:.5cqw">
+            <u style="font-size:1.16cqw">程稼夫《力学篇》 练习 3-4 · p97 ／ 习题 3-16 · p140</u>
+            <p style="font-size:1.62cqw;line-height:1.72">水平桌面上放置一顶角为 θ 的楔形块，在它的斜面上放一物体，物体与楔形块质量均为 m，各接触面间摩擦系数均为 μ。<br>1）若物体下滑时楔形块不后退，μ 与 θ 应满足什么关系？　2）若 μ = 1/5，满足上述关系的 θ 在什么范围内？</p>
+            <q style="font-size:1.24cqw">答案是两段不等式，中间还有一个 tanθ &gt; μ 的补充条件</q>
           </div>
-          <div class="ex">
-            <u>2015 自主招生 · 专题 02 相互作用和物体平衡</u>
-            <p>用同样的直木板做成不同长度的直轨道，保持 B 点到轨道左端 A 的距离为 0.8 m，仍将滑块从 P 点由静止释放，为确保滑块在轨道上滑行时<b>支架不翻倒</b>，求轨道长度的范围。</p>
-            <q>「不翻倒」在竞赛里是一个要单独验算的条件，不是背景板</q>
+          <div class="ex" style="justify-content:center;padding:1.3cqw 1.7cqw;gap:.5cqw">
+            <u style="font-size:1.16cqw">2015 自主招生 · 专题 02 相互作用和物体平衡</u>
+            <p style="font-size:1.62cqw;line-height:1.72">用同样的直木板做成不同长度的直轨道，保持 B 点到轨道左端 A 的距离为 0.8 m，仍将滑块从 P 点由静止释放，为确保滑块在轨道上滑行时<b>支架不翻倒</b>，求轨道长度的范围。</p>
+            <q style="font-size:1.24cqw">「不翻倒」在竞赛里是一个要单独验算的条件，不是背景板</q>
           </div>
         </div>
 
         <div class="punch">注意这两题问的都不是「求出多少」，而是<em>「满足什么条件」</em>。这是竞赛题最常见的问法。</div>
         <div class="tblock"><span>层 06</span><s>│</s><span>程稼夫 p97 · 自主招生专题 02</span></div>
-      </section>
-
-      <!-- ============ 碰撞 · 斜面底端挡板 ============ -->
-      <section class="slide">
-        <div class="shead">
-          <span class="layer">碰撞</span>
-          <h2>撞在斜面底端的挡板上</h2>
-          <div class="kicker">第 15 届全国预赛 · 二（10 分）</div>
-        </div>
-
-        <div class="cols c-5-7">
-          <div class="pane">
-            <div class="plabel">45° 斜面 ／ 挡板与斜面垂直 ／ 弹性碰撞</div>
-            <div class="fig"><svg id="figCollide" viewBox="0 0 320 205" role="img" aria-label="45度斜面底端挡板与反复碰撞的质点"></svg></div>
-          </div>
-
-          <div class="pane">
-            <div class="card quote">
-              <div class="qsrc">原题</div>
-              <div class="qtext">一固定的斜面，倾角 θ = 45°，斜面长 L = 2.00 m。在斜面下端有一与斜面垂直的挡板。一质量为 m 的质点从斜面最高点沿斜面下滑，初速度为零，到最底端与挡板发生<b>弹性碰撞</b>。已知质点与斜面间的滑动摩擦系数 μ = 0.20，试求此质点从开始到发生<b>第 11 次碰撞</b>的过程中运动的总路程。</div>
-            </div>
-
-            <div class="solgrid">
-              <div class="sol">
-                <h4>一次一次算<i>等比数列</i></h4>
-                <div class="note" style="font-size:1.04cqw">碰撞不耗能，一个来回只被摩擦拿走一截：</div>
-                <div class="eq xs">\[\frac{s_{k+1}}{s_k}=\frac{1-\mu}{1+\mu}=\frac23\]</div>
-              </div>
-              <div class="sol win">
-                <h4>先算无穷次<i>一行</i></h4>
-                <div class="note" style="font-size:1.04cqw">最终全部重力势能都变成摩擦热：</div>
-                <div class="eq xs">\[S_\infty=\frac{L\tan\theta}{\mu}=10.0\ \mathrm{m}\]</div>
-              </div>
-            </div>
-
-            <div class="card ans">
-              <div class="eq sm">\[S_{11}=10.0-8\left(\tfrac23\right)^{10}\approx 9.86\ \mathrm{m}\]</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="punch">弹性碰撞<em>一点能量都不拿</em>——从头到尾拿走能量的只有摩擦。</div>
-        <div class="tblock"><span>碰撞</span><s>│</s><span>第十五届全国中学生物理竞赛预赛 · 二</span></div>
       </section>
 
       <!-- ============ 拓展 · 电磁（三种轨迹） ============ -->
@@ -802,6 +774,31 @@ table.dt .obj{color:var(--ink);font-weight:500}
             <b>真题训练</b>
             <span>Mar 2028 – Sep 2028</span>
           </div>
+        </div>
+
+      </section>
+
+      <!-- ============ 课程安排 · 时间轴版（备选） ============ -->
+      <section class="slide">
+        <div class="shead">
+          <h2>课程安排</h2>
+        </div>
+
+        <div class="tl">
+          <u>01</u>
+          <b>竞赛观点下的<br>高中物理课程</b>
+          <i></i>
+          <span>Sep 2026 – May 2027</span>
+
+          <u>02</u>
+          <b>物理竞赛<br>知识补充</b>
+          <i></i>
+          <span>Jun 2027 – Feb 2028</span>
+
+          <u>03</u>
+          <b>真题训练</b>
+          <i class="end"></i>
+          <span>Mar 2028 – Sep 2028</span>
         </div>
 
       </section>
@@ -1399,52 +1396,6 @@ window.MathJax = {
     return {T:1.9, place:place};
   }
 
-  /* ---------- 45° 斜面底端挡板 · 反复碰撞 ---------- */
-  function collideFig(svg){
-    var A = {x:44, y:34}, B = {x:44, y:178}, C = {x:188, y:178};
-    var L = Math.hypot(C.x-A.x, C.y-A.y);
-    var d = {x:(C.x-A.x)/L, y:(C.y-A.y)/L};      // 沿斜面向下
-    var n = {x:d.y, y:-d.x};                      // 斜面外法线
-
-    svg.appendChild(el("polygon",{points:A.x+","+A.y+" "+B.x+","+B.y+" "+C.x+","+C.y,
-      fill:"var(--surface-2)", stroke:"var(--line)", "stroke-width":"1.5"}));
-    hatch(svg, B.x, C.x, C.y, 20);
-
-    // 45° 角
-    var ar = 36, p1 = {x:C.x-ar, y:C.y}, p2 = {x:C.x-ar*d.x, y:C.y-ar*d.y};
-    svg.appendChild(el("path",{d:"M "+p1.x.toFixed(1)+" "+p1.y.toFixed(1)+" A "+ar+" "+ar+
-      " 0 0 1 "+p2.x.toFixed(1)+" "+p2.y.toFixed(1), fill:"none",
-      stroke:"var(--teal)", "stroke-width":"1.4"}));
-    txt(svg, C.x-ar-20, C.y-8, "45°", {fill:"var(--teal)", size:12});
-
-    // 挡板：过底端、与斜面垂直
-    svg.appendChild(el("line",{x1:C.x, y1:C.y, x2:C.x+34*n.x, y2:C.y+34*n.y,
-      stroke:"var(--mark)", "stroke-width":"4", "stroke-linecap":"round"}));
-    txt(svg, C.x+38*n.x+4, C.y+34*n.y+4, "挡板", {fill:"var(--mark)", mono:false, size:11});
-
-    // 各次折返点：s_k = L (2/3)^k
-    function pt(s, off){
-      return {x:C.x - s*d.x + off*n.x, y:C.y - s*d.y + off*n.y};
-    }
-    var labels = ["L", "s₁", "s₂", "s₃"];
-    [1, 2/3, 4/9, 8/27].forEach(function(f, k){
-      var s = L*f, a = pt(s, 0), b = pt(s, 13);
-      svg.appendChild(el("line",{x1:a.x, y1:a.y, x2:b.x, y2:b.y,
-        stroke: k===0 ? "var(--teal)" : "var(--ink-3)", "stroke-width":"1.3",
-        "stroke-dasharray": k===0 ? "none" : "3 2"}));
-      var t = pt(s, 24);
-      txt(svg, t.x, t.y+3, labels[k], {anchor:"middle",
-        fill: k===0 ? "var(--teal)" : "var(--ink-3)", size:12});
-    });
-
-    // 质点（起点，静止释放）
-    var st = pt(L, 8);
-    svg.appendChild(el("circle",{cx:st.x, cy:st.y, r:6, fill:"var(--teal)"}));
-
-    txt(svg, 308, 44, "每次来回 · 短到 2/3", {anchor:"end", fill:"var(--mark)", mono:false, size:12});
-    txt(svg, 308, 66, "μ = 0.20", {anchor:"end", fill:"var(--ink-3)", size:12});
-  }
-
   /* ---------- 三个模型：轨迹都由运动方程解出来 ---------- */
   function buildEM(){
     var T = 3.6, tracks = [];
@@ -1685,7 +1636,6 @@ window.MathJax = {
   inclineFig(document.getElementById("coverFig"), {s:120, uid:2});
   twoPointsFig(document.getElementById("figTwoPts"));
   ex613Fig(document.getElementById("figEx613"));
-  collideFig(document.getElementById("figCollide"));
 
   var race = buildRace(document.getElementById("figRace"));
   var roll = buildRoll(document.getElementById("figRoll"), "roll");
