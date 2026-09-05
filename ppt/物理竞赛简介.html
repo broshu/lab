@@ -1554,10 +1554,15 @@ window.MathJax = {
 
     /* 高三：竞赛部分到此为止 */
     var ey = ROWS[2].y;
-    svg.appendChild(el("line",{x1:mx(0.4), y1:ey-20, x2:mx(0.4), y2:ey-48,
-      stroke:"var(--alt)", "stroke-width":"1.6"}));
-    svg.appendChild(el("circle",{cx:mx(0.4), cy:ey-52, r:6, fill:"var(--alt)"}));
-    txt(svg, mx(0.4)+13, ey-47, "预赛", {fill:"var(--alt)", mono:false, size:17});
+    function pin(row, m){
+      var py = ROWS[row].y;
+      svg.appendChild(el("line",{x1:mx(m), y1:py-20, x2:mx(m), y2:py-48,
+        stroke:"var(--ink)", "stroke-width":"1.6"}));
+      svg.appendChild(el("circle",{cx:mx(m), cy:py-52, r:6, fill:"var(--ink)"}));
+      txt(svg, mx(m)+13, py-47, "预赛", {fill:"var(--ink)", mono:false, size:17});
+    }
+    pin(1, 0.4);
+    pin(2, 0.4);
     svg.appendChild(el("line",{x1:mx(1)+14, y1:ey, x2:X1, y2:ey,
       stroke:"var(--line)", "stroke-width":"2.4", "stroke-dasharray":"6 7"}));
     txt(svg, mx(1)+30, ey+30, "竞赛部分到此为止", {fill:"var(--ink-3)", mono:false, size:16});
