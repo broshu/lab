@@ -11,6 +11,7 @@ import hashlib
 import html
 import json
 import re
+import struct
 from datetime import datetime
 from pathlib import Path
 
@@ -58,8 +59,38 @@ def render_table(lines):
     return "".join(out)
 
 
+def render_figure(block):
+    """独占一段的 Markdown 图片：只加载本站 assets，图注可含公式。"""
+    match = re.fullmatch(r"!\[([^\n]*)\]\(([^\s)]+)\)", block)
+    if not match:
+        return None
+    caption, src = match.groups()
+    if not re.fullmatch(r"assets/[A-Za-z0-9_./-]+\.(?:png|svg)", src) or ".." in src.split("/"):
+        raise ValueError(f"插图必须使用 assets 下的本地 PNG 或 SVG：{src}")
+    path = (ROOT / src).resolve()
+    if not path.is_relative_to((ROOT / "assets").resolve()):
+        raise ValueError(f"插图路径超出 assets 目录：{src}")
+    content = path.read_bytes()
+    if path.suffix == ".png":
+        width, height = struct.unpack(">II", content[16:24])
+    else:
+        from xml.etree import ElementTree
+        svg = ElementTree.fromstring(content)
+        width, height = map(float, svg.attrib["viewBox"].split()[2:])
+    url = f"{src}?v={hashlib.sha256(content).hexdigest()[:10]}"
+    alt = html.escape(html.unescape(caption), quote=True)
+    return (
+        '<figure class="solution-figure">'
+        f'<a href="{url}" target="_blank" rel="noopener noreferrer" title="打开大图" aria-label="打开大图：{alt}">'
+        f'<img src="{url}" alt="{alt}" width="{int(width)}" height="{int(height)}" loading="lazy" decoding="async">'
+        '</a>'
+        f'<figcaption>{inline(caption)}<span class="figure-hint">点击图片查看大图</span></figcaption>'
+        '</figure>'
+    )
+
+
 def md_to_html(md):
-    """支持：段落、**粗体**、无序列表、引用块、管道表格、$$块级公式$$。"""
+    """支持：段落、**粗体**、列表、引用、表格、公式、本地插图。"""
     # 先整体做 HTML 转义。公式里的 < & 变成实体后，DOM 文本节点里仍是原字符，
     # KaTeX 读取的是文本节点，所以渲染结果正确。
     md = html.escape(md, quote=False)
@@ -70,6 +101,11 @@ def md_to_html(md):
         if not block.strip():
             continue
         lines = block.split("\n")
+
+        figure = render_figure(block)
+        if figure:
+            out.append(figure)
+            continue
 
         # 块级公式独占一段
         if block.startswith("$$") and block.endswith("$$"):

@@ -204,6 +204,28 @@
     .solution ul { margin: 13px 0; padding-left: 22px; }
     .solution li { margin: 5px 0; }
 
+    .solution-figure {
+      margin: 20px 0;
+      padding: 16px;
+      border: 1px solid var(--soft-line);
+      border-radius: 6px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .solution-figure a {
+      display: flex;
+      justify-content: center;
+      border-radius: 3px;
+      cursor: zoom-in;
+    }
+
+    .solution-figure a:focus-visible { outline: 2px solid #167d8d; outline-offset: 5px; }
+    .solution-figure img { display: block; max-width: 100%; width: auto; height: auto; max-height: 480px; object-fit: contain; }
+    .solution-figure img[src*=".svg?"] { max-width: min(100%, 560px); max-height: none; }
+    .solution-figure figcaption { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .figure-hint { display: block; margin-top: 3px; color: #767676; font-size: 12px; }
+
     .solution blockquote {
       margin: 18px 0;
       padding: 12px 16px;
@@ -387,6 +409,7 @@
       .answer-head { padding: 14px 16px; }
       .nav { padding: 0 16px 16px; }
       .step { padding: 12px 14px; }
+      .solution-figure { padding: 10px; }
     }
   </style>
 </head>
@@ -444,7 +467,7 @@
     </section>
   </main>
 
-  <script src="data.js?v=b7be673b"></script>
+  <script src="data.js?v=9bb0fc9c"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
