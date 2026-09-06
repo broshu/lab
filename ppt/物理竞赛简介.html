@@ -255,6 +255,29 @@ table.dt .obj{color:var(--ink);font-weight:500}
     aspect-ratio:16/9;break-after:page;page-break-after:always}
   .slide:last-child{break-after:auto;page-break-after:auto}
 }
+
+/* Page 9: full derivation on the left, short method and shared result on the right. */
+.slide.drag-example{padding-top:2.4cqw;padding-bottom:3cqw;gap:1cqw}
+.drag-example .drag-question{padding:.7cqw 1.2cqw}
+.drag-example .drag-question .qsrc{margin-bottom:.2cqw}
+.drag-example .drag-question .qtext{font-size:1.42cqw;line-height:1.5}
+.drag-example .drag-solutions{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:1.3cqw}
+.drag-example .sol{min-width:0;padding:.85cqw 1cqw;gap:.4cqw}
+.drag-example .sol .eq{flex:none}
+.drag-example .sol .note{font-size:1.14cqw;line-height:1.5}
+.drag-example .drag-result{margin-top:auto;display:flex;flex-direction:column;gap:.75cqw;padding-top:.7cqw}
+.drag-example .drag-result .card{padding:.7cqw .9cqw}
+.drag-example .drag-result .punch{font-size:1.3cqw;line-height:1.5;padding-top:.65cqw}
+.drag-example .drag-result .punch em{white-space:normal}
+
+
+/* Keep the rod question free of solution hints until the presenter starts it. */
+.rod-question-mode:not(.revealed) .rod-reveal{display:none}
+.rod-question-mode:not(.revealed) .cols{grid-template-columns:1fr;align-items:center}
+.rod-question-mode:not(.revealed) .cols>.pane:not(.rod-reveal){width:76%;justify-self:center;gap:1.8cqw}
+.rod-question-mode:not(.revealed) .qtext{font-size:1.9cqw;line-height:1.8}
+.rod-question-mode:not(.revealed) .runbar{justify-content:center}
+
 </style>
 </head>
 <body>
@@ -264,7 +287,6 @@ table.dt .obj{color:var(--ink);font-weight:500}
   <header class="topbar">
     <div class="brand">
       <b>物理竞赛简介</b>
-      <span>高中物理竞赛讲座 ／ 面向高一新生 ／ 25 分钟 ／ 完全离线</span>
     </div>
     <div class="tools">
       <button class="btn" id="themeBtn" type="button">明／暗</button>
@@ -289,9 +311,7 @@ table.dt .obj{color:var(--ink);font-weight:500}
       <!-- ============ PPT1 · 第 0 层 ============ -->
       <section class="slide">
         <div class="shead">
-          <span class="layer">第 0 层</span>
           <h2>它是一个点</h2>
-          <div class="kicker">高考版 ／ 到此结束</div>
         </div>
 
         <div class="cols c-5-7">
@@ -344,7 +364,7 @@ table.dt .obj{color:var(--ink);font-weight:500}
             <div class="vote"><b>B</b>实心球</div>
             <div class="vote"><b>C</b>实心圆柱</div>
             <div class="vote"><b>D</b>圆环（空管）</div>
-            <div class="note" style="margin-top:.6cqw">四个物体<b>质量相同、半径相同</b>，从同一高度释放，斜面粗糙到不会打滑。</div>
+            <div class="note" style="margin-top:.6cqw">四个物体<b>质量相同、半径相同</b>，从同一高度释放，不考虑摩擦带来的能量损耗。</div>
           </div>
         </div>
 
@@ -355,7 +375,6 @@ table.dt .obj{color:var(--ink);font-weight:500}
       <!-- ============ PPT2 · 第 1 层 ============ -->
       <section class="slide" data-anim="race">
         <div class="shead">
-          <span class="layer">第 1 层</span>
           <h2>它不是点，它会滚</h2>
           <div class="kicker">能量被转动分走了</div>
         </div>
@@ -427,7 +446,6 @@ table.dt .obj{color:var(--ink);font-weight:500}
       <!-- ============ PPT4 · 第 2 层 · 并排动画 ============ -->
       <section class="slide" data-anim="roll">
         <div class="shead">
-          <span class="layer">第 2 层</span>
           <h2>它凭什么「纯滚动」？</h2>
           <div class="kicker">θ = 25° ／ 实心圆柱 ／ 临界 μ = 0.155</div>
         </div>
@@ -509,14 +527,13 @@ table.dt .obj{color:var(--ink);font-weight:500}
           </div>
         </div>
 
-        <div class="punch">同一道题，笨办法五个方程，聪明办法一个方程。竞赛训练的不是<em>算得快</em>，是<em>选得对</em>。</div>
+        <div class="punch">竞赛训练的不是<em>算得快</em>，是<em>选得对</em>。</div>
         <div class="tblock"><span>层 02</span><s>│</s><span>程稼夫《力学篇》 练习 6-13</span></div>
       </section>
 
       <!-- ============ 第 5 层 A · v-t 面积就是积分 ============ -->
       <section class="slide" data-anim="riemann">
         <div class="shead">
-          <span class="layer">第 5 层</span>
           <h2>现实中，阻力往往不是恒定的</h2>
           <div class="kicker">线一弯 ／ 匀变速那三条公式全部作废</div>
         </div>
@@ -559,32 +576,50 @@ table.dt .obj{color:var(--ink);font-weight:500}
       </section>
 
       <!-- ============ 第 5 层 B · 原题（变加速） ============ -->
-      <section class="slide">
+      <section class="slide drag-example">
         <div class="shead">
-          <span class="layer">第 5 层</span>
           <h2>阻力跟速度成正比的一道选择题</h2>
           <div class="kicker">2024 台州市高中物理竞赛 ／ 第 3 题</div>
         </div>
 
-        <div class="card quote">
+        <div class="card quote drag-question">
           <div class="qsrc">原题</div>
           <div class="qtext">从地面竖直向上以大小为 v₀ 抛出小球，小球落回地面处的速度为 v，小球在运动过程中受到空气阻力的作用，<b>阻力大小与速度成正比</b>，则小球从抛出到落回地面所用的时间为<br>
-            <span style="font-family:var(--mono);font-size:.9em">　A. (v₀＋v)/g　　B. (v₀−v)/g　　C. √(v₀v)/g　　D. √(v₀²＋v²)/g</span></div>
+            <span class="eqrow" style="justify-content:space-between;font-size:1.5cqw;margin-top:.45cqw">
+              <span>\(\mathrm{A}.\;\dfrac{v_0+v}{g}\)</span>
+              <span>\(\mathrm{B}.\;\dfrac{v_0-v}{g}\)</span>
+              <span>\(\mathrm{C}.\;\dfrac{\sqrt{v_0v}}{g}\)</span>
+              <span>\(\mathrm{D}.\;\dfrac{\sqrt{v_0^2+v^2}}{g}\)</span>
+            </span></div>
         </div>
 
-        <div class="solgrid">
+        <div class="solgrid drag-solutions">
           <div class="sol">
-            <h4>硬来 · 解微分方程<i>高一做不动</i></h4>
-            <div class="note" style="font-size:1.06cqw">\(m\frac{\mathrm{d}v}{\mathrm{d}t}=-mg-kv\)，上升、下降各解一次指数函数，再解超越方程求 t——根本出不来。</div>
+            <h4>解微分方程</h4>
+            <div class="note">取向上为正，速度为 \(u(t)\)，令 \(\tau=m/k\)。</div>
+            <div class="eq xs">\[\dot u+\frac{u}{\tau}=-g
+              \ \Rightarrow\ \frac{\mathrm d}{\mathrm dt}(ue^{t/\tau})=-ge^{t/\tau}\]</div>
+            <div class="eq xs">\[u(0)=v_0\ \Rightarrow\ u(t)=(v_0+g\tau)e^{-t/\tau}-g\tau\]</div>
+            <div class="eq xs">\[\begin{aligned}
+              x(t)&=\int_0^t u(s)\,\mathrm ds\\
+              &=\tau(v_0+g\tau)(1-e^{-t/\tau})-g\tau t
+            \end{aligned}\]</div>
+            <div class="note">落地时 \(x(T)=0\)、\(u(T)=-v\)，分别得到：</div>
+            <div class="eq xs">\[\begin{aligned}
+              gT&=(v_0+g\tau)(1-e^{-T/\tau})\\
+              v_0+v&=(v_0+g\tau)(1-e^{-T/\tau})
+            \end{aligned}\]</div>
+            <div class="eq xs">\[\therefore\quad T=\frac{v_0+v}{g}\]</div>
           </div>
           <div class="sol win">
             <h4>整段积分一次<i>一行出答案</i></h4>
-            <div class="note" style="font-size:1.06cqw">把方程对时间从 0 积到 T：</div>
-            <div class="eq xs" style="margin-top:.35cqw">\[m(-v-v_0)=-mgT-k\!\int_0^{T}\! v\,\mathrm{d}t\]</div>
-            <div class="note" style="font-size:1.06cqw;margin-top:.3cqw">而 \(\int v\,\mathrm{d}t\) 就是<b>位移</b>——球回到原地，位移为零，<b>阻力的冲量自动消失</b>。</div>
-          </div>
-        </div>
-
+            <div class="note" >同样取向上为正，将 \(m\dot u=-mg-ku\) 从 0 积到 T：</div>
+            <div class="eq xs" style="margin-top:.35cqw">\[\begin{aligned}
+              m(-v-v_0)&=-mgT\\
+              &\quad-k\!\int_0^T u(t)\,\mathrm dt
+            \end{aligned}\]</div>
+            <div class="note" style="margin-top:.3cqw">而 \(\int_0^T u(t)\,\mathrm{d}t\) 就是<b>位移</b>——球回到原地，位移为零，<b>阻力的冲量自动消失</b>。</div>
+            <div class="drag-result">
         <div class="card ans">
           <div class="eqrow eq">
             <span>\(\displaystyle T=\frac{v_0+v}{g}\)</span>
@@ -593,13 +628,16 @@ table.dt .obj{color:var(--ink);font-weight:500}
         </div>
 
         <div class="punch">上一页那句「面积就是位移」，在这里<em>把阻力整条消掉了</em>。</div>
+            </div>
+          </div>
+        </div>
+
         <div class="tblock"><span>层 05</span><s>│</s><span>2024 年浙江省台州市普通高中物理竞赛试题 · 第 3 题</span></div>
       </section>
 
       <!-- ============ 第 6 层 · 翻倒交互 ============ -->
       <section class="slide" data-anim="tip">
         <div class="shead">
-          <span class="layer">第 6 层</span>
           <h2>它有尺寸，它会翻</h2>
           <div class="kicker">先别说答案 ／ 让学生猜</div>
         </div>
@@ -627,7 +665,7 @@ table.dt .obj{color:var(--ink);font-weight:500}
             <div class="note">摩擦假设足够大，它<b>不会滑</b>——所以这里唯一的问题是翻不翻。</div>
             <div class="card ans">
               <div class="qsrc">这一层拆掉的是哪个假设</div>
-              <div class="note">高考的「滑块」永远不翻，因为它<b>没有形状</b>。一旦给它宽和高，稳定性就成了一个独立的问题。</div>
+              <div class="note">一旦给它宽和高，稳定性就成了一个独立的问题。</div>
             </div>
           </div>
         </div>
@@ -636,21 +674,18 @@ table.dt .obj{color:var(--ink);font-weight:500}
       </section>
 
       <!-- ============ 附加题 · 杆在光滑地面上倒下 ============ -->
-      <section class="slide" data-anim="rod">
+      <section class="slide rod-question-mode" id="rodSlide" data-anim="rod" data-autoplay="false">
         <div class="shead">
-          <span class="layer">附加题</span>
+          <span class="layer rod-reveal">附加题</span>
           <h2>杆倒下时，脚往后退了多远</h2>
-          <div class="kicker">地面光滑 ／ 一句话就能定死答案</div>
+          <div class="kicker rod-reveal">地面光滑</div>
         </div>
 
         <div class="cols c-6-5">
-          <div class="pane">
+          <div class="pane rod-reveal">
             <div class="plabel">竖直立起 → 倒下 → 躺平 ／ 质心始终在同一条铅垂线上</div>
             <div class="fig"><svg id="figRodFall" viewBox="0 0 400 230" role="img" aria-label="光滑地面上细杆倒下，下端向后移动 L/2"></svg></div>
-            <div class="runbar">
-              <button class="runbtn" id="rodBtn" type="button">▶ 重放</button>
-              <span class="runhint">下端已退 <b class="num" id="rodDx">0.00</b> L</span>
-            </div>
+
           </div>
 
           <div class="pane">
@@ -658,11 +693,14 @@ table.dt .obj{color:var(--ink);font-weight:500}
               <div class="qsrc">题目</div>
               <div class="qtext">一质量为 m、长为 L 的匀质细杆，铅直地立在<b>光滑</b>的水平地面上。轻轻一碰，杆由静止倒下。<br>问：杆躺平时，原来着地的那一端<b>沿水平方向移动了多少</b>？</div>
             </div>
-            <div class="card">
+            <div class="runbar">
+              <button class="runbtn" id="rodBtn" type="button">▶ 播放</button>
+            </div>
+            <div class="card rod-reveal">
               <div class="qsrc">关键的一句话</div>
               <div class="note">地面光滑 → 支持力竖直、重力竖直 → 水平方向<b>一个外力都没有</b> → 质心只能<b>竖直下落</b>，绝不左右挪动。</div>
             </div>
-            <div class="card ans">
+            <div class="card ans rod-reveal">
               <div class="qsrc">于是答案是几何题</div>
               <div class="note">躺平时质心仍在原来那条铅垂线上，而杆端离质心 L/2：</div>
               <div class="eqrow eq sm" style="margin-top:.35cqw">
@@ -673,14 +711,13 @@ table.dt .obj{color:var(--ink);font-weight:500}
           </div>
         </div>
 
-        <div class="punch">一个力都不用算——<em>「水平方向没有外力」</em>这一句，就把整道题做完了。</div>
-        <div class="tblock"><span>附加</span><s>│</s><span>赵凯华《新概念物理教程 · 力学》 例题 21 · 图 4-46</span></div>
+        <div class="punch rod-reveal"><em>「水平方向没有外力」</em>这一句，就把整道题做完了。</div>
+        <div class="tblock rod-reveal"><span>附加</span><s>│</s><span>赵凯华《新概念物理教程 · 力学》 例题 21 · 图 4-46</span></div>
       </section>
 
       <!-- ============ 第 6 层 · 原题 ============ -->
       <section class="slide">
         <div class="shead">
-          <span class="layer">第 6 层</span>
           <h2>相关原题</h2>
           <div class="kicker">稳定性 ／ 不后退、不翻倒</div>
         </div>
@@ -698,7 +735,7 @@ table.dt .obj{color:var(--ink);font-weight:500}
           </div>
         </div>
 
-        <div class="punch">注意这两题问的都不是「求出多少」，而是<em>「满足什么条件」</em>。这是竞赛题最常见的问法。</div>
+        <div class="punch">注意这两题问的都不是「求出多少」，而是<em>「满足什么条件」</em>。</div>
         <div class="tblock"><span>层 06</span><s>│</s><span>程稼夫 p97 · 自主招生专题 02</span></div>
       </section>
 
@@ -1303,7 +1340,6 @@ window.MathJax = {
     var meas = el("line",{x1:cmx, y1:ay, y2:ay, stroke:"var(--mark)",
       "stroke-width":"1.6", "marker-end":mk, "marker-start":mk});
     svg.appendChild(meas);
-    var lbl = txt(svg, cmx, ay+16, "", {anchor:"middle", fill:"var(--mark)", size:12});
 
     /* θ 由能量守恒解出：θ'² = 12g(1−cosθ) / [L(1+3sin²θ)] */
     var tab = [], th = 0.05, tt = 0, dt = 0.0004;
@@ -1324,7 +1360,6 @@ window.MathJax = {
       return a[1] + u*(b[1]-a[1]);
     }
 
-    var out = document.getElementById("rodDx");
     function place(t){
       var q = angleAt(t/1.9), s = Math.sin(q), c = Math.cos(q);
       var fx = cmx - half*s, fy = gy, tx2 = cmx + half*s, ty = gy - L*c;
@@ -1334,8 +1369,6 @@ window.MathJax = {
       tick2.setAttribute("x1", fx.toFixed(2)); tick2.setAttribute("x2", fx.toFixed(2));
       meas.setAttribute("x2", fx.toFixed(2));
       var d = 0.5*s;
-      lbl.textContent = "Δx = " + d.toFixed(2) + " L";
-      if (out) out.textContent = d.toFixed(2);
     }
     place(0);
     return {T:1.9, place:place};
@@ -1371,7 +1404,6 @@ window.MathJax = {
       if (i>0) s1.appendChild(el("line",{x1:x, y1:Y1-52, x2:x, y2:Y1+52,
         stroke:"var(--mark)", "stroke-width":".9", "stroke-dasharray":"3 4", opacity:".55"}));
     });
-    txt(s1, X0-2, Y1+66, "同一点射出", {anchor:"middle", fill:"var(--ink-3)", mono:false, size:11});
     txt(s1, X0+PIT, Y1+66, "又会聚", {anchor:"middle", fill:"var(--mark)", mono:false, size:11});
 
     [[13,0],[21,1.3],[26,2.5],[17,3.8],[24,5.1]].forEach(function(c, i){
@@ -1524,9 +1556,9 @@ window.MathJax = {
     bar(0, 9, 12, 1, "物理竞赛知识补充", "r");
     bar(1, 0, 6,  1, "（续）知识补充", "l");
     bar(1, 6, 12, 2, "真题训练", "r");
-    bar(2, 0, 1,  2, "", "l");
+    bar(2, 0, 0.4, 2, "", "l");
 
-    /* 高三：竞赛部分到此为止 */
+    /* 高三预赛标记 */
     var ey = ROWS[2].y;
     function pin(row, m){
       var py = ROWS[row].y;
@@ -1539,7 +1571,6 @@ window.MathJax = {
     pin(2, 0.4);
     svg.appendChild(el("line",{x1:mx(1)+14, y1:ey, x2:X1, y2:ey,
       stroke:"var(--line)", "stroke-width":"2.4", "stroke-dasharray":"6 7"}));
-    txt(svg, mx(1)+30, ey+30, "竞赛部分到此为止", {fill:"var(--ink-3)", mono:false, size:16});
 
     /* 图例 */
     var lg = [
@@ -1675,18 +1706,18 @@ window.MathJax = {
   var turnRoll = document.getElementById("turnRoll");
   var turnSlip = document.getElementById("turnSlip");
 
-  function runner(duration, step){
-    var raf = null, t0 = 0;
+  function runner(duration, step, loop){
+    var raf = null, t0 = null;
     function frame(ts){
-      if (!t0) t0 = ts;
+      if (t0 === null) t0 = ts;
       var t = (ts - t0)/1000;
-      step(Math.min(t, duration));
-      if (t < duration){ raf = requestAnimationFrame(frame); } else { raf = null; }
+      step(loop ? t % duration : Math.min(t, duration));
+      if (loop || t < duration){ raf = requestAnimationFrame(frame); } else { raf = null; }
     }
     return {
       play:function(){
         if (raf) cancelAnimationFrame(raf);
-        t0 = 0;
+        t0 = null;
         if (reduce){ step(duration); return; }
         raf = requestAnimationFrame(frame);
       },
@@ -1703,7 +1734,7 @@ window.MathJax = {
   var areaRun = buildArea(document.getElementById("figArea"));
   var tipRun  = buildTip(document.getElementById("figTip"));
   var em      = buildEM();
-  var emRun   = runner(em.T, em.place);
+  var emRun   = runner(em.T, em.place, true);
   var rf      = buildRodFall(document.getElementById("figRodFall"));
   var rodRun  = runner(rf.T, rf.place);
 
@@ -1713,7 +1744,11 @@ window.MathJax = {
   document.getElementById("raceBtn").addEventListener("click", function(){ raceRun.reset(); raceRun.play(); });
   document.getElementById("rollBtn").addEventListener("click", function(){ rollRun.reset(); rollRun.play(); });
   document.getElementById("emBtn").addEventListener("click", function(){ emRun.reset(); emRun.play(); });
-  document.getElementById("rodBtn").addEventListener("click", function(){ rodRun.reset(); rodRun.play(); });
+  document.getElementById("rodBtn").addEventListener("click", function(){
+    document.getElementById("rodSlide").classList.add("revealed");
+    this.textContent = "▶ 重放";
+    rodRun.reset(); rodRun.play();
+  });
 
   var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
   var dotsBox = document.getElementById("dots");
@@ -1736,7 +1771,14 @@ window.MathJax = {
     count.textContent = (idx+1) + " / " + slides.length;
     Object.keys(ANIM).forEach(function(k){ ANIM[k].stop(); });
     var key = slides[idx].getAttribute("data-anim");
-    if (key && ANIM[key]){ ANIM[key].reset(); ANIM[key].play(); }
+    if (key === "rod"){
+      slides[idx].classList.remove("revealed");
+      document.getElementById("rodBtn").textContent = "▶ 播放";
+    }
+    if (key && ANIM[key]){
+      ANIM[key].reset();
+      if (slides[idx].getAttribute("data-autoplay") !== "false") ANIM[key].play();
+    }
   }
   go(0);
 
