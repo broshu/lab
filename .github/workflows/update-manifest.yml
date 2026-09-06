@@ -49,6 +49,7 @@ jobs:
           cp -R ppt games resources _site/
           mkdir -p _site/tutor
           cp tutor/index.html tutor/data.js _site/tutor/
+          cp -R tutor/assets _site/tutor/
 
       - uses: actions/configure-pages@v5
 
