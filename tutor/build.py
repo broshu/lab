@@ -20,12 +20,10 @@ OUT = ROOT / "data.js"
 PAGE = ROOT / "index.html"
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
-# chat=False 表示这本书的 md 里没有题干，只有解析，页面上不显示「问问 AI」
-# —— 没有题目原文，AI 只能瞎猜，不如不给。
 BOOKS = [
-    {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1", "chat": True},
-    {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3", "chat": False},
-    {"id": "summer2026", "title": "高二暑假作业", "dir": "content", "chat": True},
+    {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1"},
+    {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3"},
+    {"id": "summer2026", "title": "高二暑假作业", "dir": "content"},
 ]
 
 # ---------------------------------------------------------------- markdown
@@ -175,9 +173,6 @@ def parse_topic(path):
             # 计算题的答案本身含 LaTeX，会以 innerHTML 插入页面，这里先转义
             "answer": html.escape(a.group(1).strip(), quote=False),
             "html": md_to_html(after),
-            # 原始 markdown（题干+选项+答案+解析），页面上不显示，
-            # 只作为上下文发给 AI —— 学生问问题时它才知道题目是什么。
-            "source": body.strip(),
         })
 
     return meta, questions
@@ -198,10 +193,6 @@ def build_book(book):
     for path in sorted((root / "topics").glob("*.md")):
         meta, questions = parse_topic(path)
         cid = meta.get("id") or path.stem.split("-")[0]
-        if not book["chat"]:
-            # 没有题干可给 AI，就别把半截资料塞进 data.js
-            for q in questions:
-                q["source"] = ""
         ready[cid] = (meta, questions)
         print(f"  [{book['id']}] {path.name}: {len(questions)} 题")
 
