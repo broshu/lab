@@ -76,7 +76,7 @@ function directDirectories(files, directory) {
 
 function buildPpt(files) {
   const items = directFiles(files, "ppt/")
-    .filter((path) => /\.(pptx|html)$/i.test(path) && !path.split("/").pop().startsWith("~$"))
+    .filter((path) => /\.(pptx|pdf|html)$/i.test(path) && !path.split("/").pop().startsWith("~$"))
     .map((path) => ({
       name: cleanFileName(path.split("/").pop()),
       href: path,
