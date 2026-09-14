@@ -259,6 +259,132 @@
 
     .solution th { background: #fafaf8; font-weight: 600; }
 
+    /* ---------- 模式切换 ---------- */
+
+    .modes {
+      display: inline-flex;
+      margin-bottom: 14px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+    }
+
+    .mode {
+      padding: 5px 16px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .mode:hover { color: var(--ink); }
+    .mode[aria-pressed="true"] { background: var(--ink); color: #fff; }
+
+    /* ---------- 对答案总表 ---------- */
+
+    .keysheet[hidden] { display: none; }
+
+    .key-group-label {
+      margin: 0 2px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .key-chapter {
+      margin-bottom: 14px;
+      padding: 16px 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+    }
+
+    .key-chapter h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .key-count { margin-left: 8px; color: var(--muted); font-size: 12px; font-weight: 400; }
+
+    .key-sub {
+      margin: 16px 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    /* 选择题：仿答题卡，题号在上、答案在下 */
+    .key-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .key-cell {
+      min-width: 54px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--card);
+      font-family: inherit;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .key-cell:hover { border-color: var(--ink); }
+    .key-cell:focus-visible { outline: 2px solid #167d8d; outline-offset: 2px; }
+
+    .key-cell .n {
+      display: block;
+      padding: 3px 6px;
+      border-bottom: 1px solid var(--soft-line);
+      background: #fafaf8;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .key-cell .a {
+      display: block;
+      padding: 7px 8px;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: .08em;
+    }
+
+    /* 非选择题：一行一题，显示最终答案 */
+    .key-list { border-top: 1px solid var(--soft-line); }
+
+    .key-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--soft-line);
+    }
+
+    .key-row .n {
+      flex: none;
+      width: 62px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .key-row .n:hover { color: var(--ink); text-decoration: underline; }
+    .key-row .a { flex: 1; font-size: 15px; overflow-x: auto; }
+
+    .key-empty { margin: 18px 2px; color: var(--muted); font-size: 14px; }
+
     .nav {
       display: flex;
       gap: 10px;
@@ -299,7 +425,12 @@
       <a class="home" href="../">← Physics Lab</a>
     </div>
 
-    <section class="picker">
+    <div class="modes" role="group" aria-label="页面模式">
+      <button type="button" class="mode" id="mode-solution" aria-pressed="true">看解析</button>
+      <button type="button" class="mode" id="mode-key" aria-pressed="false">对答案</button>
+    </div>
+
+    <section class="picker" id="picker">
       <div class="step">
         <span class="step-label">作业</span>
         <div class="chips" id="books"></div>
@@ -330,9 +461,11 @@
       </div>
     </article>
 
+    <section class="keysheet" id="keysheet" hidden></section>
+
   </main>
 
-  <script src="data.js?v=fe3190f1"></script>
+  <script src="data.js?v=81cd409f"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -342,7 +475,12 @@
     const data = window.TUTOR_DATA || { books: [] };
     const el = (id) => document.getElementById(id);
 
-    const state = { book: null, chapter: null, question: null };
+    const state = { view: "solution", book: null, chapter: null, question: null };
+
+    // 对答案总表只覆盖必修一第二章及以后：第一章早就学完了，不用再核对。
+    // 以后加第三章、第四章会自动出现，不必改这里。
+    const KEY_BOOK = "bx1";
+    const KEY_SKIP_GROUP = "第一章";
 
     function typeset(node) {
       if (!window.renderMathInElement) return;
@@ -459,8 +597,152 @@
 
     }
 
+    /* =================== 对答案总表 =================== */
+
+    function keySheetChapters() {
+      const book = data.books.find((b) => b.id === KEY_BOOK) || null;
+      const chapters = book
+        ? book.chapters.filter((c) => c.ready && c.group && c.group !== KEY_SKIP_GROUP)
+        : [];
+      return { book, chapters };
+    }
+
+    // 选择题只要核对字母；实验、填空、计算题要看完整的最终答案。
+    function isChoice(q) {
+      return /选/.test(q.type || "") || /^[A-Z]{1,4}$/.test(q.answer || "");
+    }
+
+    function openQuestion(chapterId, no) {
+      state.book = KEY_BOOK;
+      state.chapter = chapterId;
+      state.question = no;
+      renderBooks(); renderChapters(); renderQuestions();
+      setView("solution");
+      el("answer").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function keyCell(ch, q) {
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "key-cell";
+      cell.title = `看第 ${q.no} 题的解析`;
+      const no = document.createElement("span");
+      no.className = "n";
+      no.textContent = q.no;
+      const ans = document.createElement("span");
+      ans.className = "a";
+      ans.textContent = q.answer;
+      cell.append(no, ans);
+      cell.addEventListener("click", () => openQuestion(ch.id, q.no));
+      return cell;
+    }
+
+    function keyRow(ch, q) {
+      const row = document.createElement("div");
+      row.className = "key-row";
+      const no = document.createElement("button");
+      no.type = "button";
+      no.className = "n";
+      no.textContent = `第 ${q.no} 题`;
+      no.title = `看第 ${q.no} 题的解析`;
+      no.addEventListener("click", () => openQuestion(ch.id, q.no));
+      const ans = document.createElement("div");
+      ans.className = "a";
+      // answer 在 build 时已转义，里面的 LaTeX 交给 KaTeX 渲染
+      ans.innerHTML = q.answer;
+      row.append(no, ans);
+      return row;
+    }
+
+    function keyChapterCard(ch) {
+      const card = document.createElement("section");
+      card.className = "key-chapter";
+
+      const title = document.createElement("h2");
+      title.textContent = ch.title;
+      const count = document.createElement("span");
+      count.className = "key-count";
+      count.textContent = `${ch.questions.length} 题`;
+      title.append(count);
+      card.append(title);
+
+      const choice = ch.questions.filter(isChoice);
+      const written = ch.questions.filter((q) => !isChoice(q));
+
+      if (choice.length) {
+        const label = document.createElement("p");
+        label.className = "key-sub";
+        label.textContent = "选择题";
+        const grid = document.createElement("div");
+        grid.className = "key-grid";
+        grid.append(...choice.map((q) => keyCell(ch, q)));
+        card.append(label, grid);
+      }
+
+      if (written.length) {
+        const label = document.createElement("p");
+        label.className = "key-sub";
+        label.textContent = "非选择题";
+        const list = document.createElement("div");
+        list.className = "key-list";
+        list.append(...written.map((q) => keyRow(ch, q)));
+        card.append(label, list);
+      }
+
+      return card;
+    }
+
+    function renderKeySheet() {
+      const sheet = el("keysheet");
+      const { book, chapters } = keySheetChapters();
+
+      if (!chapters.length) {
+        const empty = document.createElement("p");
+        empty.className = "key-empty";
+        empty.textContent = "第二章还没有整理好的课时。";
+        sheet.replaceChildren(empty);
+        return;
+      }
+
+      const nodes = [];
+      let group = null;
+      for (const ch of chapters) {
+        if (ch.group !== group) {
+          group = ch.group;
+          const label = document.createElement("p");
+          label.className = "key-group-label";
+          label.textContent = `${book.title} · ${group}`;
+          nodes.push(label);
+        }
+        nodes.push(keyChapterCard(ch));
+      }
+      sheet.replaceChildren(...nodes);
+      typeset(sheet);
+    }
+
+    function setView(view) {
+      state.view = view === "key" ? "key" : "solution";
+      const onKey = state.view === "key";
+      el("mode-solution").setAttribute("aria-pressed", String(!onKey));
+      el("mode-key").setAttribute("aria-pressed", String(onKey));
+      el("picker").hidden = onKey;
+      el("keysheet").hidden = !onKey;
+      if (onKey) {
+        el("answer").hidden = true;
+        el("hint").hidden = true;
+        renderKeySheet();
+      } else {
+        renderSolution();
+      }
+      syncUrl();
+    }
+
+    el("mode-solution").addEventListener("click", () => setView("solution"));
+    el("mode-key").addEventListener("click", () => setView("key"));
+
     function syncUrl() {
       const params = new URLSearchParams();
+      if (state.view === "key") params.set("view", "key");
       if (state.book) params.set("b", state.book);
       if (state.chapter) params.set("c", state.chapter);
       if (state.question) params.set("q", String(state.question));
@@ -512,12 +794,16 @@
       const no = Number(params.get("q"));
       state.question = ch && ch.questions.some((item) => item.no === no) ? no : null;
 
-      renderBooks(); renderChapters(); renderQuestions(); renderSolution();
+      renderBooks(); renderChapters(); renderQuestions();
+      setView(params.get("view") === "key" ? "key" : "solution");
     }
 
     boot();
     // KaTeX 是 defer 加载的，脚本就位后再补渲染一次。
-    window.addEventListener("load", () => typeset(el("answer")));
+    window.addEventListener("load", () => {
+      typeset(el("answer"));
+      typeset(el("keysheet"));
+    });
   </script>
 </body>
 </html>

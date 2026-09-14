@@ -138,6 +138,9 @@ FRONT = re.compile(r"^---\n(.*?)\n---\n", re.S)
 # ## 1. 单选 · 电场中的平衡问题
 QHEAD = re.compile(r"^##\s+(\d+)\.\s*([^·\n]*?)(?:\s*·\s*(.*))?\s*$", re.M)
 ANSWER = re.compile(r"^\*\*答案：\s*(.+?)\s*\*\*\s*$", re.M)
+# chapters.txt 里的「第二章 3.匀变速直线运动的位移与时间的关系」——开头那截是所属章。
+# md 的 title 通常只写课时名，所以「第几章」只能从 chapters.txt 取。
+GROUP = re.compile(r"^(第[一二三四五六七八九十百]+章)\s*")
 
 
 def parse_topic(path):
@@ -198,16 +201,18 @@ def build_book(book):
 
     chapters = []
     for cid, title in order:
+        group = (GROUP.match(title).group(1) if GROUP.match(title) else "")
         if cid in ready:
             meta, questions = ready[cid]
             chapters.append({
                 "id": cid,
                 "title": meta.get("title") or title,
+                "group": group,
                 "ready": True,
                 "questions": questions,
             })
         else:
-            chapters.append({"id": cid, "title": title, "ready": False, "questions": []})
+            chapters.append({"id": cid, "title": title, "group": group, "ready": False, "questions": []})
 
     for cid in ready:
         if cid not in dict(order):
