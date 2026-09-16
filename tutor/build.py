@@ -21,6 +21,7 @@ PAGE = ROOT / "index.html"
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
 BOOKS = [
+    {"id": "xx1", "title": "选修一作业本", "dir": "content/xx1"},
     {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1"},
     {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3"},
     {"id": "summer2026", "title": "高二暑假作业", "dir": "content"},
@@ -232,7 +233,7 @@ def main():
         # 注意：注释里不能出现 content/**/topics —— 那个 */ 会提前关掉块注释，
         # 整个 data.js 直接变成语法错误，页面就白屏了。
         "/* 由 build.py 自动生成，请勿直接编辑；改题目请改各书 content 目录下的 topics 里的 md */\n"
-        f"window.TUTOR_DATA = {payload};\n",
+        f"window.HOMEWORK_DATA = {payload};\n",
         encoding="utf8",
     )
 

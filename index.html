@@ -220,8 +220,8 @@
 
   <script src="library-data.js?v=html-folder-order"></script>
   <script>
-    const tutorCard = {
-      title: "AI tutor",
+    const homeworkCard = {
+      title: "作业答案与详解",
       mark: "解析",
       href: "tutor/"
     };
@@ -301,14 +301,14 @@
       return section;
     }
 
-    function renderTutorCard() {
-      const section = createElement("section", "card tutor-card");
+    function renderHomeworkCard() {
+      const section = createElement("section", "card homework-card");
       const header = createElement("div", "card-header");
-      header.append(createElement("span", "card-title", tutorCard.title));
+      header.append(createElement("span", "card-title", homeworkCard.title));
 
       const link = createElement("a", "ask-link");
-      link.href = tutorCard.href;
-      link.append(createElement("span", "ask-mark", tutorCard.mark));
+      link.href = homeworkCard.href;
+      link.append(createElement("span", "ask-mark", homeworkCard.mark));
 
       section.append(header, link);
       return section;
@@ -316,7 +316,7 @@
 
     async function init() {
       const data = await window.loadLabData();
-      cardsRoot.replaceChildren(...data.map(renderCard), renderTutorCard());
+      cardsRoot.replaceChildren(...data.map(renderCard), renderHomeworkCard());
     }
 
     init();

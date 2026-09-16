@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI tutor</title>
+  <title>作业答案与详解</title>
   <link rel="icon" type="image/png" href="../icon.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
@@ -54,28 +54,6 @@
       font-size: 20px;
       font-weight: 600;
       letter-spacing: 0;
-    }
-
-    /* A deliberately quiet, password-protected teacher entry. */
-    .admin-entry {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
-      color: var(--muted);
-      opacity: .32;
-      text-decoration: none;
-      transition: opacity .16s ease, background .16s ease, color .16s ease;
-    }
-
-    .admin-entry:hover,
-    .admin-entry:focus-visible {
-      color: var(--ink);
-      background: #ececea;
-      opacity: 1;
-      outline: none;
     }
 
     .home {
@@ -360,6 +338,9 @@
     .key-list { border-top: 1px solid var(--soft-line); }
 
     .key-row {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
       display: flex;
       align-items: baseline;
       gap: 12px;
@@ -379,6 +360,9 @@
       text-align: left;
       cursor: pointer;
     }
+
+    .key-row:hover { background: #f5f5f1; }
+    .key-row:focus-visible { outline: 2px solid #167d8d; outline-offset: 2px; }
 
     .key-row .n:hover { color: var(--ink); text-decoration: underline; }
     .key-row .a { flex: 1; font-size: 15px; overflow-x: auto; }
@@ -419,8 +403,7 @@
   <main>
     <div class="topbar">
       <div class="title-wrap">
-        <h1>AI tutor</h1>
-        <a class="admin-entry" href="https://p-ai-tutor.dgxwmk9dbm.workers.dev/admin" target="_blank" rel="noopener" aria-label="打开教师后台" title="教师后台"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></a>
+        <h1>作业答案与详解</h1>
       </div>
       <a class="home" href="../">← Physics Lab</a>
     </div>
@@ -465,22 +448,19 @@
 
   </main>
 
-  <script src="data.js?v=81cd409f"></script>
+  <script src="data.js?v=473d655f"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
           integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
 
   <script>
-    const data = window.TUTOR_DATA || { books: [] };
+    const data = window.HOMEWORK_DATA || { books: [] };
     const el = (id) => document.getElementById(id);
 
     const state = { view: "solution", book: null, chapter: null, question: null };
 
-    // 对答案总表只覆盖必修一第二章及以后：第一章早就学完了，不用再核对。
-    // 以后加第三章、第四章会自动出现，不必改这里。
-    const KEY_BOOK = "bx1";
-    const KEY_SKIP_GROUP = "第一章";
+    // 必修一保留第二章起的核对范围；其他作业显示所有已整理章节。
 
     function typeset(node) {
       if (!window.renderMathInElement) return;
@@ -600,9 +580,9 @@
     /* =================== 对答案总表 =================== */
 
     function keySheetChapters() {
-      const book = data.books.find((b) => b.id === KEY_BOOK) || null;
+      const book = currentBook();
       const chapters = book
-        ? book.chapters.filter((c) => c.ready && c.group && c.group !== KEY_SKIP_GROUP)
+        ? book.chapters.filter((c) => c.ready && (book.id !== "bx1" || c.group !== "第一章"))
         : [];
       return { book, chapters };
     }
@@ -613,7 +593,6 @@
     }
 
     function openQuestion(chapterId, no) {
-      state.book = KEY_BOOK;
       state.chapter = chapterId;
       state.question = no;
       renderBooks(); renderChapters(); renderQuestions();
@@ -638,14 +617,19 @@
     }
 
     function keyRow(ch, q) {
-      const row = document.createElement("div");
+      const row = document.createElement("a");
       row.className = "key-row";
-      const no = document.createElement("button");
-      no.type = "button";
+      row.href = `?b=${encodeURIComponent(state.book)}&c=${encodeURIComponent(ch.id)}&q=${q.no}`;
+      row.title = `看第 ${q.no} 题的详解`;
+      row.addEventListener("click", (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        openQuestion(ch.id, q.no);
+      });
+      const no = document.createElement("span");
       no.className = "n";
       no.textContent = `第 ${q.no} 题`;
       no.title = `看第 ${q.no} 题的解析`;
-      no.addEventListener("click", () => openQuestion(ch.id, q.no));
       const ans = document.createElement("div");
       ans.className = "a";
       // answer 在 build 时已转义，里面的 LaTeX 交给 KaTeX 渲染
@@ -699,7 +683,7 @@
       if (!chapters.length) {
         const empty = document.createElement("p");
         empty.className = "key-empty";
-        empty.textContent = "第二章还没有整理好的课时。";
+        empty.textContent = "这本作业暂时没有可核对的已整理课时。";
         sheet.replaceChildren(empty);
         return;
       }
@@ -711,7 +695,7 @@
           group = ch.group;
           const label = document.createElement("p");
           label.className = "key-group-label";
-          label.textContent = `${book.title} · ${group}`;
+          label.textContent = [book.title, group].filter(Boolean).join(" · ");
           nodes.push(label);
         }
         nodes.push(keyChapterCard(ch));
@@ -725,7 +709,9 @@
       const onKey = state.view === "key";
       el("mode-solution").setAttribute("aria-pressed", String(!onKey));
       el("mode-key").setAttribute("aria-pressed", String(onKey));
-      el("picker").hidden = onKey;
+      el("picker").hidden = false;
+      el("step-chapter").hidden = onKey || !currentBook();
+      el("step-question").hidden = onKey || !currentChapter();
       el("keysheet").hidden = !onKey;
       if (onKey) {
         el("answer").hidden = true;
@@ -754,7 +740,7 @@
       state.book = id;
       state.chapter = null;
       state.question = null;
-      renderBooks(); renderChapters(); renderQuestions(); renderSolution(); syncUrl();
+      renderBooks(); renderChapters(); renderQuestions(); setView(state.view);
     }
 
     function selectChapter(id) {
