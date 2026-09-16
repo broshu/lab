@@ -460,7 +460,6 @@
 
     const state = { view: "solution", book: null, chapter: null, question: null };
 
-    // 必修一保留第二章起的核对范围；其他作业显示所有已整理章节。
 
     function typeset(node) {
       if (!window.renderMathInElement) return;
@@ -577,15 +576,7 @@
 
     }
 
-    /* =================== 对答案总表 =================== */
-
-    function keySheetChapters() {
-      const book = currentBook();
-      const chapters = book
-        ? book.chapters.filter((c) => c.ready && (book.id !== "bx1" || c.group !== "第一章"))
-        : [];
-      return { book, chapters };
-    }
+    /* =================== 当前章节答案 =================== */
 
     // 选择题只要核对字母；实验、填空、计算题要看完整的最终答案。
     function isChoice(q) {
@@ -678,29 +669,21 @@
 
     function renderKeySheet() {
       const sheet = el("keysheet");
-      const { book, chapters } = keySheetChapters();
+      const book = currentBook();
+      const ch = currentChapter();
 
-      if (!chapters.length) {
+      if (!ch || !ch.ready) {
         const empty = document.createElement("p");
         empty.className = "key-empty";
-        empty.textContent = "这本作业暂时没有可核对的已整理课时。";
+        empty.textContent = book ? "选一个章节，核对本节答案。" : "先选作业，再选章节核对答案。";
         sheet.replaceChildren(empty);
         return;
       }
 
-      const nodes = [];
-      let group = null;
-      for (const ch of chapters) {
-        if (ch.group !== group) {
-          group = ch.group;
-          const label = document.createElement("p");
-          label.className = "key-group-label";
-          label.textContent = [book.title, group].filter(Boolean).join(" · ");
-          nodes.push(label);
-        }
-        nodes.push(keyChapterCard(ch));
-      }
-      sheet.replaceChildren(...nodes);
+      const label = document.createElement("p");
+      label.className = "key-group-label";
+      label.textContent = [book.title, ch.group].filter(Boolean).join(" · ");
+      sheet.replaceChildren(label, keyChapterCard(ch));
       typeset(sheet);
     }
 
@@ -710,7 +693,7 @@
       el("mode-solution").setAttribute("aria-pressed", String(!onKey));
       el("mode-key").setAttribute("aria-pressed", String(onKey));
       el("picker").hidden = false;
-      el("step-chapter").hidden = onKey || !currentBook();
+      el("step-chapter").hidden = !currentBook();
       el("step-question").hidden = onKey || !currentChapter();
       el("keysheet").hidden = !onKey;
       if (onKey) {
@@ -746,7 +729,7 @@
     function selectChapter(id) {
       state.chapter = id;
       state.question = null;
-      renderChapters(); renderQuestions(); renderSolution(); syncUrl();
+      renderChapters(); renderQuestions(); setView(state.view);
     }
 
     function selectQuestion(no) {
