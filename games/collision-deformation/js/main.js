@@ -64,7 +64,9 @@
   const TIME_TEXT = ["慢放 ×¼", "慢放 ×½", "正常速度", "快进 ×2"];
   const SPEED_DISPLAY = 50;             // shown value = v × 50 (arbitrary units)
   const VIEW = { xmin: -3, xmax: 48.5, ymin: -11.5, ymax: 17.4 };
-  const MAX_T = 1000;
+  const MAX_T = 6000;
+  const FREE_AFTER = 40;                // no contact for this long -> ball has left the plate
+  const FAST_FORWARD = 3;               // playback factor while the ball flies away
 
   const state = {
     material: "metal",
@@ -76,6 +78,7 @@
     history: [],
     msPerStep: 0.1,
     endAt: null,
+    fastForward: false,
     lastContact: -1e9,
     showBonds: true,
     showBroken: true
@@ -179,6 +182,8 @@
     state.phase = "ready";
     state.paused = false;
     state.endAt = null;
+    state.fastForward = false;
+    state.ballStopped = false;
     state.lastContact = -1e9;
     updatePauseButton();
   }
@@ -228,8 +233,12 @@
 
   function advance() {
     const w = state.world;
-    const target = Math.max(1, Math.round(BASE_STEPS * TIME_SCALES[state.timeIndex]));
-    const budget = Math.max(8, Math.floor(11 / state.msPerStep));
+    // Once the ball has left the plate, the rest is just the ball flying away:
+    // play that part faster so the lesson doesn't wait for it.
+    state.fastForward = w.firstContact !== null && w.t - state.lastContact > FREE_AFTER;
+    const scale = TIME_SCALES[state.timeIndex] * (state.fastForward ? FAST_FORWARD : 1);
+    const target = Math.max(1, Math.round(BASE_STEPS * scale));
+    const budget = Math.max(8, Math.floor((state.fastForward ? 14 : 11) / state.msPerStep));
     const steps = Math.min(target, budget);
     const t0 = performance.now();
     for (let k = 0; k < steps; k++) {
@@ -248,28 +257,23 @@
       k: e.latticeKE / e.ke0
     });
 
-    // when to stop: let an intact plate ring for a while after the ball leaves;
-    // freeze a broken plate before its pieces fly out of view
+    // Stop only after the ball has flown out of the picture (up or down).
     const b = w.ball;
-    const outUp = b.y - b.r > VIEW.ymax + 1;
-    const viewBottom = state.viewBottom === undefined ? VIEW.ymin : state.viewBottom;
-    const outDown = b.y + b.r < viewBottom - 1;
-    const apart = w.t - state.lastContact > 100;   // ball has not touched the plate for a while
+    const top = state.viewTop === undefined ? VIEW.ymax : state.viewTop;
+    const bottom = state.viewBottom === undefined ? VIEW.ymin : state.viewBottom;
+    const gone = b.y - b.r > top || b.y + b.r < bottom;
     if (state.endAt === null && w.firstContact !== null) {
-      if (w.stats.pieces > 1) {
-        let lowest = Infinity;
-        for (let i = 0; i < w.n; i++) if (!w.fixed[i] && w.y[i] < lowest) lowest = w.y[i];
-        if (lowest < viewBottom + 1.2 || outDown || apart) state.endAt = w.t;
-        else if (outUp) state.endAt = w.t + 40;
-      } else if (outUp || outDown) {
-        state.endAt = w.t + 60;
-      } else if (apart && b.vy > 0) {
+      if (gone) state.endAt = w.t + 15;
+      // safety net: ball left the plate but is (almost) at rest
+      else if (w.t - state.lastContact > 300 && Math.hypot(b.vx, b.vy) < 0.004) {
         state.endAt = w.t;
+        state.ballStopped = true;
       }
     }
     if (state.endAt === null && w.t > MAX_T) state.endAt = w.t;
     if (state.endAt !== null && w.t >= state.endAt) {
       state.phase = "done";
+      state.fastForward = false;
       updatePauseButton();
     }
   }
@@ -317,7 +321,8 @@
   function verdict(c) {
     const w = state.world;
     if (state.phase === "ready") return "选择材料和撞击速度，然后发射。";
-    if (w.firstContact === null || state.endAt === null) return "碰撞进行中……";
+    const over = state.phase === "done" || state.fastForward;
+    if (w.firstContact === null || !over) return "碰撞进行中……";
     const e = P.energies(w);
     const keep = e.ball / e.ke0;
     const lost = Math.max(0, 1 - keep);
@@ -346,8 +351,14 @@
     els.brokenMetric.textContent = String(w.stats.broken);
     els.formedMetric.textContent = w.rebond ? String(w.stats.formed) : "0（玻璃不会形成新键）";
     els.verdictMetric.textContent = verdict(c);
-    els.timeReadout.textContent = `t = ${w.t.toFixed(0)}${state.paused ? "（已暂停）" : ""}`;
-    const html = narrative(c).replace(/r_m/g, "r<sub>m</sub>");
+    const tag = state.paused ? "（已暂停）"
+      : state.phase === "running" && state.fastForward ? "（小球飞离中 · 自动快进）"
+      : state.phase === "done" ? "（结束）" : "";
+    els.timeReadout.textContent = `t = ${w.t.toFixed(0)}${tag}`;
+    const text = state.ballStopped
+      ? "小球把动能几乎全部交给了板，自己几乎停住了（模型中没有重力），演示到此结束。"
+      : narrative(c);
+    const html = text.replace(/r_m/g, "r<sub>m</sub>");
     if (html !== state.lastNarrative) {
       els.narrative.innerHTML = html;
       state.lastNarrative = html;
@@ -367,6 +378,7 @@
     const oy = Math.min(extra / 2, 0.12 * vh * s);
     const bottom = VIEW.ymax - (Hh - oy) / s;
     state.viewBottom = bottom;
+    state.viewTop = VIEW.ymax + oy / s;
     return {
       s,
       bottom,

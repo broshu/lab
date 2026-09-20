@@ -8,6 +8,7 @@ A rigid ball hits a thin plate clamped at both ends. The plate is about 370 part
 - Glass: only the original bonds attract; a bond pulled past the cut-off never re-forms (brittle fracture).
 - Presets: light hit (both elastic), medium hit (metal bends, glass cracks), hard hit (both break).
 - Side panels: live F–r curve with every bond plotted as a dot, and the energy split (ball KE / molecular PE / particle KE) over time.
+- The run always continues until the ball has flown out of the picture; once the ball has left the plate, playback speeds up ×3 automatically.
 - Keys: Space launch/pause, R reset, 1/2/3 presets, M switch material.
 
 Open `index.html` to run it.

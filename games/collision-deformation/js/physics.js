@@ -48,6 +48,10 @@
       const w = f - k;
       return UTAB[k] * (1 - w) + UTAB[k + 1] * w;
     }
+    // tabulated force for the hot loop (linear interpolation)
+    const FTAB = new Float64Array(TAB_N + 2);
+    for (let k = 0; k <= TAB_N + 1; k++) FTAB[k] = force(Math.min(rc, TAB_MIN + k * TAB_DR));
+    const invDR = 1 / TAB_DR;
     const uR0 = U(R0);
     let rm = R0, fmax = 0;
     for (let r = R0; r < rc; r += 0.0005) {
@@ -56,6 +60,7 @@
     }
     return {
       a, rs, rc, rm, fmax, uR0, force, U,
+      tab: { min: TAB_MIN, inv: invDR, n: TAB_N, F: FTAB, U: UTAB },
       breakR: 1.5,
       repForce: (r) => (r < R0 ? morseF(r) : 0),
       repU: (r) => (r < R0 ? U(r) - uR0 : 0)
@@ -149,12 +154,8 @@
     };
     w.ke0 = 0.5 * o.ballMass * o.speed * o.speed;
 
-    // bounded cell grid; fragments that fly far away are clamped to edge cells
-    const cs = pot.rc;
-    w.grid = { minx: -12, miny: -60, cs, ncx: 0, ncy: 0 };
-    w.grid.ncx = Math.ceil((w.width + 24) / cs) + 1;
-    w.grid.ncy = Math.ceil((w.height + 100) / cs) + 1;
-    w.cellHead = new Int32Array(w.grid.ncx * w.grid.ncy);
+    // cell grid (rebuilt every step to follow the particles)
+    w.grid = { minx: 0, miny: 0, cs: pot.rc, ncx: 1, ncy: 1 };
 
     computeForces(w);
     w.pe0 = w.pe;
@@ -162,15 +163,34 @@
     return w;
   }
 
+  const MAX_CELLS = 60000;
   function fillCells(w) {
-    const g = w.grid, head = w.cellHead, next = w.cellNext;
-    head.fill(-1);
-    const ncx = g.ncx, ncy = g.ncy, inv = 1 / g.cs;
-    for (let i = 0; i < w.n; i++) {
-      let cx = Math.floor((w.x[i] - g.minx) * inv);
-      let cy = Math.floor((w.y[i] - g.miny) * inv);
-      if (cx < 0) cx = 0; else if (cx >= ncx) cx = ncx - 1;
-      if (cy < 0) cy = 0; else if (cy >= ncy) cy = ncy - 1;
+    const g = w.grid, next = w.cellNext, x = w.x, y = w.y, n = w.n;
+    // grid follows the particles (fragments may fly far away)
+    let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    for (let i = 0; i < n; i++) {
+      const xi = x[i], yi = y[i];
+      if (xi < minx) minx = xi;
+      if (xi > maxx) maxx = xi;
+      if (yi < miny) miny = yi;
+      if (yi > maxy) maxy = yi;
+    }
+    const inv = 1 / g.cs;
+    let ncx = Math.floor((maxx - minx) * inv) + 1;
+    let ncy = Math.floor((maxy - miny) * inv) + 1;
+    if (ncx * ncy > MAX_CELLS) {
+      ncx = Math.min(ncx, 300);
+      ncy = Math.max(1, Math.min(ncy, Math.floor(MAX_CELLS / ncx)));
+    }
+    g.minx = minx; g.miny = miny; g.ncx = ncx; g.ncy = ncy;
+    if (!w.cellHead || w.cellHead.length < ncx * ncy) w.cellHead = new Int32Array(Math.max(ncx * ncy, 1024));
+    const head = w.cellHead;
+    head.fill(-1, 0, ncx * ncy);
+    for (let i = 0; i < n; i++) {
+      let cx = Math.floor((x[i] - minx) * inv);
+      let cy = Math.floor((y[i] - miny) * inv);
+      if (cx >= ncx) cx = ncx - 1;
+      if (cy >= ncy) cy = ncy - 1;
       const c = cy * ncx + cx;
       next[i] = head[c];
       head[c] = i;
@@ -215,16 +235,46 @@
     const metal = w.rebond;
     const rc2 = metal ? pot.rc * pot.rc : R0 * R0;
 
-    forEachPair(w, rc2, (i, j, dx, dy, r2) => {
-      if (fixed[i] && fixed[j]) return;
-      const r = Math.sqrt(r2);
-      let f;
-      if (metal) { f = pot.force(r); pe += pot.U(r); }
-      else { f = pot.repForce(r); pe += pot.repU(r); }
-      const s = f / r;
-      fx[i] -= s * dx; fy[i] -= s * dy;
-      fx[j] += s * dx; fy[j] += s * dy;
-    });
+    // metal: every pair within rc; glass: only the repulsive branch (r < r0) here
+    const T = pot.tab, FT = T.F, UT = T.U, tmin = T.min, tinv = T.inv, uR0 = pot.uR0;
+    const g = w.grid, head = w.cellHead, next = w.cellNext, ncx = g.ncx, ncy = g.ncy;
+    for (let cy = 0; cy < ncy; cy++) {
+      for (let cx = 0; cx < ncx; cx++) {
+        for (let i = head[cy * ncx + cx]; i !== -1; i = next[i]) {
+          const xi = x[i], yi = y[i], fi = fixed[i];
+          let fxi = 0, fyi = 0;
+          for (let k = 0; k < 5; k++) {
+            let j;
+            if (k === 0) j = next[i];
+            else {
+              const nxC = cx + OFFX[k - 1], nyC = cy + OFFY[k - 1];
+              if (nxC < 0 || nxC >= ncx || nyC >= ncy) continue;
+              j = head[nyC * ncx + nxC];
+            }
+            for (; j !== -1; j = next[j]) {
+              const dx = x[j] - xi, dy = y[j] - yi;
+              const r2 = dx * dx + dy * dy;
+              if (r2 >= rc2) continue;
+              if (fi && fixed[j]) continue;
+              const r = Math.sqrt(r2);
+              let q = (r - tmin) * tinv;
+              let f, u;
+              if (q <= 0) { f = FT[0]; u = UT[0] + (tmin - r) * FT[0]; }
+              else {
+                const kq = q | 0, wq = q - kq;
+                f = FT[kq] + (FT[kq + 1] - FT[kq]) * wq;
+                u = UT[kq] + (UT[kq + 1] - UT[kq]) * wq;
+              }
+              pe += metal ? u : u - uR0;   // glass: repulsive branch measured from r0
+              const s = f / r;
+              fxi -= s * dx; fyi -= s * dy;
+              fx[j] += s * dx; fy[j] += s * dy;
+            }
+          }
+          fx[i] += fxi; fy[i] += fyi;
+        }
+      }
+    }
 
     if (!metal) {
       // original bonds add the attractive branch; a bond pulled past rc is gone
@@ -236,9 +286,10 @@
         const dx = x[j] - x[i], dy = y[j] - y[i];
         const r = Math.sqrt(dx * dx + dy * dy);
         if (r >= rc) { alive[k] = 0; continue; }
-        if (r < R0) { pe += pot.uR0; continue; }
-        pe += pot.U(r);
-        const s = pot.force(r) / r;
+        if (r < R0) { pe += uR0; continue; }
+        const q = (r - tmin) * tinv, kq = q | 0, wq = q - kq;
+        pe += UT[kq] + (UT[kq + 1] - UT[kq]) * wq;
+        const s = (FT[kq] + (FT[kq + 1] - FT[kq]) * wq) / r;
         fx[i] -= s * dx; fy[i] -= s * dy;
         fx[j] += s * dx; fy[j] += s * dy;
       }
