@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>碰撞中的形变 · 微观机理</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Collision · Deformation</p>
+      <h1>碰撞中的形变：弹性、塑性与断裂</h1>
+      <p class="lede">小球撞击两端固定的薄板。板里的粒子之间按分子力 F–r 曲线相互作用，小球弹回、板弯曲、板断开都是逐步计算出来的，不是预设的动画。</p>
+    </div>
+    <a class="back-link" href="../../index.html">返回 Lab</a>
+  </header>
+
+  <main class="app">
+    <section class="panel controls-panel">
+      <div class="mode-tabs" role="group" aria-label="材料">
+        <button class="mode-button active" id="metalMode" type="button" data-material="metal">金属<small>韧性 · 能换邻居</small></button>
+        <button class="mode-button" id="glassMode" type="button" data-material="glass">玻璃<small>脆性 · 键断不再接</small></button>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>撞击</h2>
+          <span class="status-pill neutral" id="statusPill">准备</span>
+        </div>
+        <div class="preset-row" role="group" aria-label="快速演示">
+          <button class="preset-button" type="button" data-speed="0.08">轻碰<small>弹性</small></button>
+          <button class="preset-button" type="button" data-speed="0.19">中撞<small>金属弯 · 玻璃裂</small></button>
+          <button class="preset-button" type="button" data-speed="0.26">猛撞<small>都断</small></button>
+        </div>
+        <label class="slider-row">
+          <span>撞击速度</span>
+          <input id="speedInput" type="range" min="0.04" max="0.32" step="0.01" value="0.08">
+          <strong id="speedValue">4.0</strong>
+        </label>
+        <div class="button-row">
+          <button class="primary-button" id="launchButton" type="button">发射</button>
+          <button class="secondary-button" id="resetButton" type="button">重置</button>
+        </div>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>观察</h2>
+          <span class="status-pill neutral" id="timeScaleText">正常速度</span>
+        </div>
+        <label class="slider-row">
+          <span>播放速度</span>
+          <input id="timeScale" type="range" min="0" max="3" step="1" value="2">
+          <strong id="timeValue">×1</strong>
+        </label>
+        <button class="secondary-button" id="pauseButton" type="button">暂停</button>
+        <label class="check-row"><input id="showBonds" type="checkbox" checked><span>显示粒子间的键</span></label>
+        <label class="check-row"><input id="showBroken" type="checkbox" checked><span>标出断开的键</span></label>
+        <p class="hint-text">快捷键：<kbd>空格</kbd> 发射 / 暂停，<kbd>R</kbd> 重置，<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 三档演示，<kbd>M</kbd> 切换材料</p>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <span>小球动能（占撞击前）</span>
+          <strong id="keMetric">100%</strong>
+        </div>
+        <div class="metric">
+          <span>断开的原有键</span>
+          <strong id="brokenMetric">0</strong>
+        </div>
+        <div class="metric">
+          <span>新形成的键（换了邻居）</span>
+          <strong id="formedMetric">0</strong>
+        </div>
+        <div class="metric verdict">
+          <span>结论</span>
+          <strong id="verdictMetric">选择材料和撞击速度，然后发射。</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage-panel">
+      <div class="stage-header">
+        <div>
+          <h2 id="stageTitle">微观视图 · 金属薄板</h2>
+          <p id="stageSubtitle">每个圆点代表一个粒子（教材中统称“分子”），连线表示相邻粒子之间的相互作用。</p>
+        </div>
+        <div class="legend">
+          <span><i class="legend-line compress"></i>受压</span>
+          <span><i class="legend-line stretch"></i>受拉</span>
+          <span><i class="legend-line danger"></i><em>超过 r<sub>m</sub></em></span>
+          <span><i class="legend-line newbond"></i>新形成</span>
+          <span><i class="legend-line broken"></i>已断开</span>
+          <span><i class="legend-dot clamp"></i>固定端</span>
+        </div>
+      </div>
+      <canvas id="latticeCanvas" aria-label="薄板中的粒子与小球"></canvas>
+      <div class="readout-strip">
+        <span id="timeReadout">t = 0</span>
+        <span id="narrative">按「发射」或空格键开始。</span>
+      </div>
+    </section>
+
+    <section class="panel graphs-panel">
+      <div class="graph-card">
+        <div class="stage-header">
+          <div>
+            <h2>分子力 F–r 曲线</h2>
+            <p>每个点是一对相邻粒子此刻的间距和相互作用力。F &gt; 0 为斥力，F &lt; 0 为引力。</p>
+          </div>
+        </div>
+        <canvas id="forceCanvas" aria-label="分子力随间距变化的曲线"></canvas>
+      </div>
+      <div class="graph-card">
+        <div class="stage-header">
+          <div>
+            <h2>能量去向</h2>
+            <p>以撞击前小球的动能为 100%。</p>
+          </div>
+        </div>
+        <canvas id="energyCanvas" aria-label="能量随时间的变化"></canvas>
+      </div>
+    </section>
+
+    <section class="panel explanation-panel">
+      <h2>要点</h2>
+      <div class="concept-grid">
+        <div>
+          <h3><span class="tag elastic">1</span>弹性形变</h3>
+          <p>粒子只偏离平衡位置 r<sub>0</sub> 一点点，邻居没有变。受压处表现为斥力，受拉处表现为引力，都指回 r<sub>0</sub>；在 r<sub>0</sub> 附近 F 与 Δr 近似成正比，宏观上就是胡克定律。撤去外力后复原：动能 → 分子势能 → 动能，近似弹性碰撞。</p>
+        </div>
+        <div>
+          <h3><span class="tag plastic">2</span>塑性形变</h3>
+          <p>力再大些，一层粒子整体滑过一个间距，停在新的平衡位置，换了邻居（图中绿色的键）。但任何时刻都有键连着，所以不裂。回不到原位，形成永久弯曲；一部分动能变成粒子的无规则振动（内能），是非弹性碰撞。</p>
+        </div>
+        <div>
+          <h3><span class="tag fracture">3</span>断裂</h3>
+          <p>某处间距被拉过 r<sub>m</sub>（引力最大处）。过了 r<sub>m</sub>，距离越大引力反而越小，外力一旦超过最大引力，就再也找不到平衡位置，越拉越开。注意裂纹从板的下表面开始：那里受拉。断裂是“拉断”，不是“压碎”。</p>
+        </div>
+      </div>
+      <div class="concept-grid two">
+        <div>
+          <h3>金属与玻璃</h3>
+          <p>两种材料用的是同一条 F–r 曲线。区别只在于：金属中靠近的粒子都会相互吸引，可以和新邻居重新结合，所以能滑移、能弯；玻璃中的键一旦断开就不会再接上，没有塑性阶段，直接从弹性形变到断裂。</p>
+        </div>
+        <div>
+          <h3>模型说明</h3>
+          <p>二维示意模型，约 370 个粒子；F–r 曲线形状与教材一致，数值为示意。小球视为刚体，撞击前粒子静止（忽略原有的热运动）。真实材料里有缺陷，往往在缺陷处先断，所需的力远小于这里的理想值。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/physics.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
