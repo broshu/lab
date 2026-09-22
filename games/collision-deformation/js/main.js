@@ -57,11 +57,114 @@
     heat: "#e0664f"
   };
 
+  // ---------- strings (page language decides) ----------
+  const STRINGS = {
+    zh: {
+      timeText: ["慢放 ×¼", "慢放 ×½", "正常速度", "快进 ×2"],
+      pause: "暂停", resume: "继续",
+      stageMetal: "微观视图 · 金属薄板", stageGlass: "微观视图 · 玻璃薄板",
+      subMetal: "每个圆点代表一个粒子（教材中统称“分子”）。金属：靠近的粒子都会相互吸引，粒子可以离开旧邻居、和新邻居结合。",
+      subGlass: "每个圆点代表一个粒子（教材中统称“分子”）。玻璃：只有原来相邻的粒子之间有引力，键被拉断后不会再接上。",
+      lblRunning: "飞行中", lblReady: "准备", lblFracture: "断裂", lblPlastic: "塑性形变", lblCrack: "出现裂纹",
+      lblElastic: "弹性形变", lblRecovered: "弹性 · 已复原",
+      nReady: "按「发射」或空格键开始。",
+      nRunning: "小球飞向薄板……",
+      nElasticTouch: "接触中：板的上表面受压（蓝），下表面受拉（红）。粒子只偏离平衡位置一点点，邻居没有变。",
+      nElasticAfter: "小球弹回，粒子回到原来的位置：弹性形变。",
+      nPlastic: "有的键被拉过 r_m 后断开，粒子随即和新邻居结合（绿）：板永久弯曲，但没有断开。",
+      nCrackMetal: "键被拉过 r_m 后断开，出现裂纹。",
+      nCrackGlass: "下表面受拉最厉害：那里的键先被拉过 r_m 而断开，裂纹从受拉的一侧向上扩展。",
+      nFractureMetal: "形变太大：金属先弯曲，随后在受拉最厉害的地方被拉断。",
+      nFractureGlass: "键断了不会再接上：裂纹贯穿，玻璃板断开。",
+      nStopped: "小球把动能几乎全部交给了板，自己几乎停住了（模型中没有重力），演示到此结束。",
+      vReady: "选择材料和撞击速度，然后发射。",
+      vRunning: "碰撞进行中……",
+      vElastic: (k) => `近似弹性碰撞：小球带回 ${k} 的动能，板恢复原状。`,
+      vPlastic: (l) => `非弹性碰撞：损失的 ${l} 动能变成了板的内能（粒子振动加剧、分子势能增加），板永久弯曲。`,
+      vCrack: (l) => `非弹性碰撞：损失的 ${l} 动能用来拉断键（分子势能增加）和使粒子振动（内能）。`,
+      vFracture: (l) => `非弹性碰撞：损失的 ${l} 动能用来拉断键（分子势能增加）、使粒子振动，以及让断开的部分运动。`,
+      vOther: (k) => `小球带回 ${k} 的动能。`,
+      glassNoNew: "0（玻璃不会形成新键）",
+      tPaused: "（已暂停）", tFast: "（小球飞离中 · 自动快进）", tDone: "（结束）",
+      clamp: "固定端",
+      longest: (r) => `拉得最长的键：r = ${r} r₀`,
+      repulsion: "斥力", attraction: "引力",
+      rangeEnds: "作用消失", bondBreaks: "键断开",
+      hooke: "r₀ 附近近似直线：F ∝ Δr（胡克定律）",
+      pastRm: ["过了 r_m：越拉，引力越小", "拉不回来"],
+      fmax: "最大引力",
+      time: "时间 →", contact: "接触",
+      eBall: "小球动能", ePE: "分子势能", eKE: "粒子动能（振动）",
+      eEmpty: "发射后显示能量怎样转移"
+    },
+    en: {
+      timeText: ["Slow ×¼", "Slow ×½", "Normal speed", "Fast ×2"],
+      pause: "Pause", resume: "Resume",
+      stageMetal: "Microscopic view · metal plate", stageGlass: "Microscopic view · glass plate",
+      subMetal: "Each dot is one particle (an atom or molecule). Metal: any two particles that come close attract each other, so a particle can leave its old neighbours and bond to new ones.",
+      subGlass: "Each dot is one particle (an atom or molecule). Glass: only particles that started as neighbours attract; once a bond is pulled apart it never re-forms.",
+      lblRunning: "In flight", lblReady: "Ready", lblFracture: "Fracture", lblPlastic: "Plastic", lblCrack: "Cracked",
+      lblElastic: "Elastic", lblRecovered: "Elastic · recovered",
+      nReady: "Press Launch or the space bar to start.",
+      nRunning: "The ball flies towards the plate…",
+      nElasticTouch: "Contact: the top of the plate is compressed (blue) and the bottom is stretched (red). Particles move only slightly from equilibrium and keep their neighbours.",
+      nElasticAfter: "The ball bounces back and every particle returns to its old place: elastic deformation.",
+      nPlastic: "Some bonds were pulled past r_m and broke, and the particles at once bonded to new neighbours (green): the plate stays bent but is still in one piece.",
+      nCrackMetal: "Bonds pulled past r_m have broken: a crack appears.",
+      nCrackGlass: "The bottom surface is stretched the most: bonds there pass r_m first and break, and the crack grows upwards from the stretched side.",
+      nFractureMetal: "Too much deformation: the metal bends first, then tears where it is stretched the most.",
+      nFractureGlass: "Broken bonds never re-form: the crack runs right through and the glass plate breaks.",
+      nStopped: "The ball has handed almost all its kinetic energy to the plate and has nearly stopped (the model has no gravity). The run ends here.",
+      vReady: "Choose a material and an impact speed, then launch.",
+      vRunning: "Collision in progress…",
+      vElastic: (k) => `Nearly elastic collision: the ball keeps ${k} of its kinetic energy and the plate recovers.`,
+      vPlastic: (l) => `Inelastic collision: ${l} of the kinetic energy was lost. It became internal energy of the plate (stronger particle vibration, higher molecular potential energy), and the plate stays bent.`,
+      vCrack: (l) => `Inelastic collision: ${l} of the kinetic energy was lost, spent on breaking bonds (molecular potential energy) and making particles vibrate (internal energy).`,
+      vFracture: (l) => `Inelastic collision: ${l} of the kinetic energy was lost, spent on breaking bonds (molecular potential energy), making particles vibrate and moving the broken pieces.`,
+      vOther: (k) => `The ball keeps ${k} of its kinetic energy.`,
+      glassNoNew: "0 (glass forms no new bonds)",
+      tPaused: " (paused)", tFast: " (ball leaving · auto fast-forward)", tDone: " (finished)",
+      clamp: "Clamped",
+      longest: (r) => `Longest bond: r = ${r} r₀`,
+      repulsion: "Repulsion", attraction: "Attraction",
+      rangeEnds: "range ends", bondBreaks: "bond breaks",
+      hooke: "Near r₀ almost straight: F ∝ Δr (Hooke's law)",
+      pastRm: ["Past r_m: the further apart,", "the weaker the attraction —", "no way back"],
+      fmax: "Max attraction",
+      time: "Time →", contact: "Contact",
+      eBall: "Ball KE", ePE: "Molecular PE", eKE: "Particle KE (vibration)",
+      eEmpty: "The energy transfer appears after launch"
+    }
+  };
+  const LANG = (document.documentElement.lang || "").toLowerCase().startsWith("zh") ? "zh" : "en";
+  const S = STRINGS[LANG];
+
+  // ---------- canvas colours (CSS variables, so a stylesheet can theme them) ----------
+  const THEME_VARS = {
+    canvas: ["--canvas-bg", "#f9fbfd"],
+    ink: ["--canvas-ink", "#17212f"],
+    muted: ["--canvas-muted", "#647084"],
+    grid: ["--canvas-grid", "#e3e9f1"],
+    axis: ["--canvas-axis", "#9aa7b8"],
+    marker: ["--canvas-marker", "#56677d"],
+    clampFill: ["--canvas-clamp", "#dfe5ed"],
+    clampHatch: ["--canvas-clamp-hatch", "rgba(60, 70, 86, 0.22)"],
+    clampEdge: ["--canvas-clamp-edge", "#9aa7b8"],
+    clampAtom: ["--canvas-clamp-atom", "#3c4656"],
+    tagBg: ["--canvas-tag-bg", "rgba(255, 255, 255, 0.92)"],
+    bond: ["--canvas-bond", "184, 194, 208"],
+    broken: ["--canvas-broken", "rgba(155, 44, 44, 0.75)"],
+    breakText: ["--canvas-break-text", "#9b2c2c"],
+    blueText: ["--canvas-blue-text", "rgba(47, 111, 214, 0.95)"],
+    orangeText: ["--canvas-orange-text", "#c26a0a"],
+    arrow: ["--canvas-arrow", "#b36b00"]
+  };
+  const THEME = {};
+
   const DT = 0.01;
   const BASE_STEPS = 100;               // integration steps per frame at ×1
   const TIME_SCALES = [0.25, 0.5, 1, 2];
   const TIME_LABELS = ["×¼", "×½", "×1", "×2"];
-  const TIME_TEXT = ["慢放 ×¼", "慢放 ×½", "正常速度", "快进 ×2"];
   const SPEED_DISPLAY = 50;             // shown value = v × 50 (arbitrary units)
   const VIEW = { xmin: -3, xmax: 48.5, ymin: -11.5, ymax: 17.4 };
   const MAX_T = 6000;
@@ -151,12 +254,26 @@
   const BUCKET_NEW = 2 * LEVELS + 2;
   const BUCKET_COUNT = 2 * LEVELS + 3;
   const BUCKET_COLORS = [];
-  for (let k = 0; k < BUCKET_COUNT; k++) {
-    if (k < LEVELS) BUCKET_COLORS.push(rgb(mix(COLORS.neutral, COLORS.compress, 0.3 + 0.7 * (LEVELS - k) / LEVELS)));
-    else if (k === BUCKET_NEUTRAL) BUCKET_COLORS.push(rgb(COLORS.neutral));
-    else if (k < BUCKET_DANGER) BUCKET_COLORS.push(rgb(mix(COLORS.neutral, COLORS.stretch, 0.3 + 0.7 * (k - LEVELS) / LEVELS)));
-    else if (k === BUCKET_DANGER) BUCKET_COLORS.push(COLORS.danger);
-    else BUCKET_COLORS.push(COLORS.newbond);
+  function buildBuckets() {
+    BUCKET_COLORS.length = 0;
+    for (let k = 0; k < BUCKET_COUNT; k++) {
+      if (k < LEVELS) BUCKET_COLORS.push(rgb(mix(COLORS.neutral, COLORS.compress, 0.3 + 0.7 * (LEVELS - k) / LEVELS)));
+      else if (k === BUCKET_NEUTRAL) BUCKET_COLORS.push(rgb(COLORS.neutral));
+      else if (k < BUCKET_DANGER) BUCKET_COLORS.push(rgb(mix(COLORS.neutral, COLORS.stretch, 0.3 + 0.7 * (k - LEVELS) / LEVELS)));
+      else if (k === BUCKET_DANGER) BUCKET_COLORS.push(COLORS.danger);
+      else BUCKET_COLORS.push(COLORS.newbond);
+    }
+  }
+
+  function readTheme() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const key in THEME_VARS) {
+      const [name, fallback] = THEME_VARS[key];
+      THEME[key] = cs.getPropertyValue(name).trim() || fallback;
+    }
+    const parts = THEME.bond.split(",").map((v) => parseFloat(v));
+    if (parts.length === 3 && parts.every((v) => !Number.isNaN(v))) COLORS.neutral = parts;
+    buildBuckets();
   }
 
   function bucketOf(r, isNew) {
@@ -203,17 +320,15 @@
   }
 
   function updatePauseButton() {
-    els.pauseButton.textContent = state.paused ? "继续" : "暂停";
+    els.pauseButton.textContent = state.paused ? S.resume : S.pause;
     els.pauseButton.disabled = state.phase !== "running";
   }
 
   function setMaterial(m) {
     state.material = m;
     els.modeButtons.forEach((b) => b.classList.toggle("active", b.dataset.material === m));
-    els.stageTitle.textContent = m === "metal" ? "微观视图 · 金属薄板" : "微观视图 · 玻璃薄板";
-    els.stageSubtitle.textContent = m === "metal"
-      ? "每个圆点代表一个粒子（教材中统称“分子”）。金属：靠近的粒子都会相互吸引，粒子可以离开旧邻居、和新邻居结合。"
-      : "每个圆点代表一个粒子（教材中统称“分子”）。玻璃：只有原来相邻的粒子之间有引力，键被拉断后不会再接上。";
+    els.stageTitle.textContent = m === "metal" ? S.stageMetal : S.stageGlass;
+    els.stageSubtitle.textContent = m === "metal" ? S.subMetal : S.subGlass;
     newWorld();
   }
 
@@ -228,7 +343,7 @@
     state.timeIndex = i;
     els.timeScale.value = String(i);
     els.timeValue.textContent = TIME_LABELS[i];
-    els.timeScaleText.textContent = TIME_TEXT[i];
+    els.timeScaleText.textContent = S.timeText[i];
   }
 
   function advance() {
@@ -284,61 +399,51 @@
     const w = state.world;
     const s = w.stats;
     if (w.firstContact === null) {
-      return state.phase === "running" ? { key: "running", label: "飞行中" } : { key: "ready", label: "准备" };
+      return state.phase === "running" ? { key: "running", label: S.lblRunning } : { key: "ready", label: S.lblReady };
     }
-    if (s.pieces > 1) return { key: "fracture", label: "断裂" };
+    if (s.pieces > 1) return { key: "fracture", label: S.lblFracture };
     if (s.broken > 0) {
-      if (w.rebond && s.formed >= 0.5 * s.broken) return { key: "plastic", label: "塑性形变" };
-      return { key: "crack", label: "出现裂纹" };
+      if (w.rebond && s.formed >= 0.5 * s.broken) return { key: "plastic", label: S.lblPlastic };
+      return { key: "crack", label: S.lblCrack };
     }
     const touching = w.t - state.lastContact < 8;
-    return { key: "elastic", label: touching ? "弹性形变" : "弹性 · 已复原", touching };
+    return { key: "elastic", label: touching ? S.lblElastic : S.lblRecovered, touching };
   }
 
   function narrative(c) {
     const w = state.world;
     switch (c.key) {
-      case "ready": return "按「发射」或空格键开始。";
-      case "running": return "小球飞向薄板……";
-      case "elastic":
-        return c.touching
-          ? "接触中：板的上表面受压（蓝），下表面受拉（红）。粒子只偏离平衡位置一点点，邻居没有变。"
-          : "小球弹回，粒子回到原来的位置：弹性形变。";
-      case "plastic":
-        return "有的键被拉过 r_m 后断开，粒子随即和新邻居结合（绿）：板永久弯曲，但没有断开。";
-      case "crack":
-        return w.rebond
-          ? "键被拉过 r_m 后断开，出现裂纹。"
-          : "下表面受拉最厉害：那里的键先被拉过 r_m 而断开，裂纹从受拉的一侧向上扩展。";
-      case "fracture":
-        return w.rebond
-          ? "形变太大：金属先弯曲，随后在受拉最厉害的地方被拉断。"
-          : "键断了不会再接上：裂纹贯穿，玻璃板断开。";
+      case "ready": return S.nReady;
+      case "running": return S.nRunning;
+      case "elastic": return c.touching ? S.nElasticTouch : S.nElasticAfter;
+      case "plastic": return S.nPlastic;
+      case "crack": return w.rebond ? S.nCrackMetal : S.nCrackGlass;
+      case "fracture": return w.rebond ? S.nFractureMetal : S.nFractureGlass;
       default: return "";
     }
   }
 
   function verdict(c) {
     const w = state.world;
-    if (state.phase === "ready") return "选择材料和撞击速度，然后发射。";
+    if (state.phase === "ready") return S.vReady;
     const over = state.phase === "done" || state.fastForward;
-    if (w.firstContact === null || !over) return "碰撞进行中……";
+    if (w.firstContact === null || !over) return S.vRunning;
     const e = P.energies(w);
     const keep = e.ball / e.ke0;
     const lost = Math.max(0, 1 - keep);
     if (c.key === "elastic" && keep > 0.88) {
-      return `近似弹性碰撞：小球带回 ${pct(keep)} 的动能，板恢复原状。`;
+      return S.vElastic(pct(keep));
     }
     if (c.key === "plastic") {
-      return `非弹性碰撞：损失的 ${pct(lost)} 动能变成了板的内能（粒子振动加剧、分子势能增加），板永久弯曲。`;
+      return S.vPlastic(pct(lost));
     }
     if (c.key === "crack") {
-      return `非弹性碰撞：损失的 ${pct(lost)} 动能用来拉断键（分子势能增加）和使粒子振动（内能）。`;
+      return S.vCrack(pct(lost));
     }
     if (c.key === "fracture") {
-      return `非弹性碰撞：损失的 ${pct(lost)} 动能用来拉断键（分子势能增加）、使粒子振动，以及让断开的部分运动。`;
+      return S.vFracture(pct(lost));
     }
-    return `小球带回 ${pct(keep)} 的动能。`;
+    return S.vOther(pct(keep));
   }
 
   function updatePanel() {
@@ -349,14 +454,14 @@
     const e = P.energies(w);
     els.keMetric.textContent = state.phase === "ready" ? "100%" : pct(e.ball / e.ke0);
     els.brokenMetric.textContent = String(w.stats.broken);
-    els.formedMetric.textContent = w.rebond ? String(w.stats.formed) : "0（玻璃不会形成新键）";
+    els.formedMetric.textContent = w.rebond ? String(w.stats.formed) : S.glassNoNew;
     els.verdictMetric.textContent = verdict(c);
-    const tag = state.paused ? "（已暂停）"
-      : state.phase === "running" && state.fastForward ? "（小球飞离中 · 自动快进）"
-      : state.phase === "done" ? "（结束）" : "";
+    const tag = state.paused ? S.tPaused
+      : state.phase === "running" && state.fastForward ? S.tFast
+      : state.phase === "done" ? S.tDone : "";
     els.timeReadout.textContent = `t = ${w.t.toFixed(0)}${tag}`;
     const text = state.ballStopped
-      ? "小球把动能几乎全部交给了板，自己几乎停住了（模型中没有重力），演示到此结束。"
+      ? S.nStopped
       : narrative(c);
     const html = text.replace(/r_m/g, "r<sub>m</sub>");
     if (html !== state.lastNarrative) {
@@ -396,13 +501,13 @@
     ];
     lctx.save();
     for (const [xa, xb] of blocks) {
-      lctx.fillStyle = "#dfe5ed";
+      lctx.fillStyle = THEME.clampFill;
       lctx.fillRect(xa, y0, xb - xa, y1 - y0);
       lctx.save();
       lctx.beginPath();
       lctx.rect(xa, y0, xb - xa, y1 - y0);
       lctx.clip();
-      lctx.strokeStyle = "rgba(60, 70, 86, 0.22)";
+      lctx.strokeStyle = THEME.clampHatch;
       lctx.lineWidth = 1;
       for (let d = -200; d < 400; d += 9) {
         lctx.beginPath();
@@ -411,15 +516,15 @@
         lctx.stroke();
       }
       lctx.restore();
-      lctx.strokeStyle = "#9aa7b8";
+      lctx.strokeStyle = THEME.clampEdge;
       lctx.strokeRect(xa, y0, xb - xa, y1 - y0);
     }
-    lctx.fillStyle = COLORS.muted;
+    lctx.fillStyle = THEME.muted;
     lctx.font = "600 12px Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif";
     lctx.textAlign = "center";
     lctx.textBaseline = "bottom";
-    lctx.fillText("固定端", Math.max(28, (blocks[0][0] + blocks[0][1]) / 2), y0 - 6);
-    lctx.fillText("固定端", Math.min(sizes.lattice.w - 28, (blocks[1][0] + blocks[1][1]) / 2), y0 - 6);
+    lctx.fillText(S.clamp, Math.max(28, (blocks[0][0] + blocks[0][1]) / 2), y0 - 6);
+    lctx.fillText(S.clamp, Math.min(sizes.lattice.w - 28, (blocks[1][0] + blocks[1][1]) / 2), y0 - 6);
     lctx.restore();
   }
 
@@ -451,7 +556,7 @@
     const pad = 6, h = 20;
     let bx = x - tw / 2 - pad;
     bx = Math.max(4, Math.min(bx, sizes.lattice.w - tw - 2 * pad - 4));
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.fillStyle = THEME.tagBg;
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
@@ -470,7 +575,7 @@
     const w = state.world;
     const { w: W, h: Hh } = sizes.lattice;
     lctx.clearRect(0, 0, W, Hh);
-    lctx.fillStyle = "#f9fbfd";
+    lctx.fillStyle = THEME.canvas;
     lctx.fillRect(0, 0, W, Hh);
     const T = latticeTransform();
     const s = T.s;
@@ -482,7 +587,7 @@
     // broken original bonds (dashed)
     if (state.showBroken && w.stats.broken > 0) {
       lctx.save();
-      lctx.strokeStyle = COLORS.broken;
+      lctx.strokeStyle = THEME.broken;
       lctx.lineWidth = Math.max(1, s * 0.07);
       lctx.setLineDash([Math.max(2, s * 0.14), Math.max(2, s * 0.12)]);
       lctx.beginPath();
@@ -535,7 +640,7 @@
     lctx.lineWidth = 1;
     lctx.fill(body);
     lctx.stroke(body);
-    lctx.fillStyle = COLORS.clampAtom;
+    lctx.fillStyle = THEME.clampAtom;
     lctx.fill(fixedP);
 
     // most stretched bond
@@ -549,7 +654,7 @@
       lctx.arc(mx, my, Math.max(8, s * 0.75), 0, Math.PI * 2);
       lctx.stroke();
       const below = my + 30 < Hh - 12;
-      labelTag(lctx, `拉得最长的键：r = ${ms.r.toFixed(2)} r₀`, mx, below ? my + 28 : my - 28, col);
+      labelTag(lctx, S.longest(ms.r.toFixed(2)), mx, below ? my + 28 : my - 28, col);
     }
 
     // ball
@@ -573,8 +678,8 @@
       const len = (v / 0.3) * 7 * s;
       const ux = b.vx / v, uy = -b.vy / v;
       const sx = bx + ux * (br + 4), sy = by + uy * (br + 4);
-      drawArrow(lctx, sx, sy, sx + ux * len, sy + uy * len, "#b36b00", 3);
-      lctx.fillStyle = "#b36b00";
+      drawArrow(lctx, sx, sy, sx + ux * len, sy + uy * len, THEME.arrow, 3);
+      lctx.fillStyle = THEME.arrow;
       lctx.font = "700 13px Inter, 'PingFang SC', sans-serif";
       lctx.textAlign = "left";
       lctx.textBaseline = "middle";
@@ -591,7 +696,7 @@
     const { w: W, h: Hh } = sizes.force;
     const ctx = fctx;
     ctx.clearRect(0, 0, W, Hh);
-    ctx.fillStyle = "#f9fbfd";
+    ctx.fillStyle = THEME.canvas;
     ctx.fillRect(0, 0, W, Hh);
 
     const L = 54, R = 14, Tp = 16, B = 34;
@@ -607,7 +712,7 @@
     ctx.fillRect(X(POT.rc), Tp, X(FR.rMax) - X(POT.rc), Hh - Tp - B);
 
     // axes
-    ctx.strokeStyle = COLORS.axis;
+    ctx.strokeStyle = THEME.axis;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(L, Tp);
@@ -616,12 +721,27 @@
     ctx.lineTo(W - R, Y(0));
     ctx.stroke();
 
-    ctx.fillStyle = COLORS.muted;
+    ctx.fillStyle = THEME.muted;
+    ctx.textBaseline = "middle";
+    if (LANG === "zh") {
+      ctx.font = font(700, 12);
+      ctx.textAlign = "right";
+      ctx.fillText(S.repulsion, L - 8, Y(fTop * 0.55));
+      ctx.fillText(S.attraction, L - 8, Y(fBot * 0.55));
+    } else {
+      // longer English words: write them vertically along the axis
+      ctx.font = font(700, 11);
+      ctx.textAlign = "center";
+      for (const [text, fy] of [[S.repulsion, fTop * 0.5], [S.attraction, fBot * 0.55]]) {
+        ctx.save();
+        ctx.translate(L - 30, Y(fy));
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+      }
+    }
     ctx.font = font(700, 12);
     ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    ctx.fillText("斥力", L - 8, Y(fTop * 0.55));
-    ctx.fillText("引力", L - 8, Y(fBot * 0.55));
     ctx.fillText("0", L - 8, Y(0));
     ctx.textAlign = "right";
     ctx.textBaseline = "alphabetic";
@@ -640,11 +760,13 @@
       ctx.fillStyle = color;
       ctx.font = font(700, 12);
       ctx.textBaseline = "top";
-      drawRich(ctx, label, X(r), Hh - B + 6, "center");
+      const half = ctx.measureText(label.replace("_", "")).width / 2;
+      const cx = Math.max(L + half, Math.min(W - 2 - half, X(r)));
+      drawRich(ctx, label, cx, Hh - B + 6, "center");
     };
-    vline(1, "r₀", "#56677d", [3, 3]);
+    vline(1, "r₀", THEME.marker, [3, 3]);
     vline(POT.rm, "r_m", COLORS.danger, [4, 3]);
-    vline(POT.rc, w.rebond ? "作用消失" : "键断开", "#9b2c2c", [2, 3]);
+    vline(POT.rc, w.rebond ? S.rangeEnds : S.bondBreaks, THEME.breakText, [2, 3]);
 
     // F_max level
     ctx.save();
@@ -673,7 +795,7 @@
     ctx.beginPath();
     ctx.rect(L, Tp, W - L - R, Hh - Tp - B);
     ctx.clip();
-    ctx.strokeStyle = COLORS.ink;
+    ctx.strokeStyle = THEME.ink;
     ctx.lineWidth = 2.2;
     ctx.beginPath();
     for (let px = L; px <= W - R; px += 1) {
@@ -688,13 +810,12 @@
     ctx.font = font(700, 12);
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(47,111,214,0.95)";
-    ctx.fillText("r₀ 附近近似直线：F ∝ Δr（胡克定律）", X(1.03), Y(fTop * 0.62));
-    ctx.fillStyle = "#c26a0a";
-    drawRich(ctx, "过了 r_m：越拉，引力越小", X(POT.rm) + 6, Y(fTop * 0.28), "left");
-    ctx.fillText("拉不回来", X(POT.rm) + 6, Y(fTop * 0.28) + 16);
+    ctx.fillStyle = THEME.blueText;
+    ctx.fillText(S.hooke, X(1.03), Y(fTop * 0.62));
+    ctx.fillStyle = THEME.orangeText;
+    S.pastRm.forEach((line, i) => drawRich(ctx, line, X(POT.rm) + 6, Y(fTop * 0.3) + i * 15, "left"));
     ctx.textBaseline = "bottom";
-    ctx.fillText("最大引力", L + 6, Y(-POT.fmax) - 3);
+    ctx.fillText(S.fmax, L + 6, Y(-POT.fmax) - 3);
 
     // dots for every bond
     const Lb = w.bondList;
@@ -749,11 +870,11 @@
     const { w: W, h: Hh } = sizes.energy;
     const ctx = ectx;
     ctx.clearRect(0, 0, W, Hh);
-    ctx.fillStyle = "#f9fbfd";
+    ctx.fillStyle = THEME.canvas;
     ctx.fillRect(0, 0, W, Hh);
     const font = (wgt, px) => `${wgt} ${px}px Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif`;
 
-    const L = 44, R = 14, Tp = 44, B = 30;
+    const L = 44, R = 14, Tp = 48, B = 30;
     const hist = state.history;
     const tEnd = hist.length ? hist[hist.length - 1].t : 0;
     const tSpan = Math.max(300, tEnd * 1.04);
@@ -761,9 +882,9 @@
     const Y = (v) => Tp + (1.1 - v) / 1.1 * (Hh - Tp - B);
 
     // grid
-    ctx.strokeStyle = COLORS.grid;
+    ctx.strokeStyle = THEME.grid;
     ctx.lineWidth = 1;
-    ctx.fillStyle = COLORS.muted;
+    ctx.fillStyle = THEME.muted;
     ctx.font = font(600, 11);
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
@@ -776,12 +897,12 @@
     }
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
-    ctx.fillText("时间 →", W - R, Hh - B + 8);
+    ctx.fillText(S.time, W - R, Hh - B + 8);
 
     const series = [
-      { key: "b", label: "小球动能", color: COLORS.ball },
-      { key: "p", label: "分子势能", color: COLORS.pe },
-      { key: "k", label: "粒子动能（振动）", color: COLORS.heat }
+      { key: "b", label: S.eBall, color: COLORS.ball },
+      { key: "p", label: S.ePE, color: COLORS.pe },
+      { key: "k", label: S.eKE, color: COLORS.heat }
     ];
 
     if (hist.length > 1) {
@@ -804,28 +925,28 @@
       const w = state.world;
       if (w.firstContact !== null) {
         ctx.save();
-        ctx.strokeStyle = "#56677d";
+        ctx.strokeStyle = THEME.marker;
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
         ctx.moveTo(X(w.firstContact), Tp - 4);
         ctx.lineTo(X(w.firstContact), Hh - B);
         ctx.stroke();
         ctx.restore();
-        ctx.fillStyle = "#56677d";
+        ctx.fillStyle = THEME.marker;
         ctx.font = font(700, 11);
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
-        ctx.fillText("接触", X(w.firstContact) + 4, Hh - B + 8);
+        ctx.fillText(S.contact, X(w.firstContact) + 4, Hh - B + 8);
       }
     } else {
-      ctx.fillStyle = COLORS.muted;
+      ctx.fillStyle = THEME.muted;
       ctx.font = font(600, 13);
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("发射后显示能量怎样转移", (L + W - R) / 2, Y(0.5));
+      ctx.fillText(S.eEmpty, (L + W - R) / 2, Y(0.5));
     }
 
-    ctx.strokeStyle = COLORS.axis;
+    ctx.strokeStyle = THEME.axis;
     ctx.beginPath();
     ctx.moveTo(L, Tp - 6);
     ctx.lineTo(L, Hh - B);
@@ -838,14 +959,14 @@
     ctx.textBaseline = "middle";
     ctx.textAlign = "left";
     let lx = L;
-    const ly = 18;
+    let ly = 14;
     for (const sr of series) {
       const text = `${sr.label} ${pct(last[sr.key])}`;
       const tw = ctx.measureText(text).width;
-      if (lx + 16 + tw > W - R && lx > L) break;
+      if (lx + 16 + tw > W - R && lx > L) { lx = L; ly += 17; }   // wrap to a second line
       ctx.fillStyle = sr.color;
       ctx.fillRect(lx, ly - 6, 12, 12);
-      ctx.fillStyle = COLORS.ink;
+      ctx.fillStyle = THEME.ink;
       ctx.fillText(text, lx + 16, ly);
       lx += 16 + tw + 16;
     }
@@ -907,6 +1028,12 @@
   window.addEventListener("resize", resizeAll);
 
   // ---------- start ----------
+  readTheme();
+  if (window.matchMedia) {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", readTheme);
+    else if (mq.addListener) mq.addListener(readTheme);
+  }
   resizeAll();
   setTimeIndex(2);
   setSpeed(state.speed);
