@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>滑块与可动曲面 · Physics Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">Mechanics · Momentum & Energy</p><h1>滑块与可动曲面</h1><p class="lede">滑块从左向右进入有限曲面。改变质量和初速度，观察从上滑、飞出到离开入口、落到地面的完整运动。</p></div>
+    <a class="back-link" href="../../index.html">返回 Lab</a>
+  </header>
+  <main class="app">
+    <section class="panel controls-panel" aria-label="实验控制">
+      <div class="block-heading"><h2>初始条件</h2><span class="pill">无摩擦</span></div>
+      <div class="parameter"><label for="massSmall">滑块质量 <i>m</i></label><div class="number-wrap"><input id="massSmall" type="number" min="0.2" max="10" step="0.1" value="1"><span>kg</span></div><input id="massSmallRange" aria-label="滑块质量滑杆" type="range" min="0.2" max="10" step="0.1" value="1"></div>
+      <div class="parameter"><label for="massRamp">底座质量 <i>M</i></label><div class="number-wrap"><input id="massRamp" type="number" min="0.2" max="20" step="0.1" value="3"><span>kg</span></div><input id="massRampRange" aria-label="底座质量滑杆" type="range" min="0.2" max="20" step="0.1" value="3"></div>
+      <div class="parameter"><label for="speed">初速度 <i>v</i><sub>0</sub> →</label><div class="number-wrap"><input id="speed" type="number" min="0.5" max="10" step="0.1" value="5"><span>m/s</span></div><input id="speedRange" aria-label="初速度滑杆" type="range" min="0.5" max="10" step="0.1" value="5"></div>
+      <p class="hint">调整参数会回到起点，底座初速度为 0。</p>
+      <div class="divider"></div>
+      <button id="play" class="primary-button">播放</button>
+      <label class="playback">播放速度<select id="rate"><option value="0.25">0.25 ×</option><option value="0.5" selected>0.5 ×</option><option value="1">1 ×</option><option value="2">2 ×</option></select></label>
+      <label class="check-row"><input type="checkbox" id="vectors" checked>显示对地速度箭头</label>
+      <label class="check-row"><input type="checkbox" id="trail" checked>显示滑块对地轨迹</label>
+      <p class="hint">空格：播放 / 暂停。播放结束后，点击同一按钮可重新播放。</p>
+      <div class="prediction"><span>预测最大上升高度</span><strong id="heightPrediction">—</strong><span>h<sub>max</sub> = Mv<sub>0</sub>² / [2g(m + M)]</span><span id="flightPrediction">—</span></div>
+    </section>
+    <section class="panel stage-panel">
+      <div class="stage-header"><div><h2>运动观察</h2><p>地面参考系 · 向右为正 · 圆弧半径 1.50 m · 入口离地 0.40 m</p></div><span id="phase" class="pill" role="status">准备</span></div>
+      <canvas id="motion" aria-label="滑块向右进入有限圆弧曲面，速度足够大时从顶端飞出，落回曲面后从入口离开，最终落到地面；实时数值见下方">浏览器需要支持 Canvas 才能显示动画。</canvas>
+      <div class="timeline"><span id="timeLabel">0.00 s</span><input id="timeline" type="range" min="0" max="1000" value="0" step="1" aria-label="实验时间轴"><span id="durationLabel">—</span></div>
+      <p class="narrative" id="narrative">点击「播放」，或拖动时间轴观察任意时刻。</p>
+      <div class="readouts"><div><span>滑块水平速度 v<sub>x</sub></span><strong id="vx">—</strong></div><div><span>底座速度 V</span><strong id="V">—</strong></div><div><span>离地高度 y</span><strong id="height">—</strong></div><div><span>底座位移 X</span><strong id="displacement">—</strong></div></div>
+    </section>
+    <section class="panel graphs-panel">
+      <div class="graph-card"><div class="stage-header"><div><h2>水平速度</h2><p><span class="key orange">滑块 v<sub>x</sub></span><span class="key blue">底座 V</span><span class="key muted">最高点</span></p></div><span class="unit">m/s</span></div><canvas id="velocity" aria-label="滑块与底座的水平速度随时间变化"></canvas></div>
+      <div class="graph-card"><div class="stage-header"><div><h2>能量去向</h2><p>系统总机械能 <strong id="totalEnergy">—</strong></p></div></div><div class="energy-content"><div class="energy-bar" aria-label="系统能量分配"><span id="kmBar"></span><span id="kMBar"></span><span id="peBar"></span></div><div class="energy-row"><span class="key orange">滑块动能</span><strong id="km">—</strong></div><div class="energy-row"><span class="key blue">底座动能</span><strong id="kM">—</strong></div><div class="energy-row"><span class="key green">重力势能</span><strong id="pe">—</strong></div><p class="conservation" id="momentum">—</p></div></div>
+    </section>
+    <section class="panel explanation-panel"><h2>观察中的物理</h2><div class="concept-grid">
+      <div><h3>① 水平方向动量守恒</h3><p class="formula">mv<sub>x</sub> + MV = mv<sub>0</sub></p><p>地面光滑，系统没有水平外力。滑块上爬时，把一部分水平动量传给底座。</p></div>
+      <div><h3>② 最高点：相对速度为零</h3><p class="formula">v<sub>x</sub> = V = mv<sub>0</sub> / (m + M)</p><p>最高点可能在曲面上，也可能在空中。两种情况下滑块相对底座瞬时静止，对地仍向右运动；此时仍有水平动能。</p></div>
+      <div><h3>③ 离开入口后</h3><p class="formula">v<sub>x</sub> = (m − M)v<sub>0</sub> / (m + M)</p><p>离开入口时竖直速度为零，随后只受重力作用，做平抛运动；若水平速度恰为零，则竖直下落。离地高度降至 0 时结束。</p></div>
+    </div><div class="flight-note"><strong>什么时候会飞出？</strong><p>圆弧半径 R = 1.50 m，弧长 πR/2 ≈ 2.36 m，尺寸固定。只有 v<sub>0</sub> &gt; √[2gR(m + M)/M] 才会从顶端飞出；等于临界值时，滑块恰好到达顶端后返回。顶端切线竖直，所以飞出时滑块与底座的水平速度相同，滑块落下后会重新进入曲面。</p></div><p class="model-note">模型约定：滑块视为质点，不考虑转动；地面与曲面均光滑，g = 9.8 m/s²。曲面为固定的四分之一圆弧，入口切线水平、出口切线竖直。飞行阶段只受重力，底座匀速移动；滑块落回顶端时与曲面相切，平滑接续下滑，不引入碰撞能量损失。入口离地 0.40 m，滑块离开入口后继续运动，直到首次接触地面；结束帧显示触地瞬间，不模拟碰撞与反弹。重力势能以地面为零，y 是离地高度，预测上升高度 h 从入口算起。画面按每次实验的完整运动范围等比例缩放，物理尺寸不变。</p></section>
+  </main>
+  <script src="js/physics.js"></script><script src="js/main.js"></script>
+</body>
+</html>
