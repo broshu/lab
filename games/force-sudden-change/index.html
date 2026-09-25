@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>力能否突变 · 弹力与摩擦力</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Force · Sudden Change</p>
+      <h1>力能否突变：硬物体、弹簧与摩擦力</h1>
+      <p class="lede">拖动小球、测力计或原子，看形变量和力怎样随之变化。力能不能突变，要看产生这个力的形变能不能在一瞬间改变。</p>
+    </div>
+    <a class="back-link" href="../../index.html">返回 Lab</a>
+  </header>
+
+  <main class="app">
+    <section class="panel controls-panel">
+      <div class="mode-tabs four" role="group" aria-label="演示">
+        <button class="mode-button active" type="button" data-mode="rigid">硬物体的弹力<small>钢丝悬挂小球</small></button>
+        <button class="mode-button" type="button" data-mode="spring">弹簧的弹力<small>弹簧悬挂小球</small></button>
+        <button class="mode-button" type="button" data-mode="friction">摩擦力<small>测力计拉物块</small></button>
+        <button class="mode-button" type="button" data-mode="micro">微观解释<small>原子与接触点</small></button>
+      </div>
+
+      <div class="sub-tabs" id="microTabs" role="group" aria-label="微观视图" hidden>
+        <button class="sub-button active" type="button" data-view="chain">原子链<small>硬物体</small></button>
+        <button class="sub-button" type="button" data-view="coil">螺旋钢丝<small>弹簧</small></button>
+        <button class="sub-button" type="button" data-view="contacts">接触点<small>摩擦</small></button>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>操作</h2>
+          <span class="status-pill neutral" id="statusPill">静止</span>
+        </div>
+        <p class="hint-text strong" id="dragHint">按住小球向下拉，然后松手。</p>
+        <div class="button-row">
+          <button class="primary-button" id="actionA" type="button">拉到 40 N 后松手</button>
+          <button class="secondary-button" id="actionB" type="button">松手</button>
+        </div>
+        <button class="secondary-button" id="resetButton" type="button">重置</button>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>观察</h2>
+          <span class="status-pill neutral" id="speedPill">正常速度</span>
+        </div>
+        <label class="slider-row">
+          <span>播放速度</span>
+          <input id="speedInput" type="range" min="0" max="3" step="1" value="0">
+          <strong id="speedValue">×1</strong>
+        </label>
+        <button class="secondary-button" id="pauseButton" type="button">暂停</button>
+        <label class="check-row" id="autoSlowRow"><input id="autoSlow" type="checkbox" checked><span id="autoSlowText">滑动瞬间自动慢放</span></label>
+        <p class="hint-text">快捷键：<kbd>1</kbd>–<kbd>4</kbd> 切换演示，<kbd>空格</kbd> 暂停，<kbd>R</kbd> 重置，<kbd>S</kbd> 切换播放速度</p>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><span id="m1Label">形变量</span><strong id="m1Value">—</strong></div>
+        <div class="metric"><span id="m2Label">弹力</span><strong id="m2Value">—</strong></div>
+        <div class="metric"><span id="m3Label">手的拉力</span><strong id="m3Value">—</strong></div>
+        <div class="metric"><span id="m4Label">加速度</span><strong id="m4Value">—</strong></div>
+        <div class="metric verdict"><span>刚才发生了什么</span><strong id="verdictMetric">拖动或点按钮开始。</strong></div>
+      </div>
+    </section>
+
+    <section class="stage-panel">
+      <div class="stage-header">
+        <div>
+          <h2 id="stageTitle">硬物体的弹力 · 钢丝悬挂小球</h2>
+          <p id="stageSubtitle">钢丝的形变极小，图中放大 2000 倍显示。</p>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <canvas id="stageCanvas" aria-label="演示画面，可拖动"></canvas>
+      <div class="readout-strip">
+        <span id="timeReadout">t = 0</span>
+        <span id="narrative">按住小球向下拉。</span>
+      </div>
+    </section>
+
+    <section class="panel graphs-panel">
+      <div class="graph-card">
+        <div class="stage-header">
+          <div>
+            <h2 id="graphTitle">力随时间的变化</h2>
+            <p id="graphNote">竖直的线段表示力在极短时间内完成了变化。</p>
+          </div>
+          <div class="legend" id="graphLegend"></div>
+        </div>
+        <canvas id="graphCanvas" aria-label="力随时间变化的图像"></canvas>
+      </div>
+    </section>
+
+    <section class="panel explanation-panel">
+      <h2>要点</h2>
+      <div class="concept-grid">
+        <div>
+          <h3><span class="tag rigid">1</span>硬物体：弹力可以突变</h3>
+          <p>绳、杆、钢丝、桌面的弹力同样满足 F = kx，只是 k 很大：1 m 长、直径 1 mm 的钢丝 k ≈ 1.6×10⁵ N/m。拉力改变 30 N，钢丝只需伸缩约 0.2 mm，小球移动这么一点点只要几毫秒。和所研究的过程（零点几秒）相比可以忽略，所以说弹力“可以突变”。</p>
+        </div>
+        <div>
+          <h3><span class="tag spring">2</span>弹簧：弹力不能突变</h3>
+          <p>弹簧的 k 小（这里 50 N/m），弹力改变 30 N 要伸缩 60 cm。弹簧两端连着有质量的物体，物体移动 60 cm 需要时间。所以别的力突变的瞬间，弹簧的形变来不及改变，弹力保持不变，物体的加速度却会突变。若弹簧本身被剪断，或一端没有连着物体，弹力会立即消失。</p>
+        </div>
+        <div>
+          <h3><span class="tag friction">3</span>摩擦力：三种突变</h3>
+          <p>静摩擦力来自接触点极小的弹性形变，和硬物体一样，能随拉力的变化突变（大小、方向都能变）。拉力超过最大静摩擦力后，接触点成片断开，物体滑动，摩擦力突变为较小的滑动摩擦力（静→动）；物体停下时又突变为静摩擦力（动→静）。</p>
+        </div>
+      </div>
+      <div class="concept-grid two">
+        <div>
+          <h3>微观上看</h3>
+          <p>弹力来自原子间距的微小改变。硬物体里原子间距只要变化千分之几，力就很大，而且这种变化以声速（钢中约 5×10³ m/s）传开，1 m 长的钢丝约 0.2 ms。弹簧钢丝里原子间的形变同样很小，是螺旋的形状把它放大成了几十厘米的伸长。摩擦面只在少数凸起处真正接触；滑动时接触点边断开边重新结合，形变参差不齐，所以滑动摩擦力比最大静摩擦力小。</p>
+        </div>
+        <div>
+          <h3>“突变”的含义与模型说明</h3>
+          <p>“突变”是指力的变化时间远短于所研究过程的时间，并不是真的不用时间：把播放速度调到 ×1/1000，硬物体的弹力也是连续变化的。取 g = 10 m/s²，小球质量 1 kg；最大静摩擦力 5 N、滑动摩擦力 3.5 N（10∶7）。原子链和接触点是一维示意模型，数量级按铁和常见表面估算。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/physics.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
