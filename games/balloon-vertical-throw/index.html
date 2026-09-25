@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>气球落物 · 竖直上抛 · Physics Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Kinematics · 竖直上抛运动</p>
+      <h1>气球下的重物</h1>
+      <p class="lede">气球下悬挂一重物，以 <i>v</i><sub>0</sub> = <b id="ledeV0">10</b> m/s 匀速上升，到达离地 <i>h</i> = <b id="ledeH">175</b> m 处时绳子突然断裂。重物经多长时间落地？落地速度多大？（不计空气阻力，<i>g</i> 取 <b id="ledeG">10</b> m/s²）</p>
+    </div>
+    <a class="back-link" href="../../index.html">返回 Lab</a>
+  </header>
+
+  <main class="app">
+    <!-- 左栏：参数 + 预测 -->
+    <section class="panel controls-panel" aria-label="实验控制">
+      <div class="block-heading"><h2>初始条件</h2><button id="resetExample" class="pill pill-button" type="button">恢复例题数据</button></div>
+      <div class="parameter"><label for="v0">上升速度 <i>v</i><sub>0</sub></label><div class="number-wrap"><input id="v0" type="number" min="0" max="30" step="1" value="10"><span>m/s</span></div><input id="v0Range" aria-label="上升速度滑杆" type="range" min="0" max="30" step="1" value="10"></div>
+      <div class="parameter"><label for="h">断绳高度 <i>h</i></label><div class="number-wrap"><input id="h" type="number" min="10" max="300" step="5" value="175"><span>m</span></div><input id="hRange" aria-label="断绳高度滑杆" type="range" min="10" max="300" step="5" value="175"></div>
+      <div class="parameter"><label for="g">重力加速度 <i>g</i></label><div class="number-wrap"><select id="g"><option value="10" selected>10</option><option value="9.8">9.8</option></select><span>m/s²</span></div></div>
+      <p class="hint">修改参数会回到绳断瞬间，预测与解题步骤按新数据重新计算。</p>
+
+      <div class="divider"></div>
+
+      <div class="quiz" id="quiz">
+        <div class="block-heading"><h2>先预测，再观察</h2><span class="pill" id="quizScore">0 / 3</span></div>
+        <fieldset class="question">
+          <legend>① 绳断瞬间，重物的速度是？</legend>
+          <label class="choice"><input type="radio" name="q1" value="zero">0，立即开始下落</label>
+          <label class="choice"><input type="radio" name="q1" value="up">与气球相同，竖直向上</label>
+          <label class="choice"><input type="radio" name="q1" value="down">竖直向下</label>
+          <p class="feedback" id="fb1"></p>
+        </fieldset>
+        <div class="question">
+          <label for="ansT">② 重物经多长时间落地？</label>
+          <div class="number-wrap answer"><input id="ansT" type="number" step="0.01" placeholder="?"><span>s</span></div>
+          <p class="feedback" id="fb2"></p>
+        </div>
+        <div class="question">
+          <label for="ansV">③ 落地速度大小是？</label>
+          <div class="number-wrap answer"><input id="ansV" type="number" step="0.1" placeholder="?"><span>m/s</span></div>
+          <p class="feedback" id="fb3"></p>
+        </div>
+        <button id="checkAnswers" class="secondary-button" type="button">核对答案</button>
+      </div>
+    </section>
+
+    <!-- 中栏：动画 -->
+    <section class="panel stage-panel">
+      <div class="stage-header">
+        <div><h2>运动观察</h2><p>地面参考系 · 取竖直向上为正 · 灰点为每隔 1 s 的频闪位置</p></div>
+        <span id="phase" class="pill" role="status">准备</span>
+      </div>
+      <canvas id="motion" aria-label="气球带着重物上升，绳断后重物先减速上升到最高点，再自由下落到地面；实时数值见下方">浏览器需要支持 Canvas 才能显示动画。</canvas>
+      <div class="transport">
+        <button id="play" class="primary-button" type="button">▶ 剪断绳子</button>
+        <label class="playback">速度<select id="rate"><option value="0.5">0.5 ×</option><option value="1" selected>1 ×</option><option value="2">2 ×</option></select></label>
+        <label class="check-row"><input type="checkbox" id="strobe" checked>频闪</label>
+        <label class="check-row"><input type="checkbox" id="arrow" checked>速度箭头</label>
+      </div>
+      <div class="timeline"><span id="timeLabel">0.00 s</span><input id="timeline" type="range" min="0" max="1000" value="0" step="1" aria-label="时间轴"><span id="durationLabel">—</span></div>
+      <p class="narrative" id="narrative">点击「剪断绳子」，或拖动时间轴观察任意时刻。</p>
+      <div class="readouts">
+        <div><span>时间 <i>t</i></span><strong id="rT">—</strong></div>
+        <div><span>速度 <i>v</i>（向上为正）</span><strong id="rV">—</strong></div>
+        <div><span>离地高度 <i>y</i></span><strong id="rY">—</strong></div>
+        <div><span>相对断绳点位移 <i>x</i></span><strong id="rS">—</strong></div>
+      </div>
+    </section>
+
+    <!-- 右栏：图像 -->
+    <section class="panel graphs-panel">
+      <div class="graph-card">
+        <div class="stage-header"><div><h2><i>v</i>–<i>t</i> 图像</h2><p><span class="key orange">上升位移（面积为正）</span><span class="key blue">下降位移（面积为负）</span></p></div><span class="unit">m/s</span></div>
+        <canvas id="vt" aria-label="速度随时间变化的直线，斜率为 −g"></canvas>
+      </div>
+      <div class="graph-card">
+        <div class="stage-header"><div><h2><i>y</i>–<i>t</i> 图像</h2><p>离地高度随时间变化（抛物线）</p></div><span class="unit">m</span></div>
+        <canvas id="yt" aria-label="离地高度随时间变化的抛物线"></canvas>
+      </div>
+    </section>
+
+    <!-- 解题过程 -->
+    <section class="panel solution-panel">
+      <div class="stage-header">
+        <div><h2>解题过程</h2><p>逐步展开；每一步会把动画跳到对应时刻。</p></div>
+        <div class="tabs" role="tablist">
+          <button role="tab" class="tab active" data-method="segment" aria-selected="true">分段法</button>
+          <button role="tab" class="tab" data-method="whole" aria-selected="false">全程法</button>
+        </div>
+      </div>
+      <ol class="steps" id="steps"></ol>
+      <div class="solution-actions">
+        <button id="nextStep" class="primary-button" type="button">下一步</button>
+        <button id="allSteps" class="secondary-button" type="button">全部显示</button>
+        <button id="hideSteps" class="secondary-button" type="button">收起</button>
+      </div>
+      <p class="model-note">模型：重物视为质点，只受重力。绳断后气球的运动不影响重物，图中气球按原速度继续上升仅作参照。</p>
+    </section>
+  </main>
+
+  <script src="js/physics.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
