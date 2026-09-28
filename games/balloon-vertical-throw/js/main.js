@@ -5,9 +5,8 @@
   const EXAMPLE = { v0: 10, h: 175, g: 10 };
 
   // t < 0：绳断前随气球上升；t = 0：绳断；t > 0：竖直上抛
-  const state = { ...EXAMPLE, sol: null, t: 0, started: false, playing: false, ff: false, last: 0, method: 'segment', shown: { segment: 0, whole: 0 } };
-  const FF_END = 1.5;          // 绳断前最后 1.5 s 以正常速度播放，之前快进
-  const FF_REAL = 3;           // 快进段约用 3 s 真实时间
+  const state = { ...EXAMPLE, sol: null, t: 0, started: false, playing: false, last: 0, method: 'segment', shown: { segment: 0, whole: 0 } };
+  const BULLET_LEAD = 0.35;    // 子弹在绳断前 0.35 s 进入放大区
 
   /* ---------- 数字格式 ---------- */
   const N = (x, d = 2) => {
@@ -71,12 +70,8 @@
     const s = state.sol, rate = +$('rate').value;
     const dt = Math.min((now - state.last) / 1000, 0.05);
     state.last = now;
-    // 绳断前较远的一段快进，临近绳断恢复正常速度
-    const ffSpeed = (s.t0 - FF_END) / FF_REAL;
-    state.ff = state.t < -FF_END && ffSpeed > rate;
-    let next = state.t + dt * (state.ff ? ffSpeed : rate);
-    if (state.ff && next > -FF_END) next = -FF_END;
-    if (next >= s.T) { next = s.T; state.playing = false; state.ff = false; }
+    let next = state.t + dt * rate;          // 全程同一播放速度
+    if (next >= s.T) { next = s.T; state.playing = false; }
     state.t = next;
     render();
     if (state.playing) requestAnimationFrame(tick);
@@ -139,7 +134,7 @@
     const cy = attachY - rope - ry;
     ctx.strokeStyle = '#6d5a44'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(x, cy + ry);
-    if (intact) ctx.lineTo(x, weightTopY); else ctx.lineTo(x + 3 * size, cy + ry + rope * 0.45);
+    if (intact) ctx.lineTo(x, weightTopY); else ctx.lineTo(x + 3 * size, cy + ry + rope * 0.5);
     ctx.stroke();
     const grad = ctx.createRadialGradient(x - 7 * size, cy - 9 * size, 2, x, cy, 28 * size);
     grad.addColorStop(0, '#ff9d8f'); grad.addColorStop(1, COLORS.balloon);
@@ -147,14 +142,37 @@
     ctx.fillStyle = '#b8372d'; ctx.beginPath(); ctx.moveTo(x - 4 * size, cy + ry + 4 * size); ctx.lineTo(x + 4 * size, cy + ry + 4 * size); ctx.lineTo(x, cy + ry - 2 * size); ctx.fill();
     return cy;
   }
+  const W_R = 9;               // 重物（小球）半径，像素
   function drawWeight(ctx, x, cyW, size, intact) {
-    const bw = 22 * size, bh = 16 * size;
-    if (!intact) {
+    const r = W_R * size;
+    if (!intact) {             // 断口以下的一截绳
       ctx.strokeStyle = '#6d5a44'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(x, cyW - bh / 2); ctx.lineTo(x - 2, cyW - bh / 2 - 9 * size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, cyW - r); ctx.lineTo(x - 3 * size, cyW - r - 15 * size); ctx.stroke();
     }
-    ctx.fillStyle = '#34414f'; roundRect(ctx, x - bw / 2, cyW - bh / 2, bw, bh, 3 * size); ctx.fill();
-    ctx.fillStyle = '#ffffff30'; roundRect(ctx, x - bw / 2 + 3, cyW - bh / 2 + 3 * size, bw - 6, 4 * size, 2); ctx.fill();
+    const grad = ctx.createRadialGradient(x - r * 0.35, cyW - r * 0.35, 1, x, cyW, r);
+    grad.addColorStop(0, '#7a8ea3'); grad.addColorStop(1, '#253447');
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, cyW, r, 0, Math.PI * 2); ctx.fill();
+  }
+  // 子弹：水平飞行，t = 0 时恰好在绳的中点打断绳子
+  function drawBullet(ctx, x, y) {
+    ctx.strokeStyle = '#b08d3c66'; ctx.lineWidth = 1.5;
+    for (const dy of [-3, 0, 3]) { ctx.beginPath(); ctx.moveTo(x - 60 + Math.abs(dy) * 4, y + dy); ctx.lineTo(x - 12, y + dy); ctx.stroke(); }
+    const grad = ctx.createLinearGradient(0, y - 4, 0, y + 4);
+    grad.addColorStop(0, '#f3d98a'); grad.addColorStop(0.5, '#c9a044'); grad.addColorStop(1, '#8c6a22');
+    ctx.fillStyle = grad; ctx.beginPath();
+    ctx.moveTo(x - 10, y - 3.5); ctx.lineTo(x + 2, y - 3.5); ctx.quadraticCurveTo(x + 9, y - 3, x + 11, y);
+    ctx.quadraticCurveTo(x + 9, y + 3, x + 2, y + 3.5); ctx.lineTo(x - 10, y + 3.5); ctx.closePath(); ctx.fill();
+  }
+  function drawSnap(ctx, x, y, t) {        // 断绳瞬间的火花（持续 0.3 s）
+    const f = t / 0.3, R = 8 + 22 * f;
+    ctx.globalAlpha = 1 - f; ctx.strokeStyle = '#f0a020'; ctx.lineWidth = 2;
+    for (let i = 0; i < 10; i++) {
+      const a = i * Math.PI / 5 + 0.3;
+      ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * R * 0.4, y + Math.sin(a) * R * 0.4); ctx.lineTo(x + Math.cos(a) * R, y + Math.sin(a) * R); ctx.stroke();
+    }
+    ctx.fillStyle = '#c8453b'; ctx.font = `bold 15px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('啪！', x - R - 4, y - 4);
+    ctx.globalAlpha = 1;
   }
 
   /* ---------- 主动画：左侧全景 + 右侧局部放大 ---------- */
@@ -209,9 +227,9 @@
         if (state.t > s.tUp) { ctx.strokeStyle = '#2576d6aa'; ctx.beginPath(); ctx.moveTo(cx + 3, Y(s.peak)); ctx.lineTo(cx + 3, Y(p.y)); ctx.stroke(); }
       }
     }
-    const sp = 0.55, wbh = 16 * sp;
+    const sp = 0.55, wbh = 2 * W_R * sp;
     const wy = Y(p.y) - wbh / 2;
-    const attach = cut ? Y(s.h + s.v0 * state.t) - wbh / 2 - 8 * sp : wy - wbh / 2;
+    const attach = (cut ? Y(s.h + s.v0 * state.t) : Y(p.y)) - wbh;
     ctx.globalAlpha = cut ? 0.55 : 1;
     drawBalloon(ctx, cx, attach, sp, intact, wy - wbh / 2);
     ctx.globalAlpha = 1;
@@ -269,10 +287,22 @@
     }
 
     // 气球与重物（放大）
-    const bh = 16, zwy = Z(p.y) - bh / 2;
-    const zAttach = cut ? Z(s.h + s.v0 * state.t) - bh / 2 - 8 : zwy - bh / 2;
+    const bh = 2 * W_R, zwy = Z(p.y) - bh / 2;
+    const zAttach = (cut ? Z(s.h + s.v0 * state.t) : Z(p.y)) - bh;
     const balloonCy = drawBalloon(ctx, zcx, zAttach, 1, intact, zwy - bh / 2);
     drawWeight(ctx, zcx, zwy, 1, intact);
+
+    // 子弹：沿固定高度水平飞行（地面参考系），t = 0 时到达绳的中点
+    const cutY = Z(s.h) - bh - 15, vb = (zcx - zl) / BULLET_LEAD;
+    const bxNow = zcx + vb * state.t;
+    if ((state.started || state.t > tMin()) && state.t > -BULLET_LEAD - 0.1 && bxNow < zx + zw + 80) {
+      drawBullet(ctx, bxNow, cutY);
+      if (state.t < 0) {
+        ctx.fillStyle = '#8c6a22'; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText('子弹', bxNow - 8, cutY - 8);
+      }
+    }
+    if (cut && state.t < 0.3) drawSnap(ctx, zcx, cutY, state.t);
 
     // 速度箭头：气球（左）与重物（右），同一比例
     if ($('arrow').checked) {
@@ -291,9 +321,9 @@
         ctx.fillText(`${narrow ? '' : '重物 '}${N(Math.abs(p.v), 1)} m/s ${p.v > 0 ? '↑' : '↓'}`, wx + 8, zwy - L / 2);
       }
     }
-    if (cut && p.phase !== 'landed' && zwy > zTop && zwy < zBot) {
-      ctx.fillStyle = COLORS.navy; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      ctx.fillText('a = g ↓', zcx - 20, zwy + 22);
+    if (cut && p.phase !== 'landed') {
+      ctx.fillStyle = COLORS.navy; ctx.font = `12px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(narrow ? '绳断后只受重力 a = g ↓' : '绳断后重物只受重力：a = g，竖直向下', zl + 8, zTop + 24);
     }
     // 提示：物体不在放大区内
     const note = (text, y) => {
@@ -441,16 +471,16 @@
     const nearPeak = s.v0 > 0 && Math.abs(state.t - s.tUp) < 0.06;
     let phase, cls = '', text;
     if (state.t < 0) {
-      phase = state.ff && state.playing ? '上升中 · 快进' : '随气球上升';
-      text = state.t > -FF_END
-        ? `即将到达 ${N(s.h)} m，绳子马上断裂。注意：此刻重物和气球一起以 ${N(s.v0)} m/s 向上运动。`
+      phase = state.t > -BULLET_LEAD - 0.1 ? '子弹飞来' : '随气球上升';
+      text = state.t > -1.5
+        ? `即将到达 ${N(s.h)} m，子弹将打断绳子。注意：此刻重物和气球一起以 ${N(s.v0)} m/s 向上运动。`
         : `气球带着重物以 ${N(s.v0)} m/s 匀速上升，重物的速度与气球相同。离地 ${N(p.y, 1)} m，${N(-state.t, 1)} s 后绳断。`;
     } else if (!state.started && state.t === 0) {
       phase = '悬停'; text = '气球静止在空中（v₀ = 0）。点击「播放」剪断绳子。';
     } else if (p.phase === 'landed') {
       phase = '落地'; cls = 'landed';
       text = `落地！绳断后用时 t = ${N(s.T)} s，落地速度 ${N(s.vLand)} m/s，方向竖直向下。`;
-    } else if (state.t === 0) {
+    } else if (state.t === 0 || (state.playing && state.t < 0.3)) {
       phase = '绳断瞬间'; cls = 'rising';
       text = s.v0 > 0 ? `绳断瞬间，重物由于惯性保持 ${N(s.v0)} m/s 的向上速度——速度没有突变，并不会立即下落；此后只受重力，a = g，方向向下。`
                       : '绳断瞬间重物速度为零，接下来做自由落体运动。';
