@@ -6,7 +6,8 @@
 
   // t < 0：绳断前随气球上升；t = 0：绳断；t > 0：竖直上抛
   const state = { ...EXAMPLE, sol: null, t: 0, started: false, playing: false, last: 0, method: 'segment', shown: { segment: 0, whole: 0 } };
-  const BULLET_LEAD = 0.35;    // 子弹在绳断前 0.35 s 进入放大区
+  const BULLET_LEAD = 1.0;     // 子弹在绳断前 1 s 从画面左侧飞入（2 × 播放时约 0.5 s）
+  const SNAP = 0.6;            // 断绳火花持续时间（模拟时间）
 
   /* ---------- 数字格式 ---------- */
   const N = (x, d = 2) => {
@@ -154,24 +155,26 @@
     ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, cyW, r, 0, Math.PI * 2); ctx.fill();
   }
   // 子弹：水平飞行，t = 0 时恰好在绳的中点打断绳子
-  function drawBullet(ctx, x, y) {
-    ctx.strokeStyle = '#b08d3c66'; ctx.lineWidth = 1.5;
-    for (const dy of [-3, 0, 3]) { ctx.beginPath(); ctx.moveTo(x - 60 + Math.abs(dy) * 4, y + dy); ctx.lineTo(x - 12, y + dy); ctx.stroke(); }
-    const grad = ctx.createLinearGradient(0, y - 4, 0, y + 4);
+  function drawBullet(ctx, x, y, k = 1) {
+    ctx.strokeStyle = '#b08d3c66'; ctx.lineWidth = 1.5 * Math.max(k, 0.7);
+    for (const dy of [-3, 0, 3]) { ctx.beginPath(); ctx.moveTo(x + (-60 + Math.abs(dy) * 4) * k, y + dy * k); ctx.lineTo(x - 12 * k, y + dy * k); ctx.stroke(); }
+    const grad = ctx.createLinearGradient(0, y - 4 * k, 0, y + 4 * k);
     grad.addColorStop(0, '#f3d98a'); grad.addColorStop(0.5, '#c9a044'); grad.addColorStop(1, '#8c6a22');
     ctx.fillStyle = grad; ctx.beginPath();
-    ctx.moveTo(x - 10, y - 3.5); ctx.lineTo(x + 2, y - 3.5); ctx.quadraticCurveTo(x + 9, y - 3, x + 11, y);
-    ctx.quadraticCurveTo(x + 9, y + 3, x + 2, y + 3.5); ctx.lineTo(x - 10, y + 3.5); ctx.closePath(); ctx.fill();
+    ctx.moveTo(x - 10 * k, y - 3.5 * k); ctx.lineTo(x + 2 * k, y - 3.5 * k); ctx.quadraticCurveTo(x + 9 * k, y - 3 * k, x + 11 * k, y);
+    ctx.quadraticCurveTo(x + 9 * k, y + 3 * k, x + 2 * k, y + 3.5 * k); ctx.lineTo(x - 10 * k, y + 3.5 * k); ctx.closePath(); ctx.fill();
   }
-  function drawSnap(ctx, x, y, t) {        // 断绳瞬间的火花（持续 0.3 s）
-    const f = t / 0.3, R = 8 + 22 * f;
+  function drawSnap(ctx, x, y, t, k = 1) {  // 断绳瞬间的火花（持续 SNAP）
+    const f = t / SNAP, R = (8 + 22 * f) * k;
     ctx.globalAlpha = 1 - f; ctx.strokeStyle = '#f0a020'; ctx.lineWidth = 2;
     for (let i = 0; i < 10; i++) {
       const a = i * Math.PI / 5 + 0.3;
       ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * R * 0.4, y + Math.sin(a) * R * 0.4); ctx.lineTo(x + Math.cos(a) * R, y + Math.sin(a) * R); ctx.stroke();
     }
-    ctx.fillStyle = '#c8453b'; ctx.font = `bold 15px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-    ctx.fillText('啪！', x - R - 4, y - 4);
+    if (k >= 1) {
+      ctx.fillStyle = '#c8453b'; ctx.font = `bold 15px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      ctx.fillText('啪！', x - R - 4, y - 4);
+    }
     ctx.globalAlpha = 1;
   }
 
@@ -234,6 +237,10 @@
     drawBalloon(ctx, cx, attach, sp, intact, wy - wbh / 2);
     ctx.globalAlpha = 1;
     drawWeight(ctx, cx, wy, sp, intact);
+    // 子弹（全景）：同一时刻到达绳的中点
+    const pCutY = Y(s.h) - wbh - 15 * sp, pbx = cx + (cx - left) / BULLET_LEAD * state.t;
+    if ((state.started || state.t > tMin()) && state.t > -BULLET_LEAD - 0.1 && pbx < pw + 60) drawBullet(ctx, pbx, pCutY, 0.6);
+    if (cut && state.t < SNAP) drawSnap(ctx, cx, pCutY, state.t, 0.5);
     if ($('arrow').checked && Math.abs(p.v) > 1e-6) {
       const len = p.v * 55 / Math.max(s.v0, s.vLand);
       let y0 = wy; if (y0 - len > h - 4) y0 = h - 4 + len;
@@ -297,12 +304,8 @@
     const bxNow = zcx + vb * state.t;
     if ((state.started || state.t > tMin()) && state.t > -BULLET_LEAD - 0.1 && bxNow < zx + zw + 80) {
       drawBullet(ctx, bxNow, cutY);
-      if (state.t < 0) {
-        ctx.fillStyle = '#8c6a22'; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        ctx.fillText('子弹', bxNow - 8, cutY - 8);
-      }
     }
-    if (cut && state.t < 0.3) drawSnap(ctx, zcx, cutY, state.t);
+    if (cut && state.t < SNAP) drawSnap(ctx, zcx, cutY, state.t);
 
     // 速度箭头：气球（左）与重物（右），同一比例
     if ($('arrow').checked) {
@@ -480,7 +483,7 @@
     } else if (p.phase === 'landed') {
       phase = '落地'; cls = 'landed';
       text = `落地！绳断后用时 t = ${N(s.T)} s，落地速度 ${N(s.vLand)} m/s，方向竖直向下。`;
-    } else if (state.t === 0 || (state.playing && state.t < 0.3)) {
+    } else if (state.t === 0 || (state.playing && state.t < SNAP)) {
       phase = '绳断瞬间'; cls = 'rising';
       text = s.v0 > 0 ? `绳断瞬间，重物由于惯性保持 ${N(s.v0)} m/s 的向上速度——速度没有突变，并不会立即下落；此后只受重力，a = g，方向向下。`
                       : '绳断瞬间重物速度为零，接下来做自由落体运动。';
