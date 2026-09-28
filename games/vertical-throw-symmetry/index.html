@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>竖直上抛的对称性 · Physics Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Kinematics · 竖直上抛运动</p>
+      <h1>竖直上抛的对称性</h1>
+      <p class="lede">物体从地面以初速度 <i>v</i><sub>0</sub> 竖直上抛。任取一段位移 AB：上升通过 AB 与下降通过 BA 的时间相等吗？经过同一点时，上升与下降的速度大小相等吗？</p>
+    </div>
+    <a class="back-link" href="../../index.html">返回 Lab</a>
+  </header>
+
+  <main class="app">
+    <!-- 左栏 -->
+    <section class="panel controls-panel" aria-label="实验控制">
+      <div class="block-heading"><h2>抛出条件</h2><button id="reset" class="pill pill-button" type="button">恢复默认</button></div>
+      <div class="parameter"><label for="v0">初速度 <i>v</i><sub>0</sub> ↑</label><div class="number-wrap"><input id="v0" type="number" min="5" max="40" step="1" value="20"><span>m/s</span></div><input id="v0Range" aria-label="初速度滑杆" type="range" min="5" max="40" step="1" value="20"></div>
+      <div class="parameter"><label for="g">重力加速度 <i>g</i></label><div class="number-wrap"><select id="g"><option value="10" selected>10</option><option value="9.8">9.8</option></select><span>m/s²</span></div></div>
+      <div class="facts"><span>最大高度 <i>H</i> = <b id="factH">—</b></span><span>上升时间 <i>t</i><sub>上</sub> = <b id="factTop">—</b></span><span>总时间 <i>T</i> = <b id="factT">—</b></span></div>
+
+      <div class="divider"></div>
+
+      <div class="block-heading"><h2>选取一段位移 AB</h2><span class="pill">可在画面中拖动</span></div>
+      <div class="parameter"><label for="yA"><span class="dot a"></span>A 点离地高度</label><div class="number-wrap"><input id="yA" type="number" step="0.05" value="8.75"><span>m</span></div><input id="yARange" aria-label="A 点高度滑杆" type="range" step="0.05" value="8.75"></div>
+      <div class="parameter"><label for="yB"><span class="dot b"></span>B 点离地高度</label><div class="number-wrap"><input id="yB" type="number" step="0.05" value="18.75"><span>m</span></div><input id="yBRange" aria-label="B 点高度滑杆" type="range" step="0.05" value="18.75"></div>
+      <p class="hint">A 始终在 B 下方。改变初速度时，A、B 按比例随最大高度缩放。</p>
+
+      <div class="divider"></div>
+
+      <label class="check-row"><input type="checkbox" id="revealAll">直接显示完整分析（不等动画）</label>
+      <p class="hint">空格：播放 / 暂停。建议先让学生预测，再播放。</p>
+    </section>
+
+    <!-- 中栏：动画 -->
+    <section class="panel stage-panel">
+      <div class="stage-header">
+        <div><h2>运动观察</h2><p>地面参考系 · 向上为正 · 左侧为上升轨迹，右侧为下降轨迹</p></div>
+        <span id="phase" class="pill" role="status">准备</span>
+      </div>
+      <canvas id="motion" aria-label="小球竖直上抛，AB 段以色带标出，上升与下降经过 A、B 时的速度箭头分别画在左右两侧">浏览器需要支持 Canvas 才能显示动画。</canvas>
+      <div class="transport">
+        <button id="play" class="primary-button" type="button">▶ 抛出</button>
+        <label class="playback">速度<select id="rate"><option value="0.25">0.25 ×</option><option value="0.5" selected>0.5 ×</option><option value="1">1 ×</option></select></label>
+      </div>
+      <div class="timeline"><span id="timeLabel">0.00 s</span><input id="timeline" type="range" min="0" max="1000" value="0" step="1" aria-label="时间轴"><span id="durationLabel">—</span></div>
+      <p class="narrative" id="narrative">点击「抛出」。</p>
+
+      <table class="compare" aria-label="上升与下降对比">
+        <thead><tr><th></th><th class="up">上升（A → B）</th><th class="down">下降（B → A）</th><th></th></tr></thead>
+        <tbody>
+          <tr><th>通过 AB 用时</th><td class="up" id="cDtUp">—</td><td class="down" id="cDtDown">—</td><td id="eqDt"></td></tr>
+          <tr><th>经过 A 的速度</th><td class="up" id="cVAup">—</td><td class="down" id="cVAdown">—</td><td id="eqVA"></td></tr>
+          <tr><th>经过 B 的速度</th><td class="up" id="cVBup">—</td><td class="down" id="cVBdown">—</td><td id="eqVB"></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 右栏：图像 -->
+    <section class="panel graphs-panel">
+      <div class="graph-card">
+        <div class="stage-header"><div><h2><i>v</i>–<i>t</i> 图像</h2><p><span class="key orange">上升通过 AB</span><span class="key blue">下降通过 BA</span><span class="key line">对称轴 t = v<sub>0</sub>/g</span></p></div><span class="unit">m/s</span></div>
+        <canvas id="vt" aria-label="速度随时间变化的直线，上升与下降通过 AB 的时间区间关于最高点时刻对称"></canvas>
+      </div>
+      <div class="graph-card">
+        <div class="stage-header"><div><h2><i>y</i>–<i>t</i> 图像</h2><p>A、B 两条水平线与抛物线各交两次</p></div><span class="unit">m</span></div>
+        <canvas id="yt" aria-label="高度随时间变化的抛物线，与 A、B 高度线的交点关于最高点对称"></canvas>
+      </div>
+    </section>
+
+    <!-- 解释 -->
+    <section class="panel explain-panel">
+      <div class="stage-header"><div><h2>为什么对称？</h2><p>公式中的数字随当前参数实时更新</p></div></div>
+      <div class="cards">
+        <article class="card">
+          <h3>① 速度对称：同一点速度大小相等</h3>
+          <p>由 <span class="f">v² − v<sub>0</sub>² = −2g y</span> 得</p>
+          <p class="eq">|v| = √(v<sub>0</sub>² − 2g y)</p>
+          <p>速度大小只取决于高度 y，与上升还是下降无关；只有方向相反。</p>
+          <p class="num" id="expV"></p>
+        </article>
+        <article class="card">
+          <h3>② 时间对称：通过同一段位移用时相等</h3>
+          <p>上升 A→B：<span class="f">v<sub>B</sub> = v<sub>A</sub> − gΔt<sub>上</sub></span><br>下降 B→A：<span class="f">v<sub>A</sub> = v<sub>B</sub> + gΔt<sub>下</sub></span></p>
+          <p class="eq">Δt<sub>上</sub> = Δt<sub>下</sub> = (v<sub>A</sub> − v<sub>B</sub>) / g</p>
+          <p>逆向思维：下降过程就是上升过程的「倒放」，加速度都是 g。</p>
+          <p class="num" id="expT"></p>
+        </article>
+        <article class="card">
+          <h3>③ 在 v–t 图像中看对称</h3>
+          <p>图线是一条斜率为 −g 的直线，关于点 (v<sub>0</sub>/g, 0) <b>中心对称</b>。</p>
+          <p>橙、蓝两块阴影：<b>宽度</b>相等 → 用时相等；<b>面积</b>相等（一正一负）→ 位移大小都等于 AB；两端高度相等 → 速度大小相等。</p>
+          <p class="num" id="expG"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/physics.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
