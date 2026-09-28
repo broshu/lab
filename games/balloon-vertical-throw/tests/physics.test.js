@@ -13,6 +13,11 @@ close(s.at(7).y, 0); close(s.at(7).v, -60); close(s.at(1).v, 0); close(s.at(1).y
 assert.equal(s.at(0).phase, 'release'); assert.equal(s.at(0.5).phase, 'rising');
 assert.equal(s.at(1).phase, 'peak'); assert.equal(s.at(3).phase, 'falling');
 assert.equal(s.at(7).phase, 'landed'); assert.equal(s.at(99).t, 7);
+// 绳断前：从地面匀速上升 17.5 s
+close(s.t0, 17.5); close(s.at(-17.5).y, 0); close(s.at(-99).y, 0); close(s.at(-1).y, 165);
+close(s.at(-1).v, 10); assert.equal(s.at(-3).phase, 'ascent');
+close(s.at(-1e-9).v, s.at(0).v, 1e-6);   // 绳断瞬间速度连续（惯性）
+close(s.at(-1e-9).y, s.at(0).y, 1e-6);
 cases++;
 
 for (const v0 of [0, 1, 5, 10, 20, 30]) for (const h of [10, 50, 175, 300]) for (const g of [9.8, 10]) {

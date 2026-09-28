@@ -16,8 +16,15 @@
     const disc = v0 * v0 + 2 * g * h;
     const roots = [(v0 + Math.sqrt(disc)) / g, (v0 - Math.sqrt(disc)) / g];
 
+    // 绳断前：气球带着重物从地面匀速上升，历时 t0（t < 0 的阶段）
+    const t0 = v0 > 0 ? h / v0 : 0;
+
     function at(t) {
-      const time = Math.min(Math.max(t, 0), T);
+      if (t < 0) {
+        const time = Math.max(t, -t0);
+        return { t: time, s: v0 * time, y: Math.max(h + v0 * time, 0), v: v0, phase: 'ascent' };
+      }
+      const time = Math.min(t, T);
       const s = v0 * time - 0.5 * g * time * time;   // displacement from release point
       const v = v0 - g * time;
       let phase = 'release';
@@ -28,7 +35,7 @@
       return { t: time, s, y: Math.max(h + s, 0), v, phase };
     }
 
-    return { v0, h, g, tUp, rise, peak, tDown, T, vLand, roots, at };
+    return { v0, h, g, t0, tUp, rise, peak, tDown, T, vLand, roots, at };
   }
 
   const api = { solve };

@@ -4,7 +4,10 @@
   const $ = id => document.getElementById(id);
   const EXAMPLE = { v0: 10, h: 175, g: 10 };
 
-  const state = { ...EXAMPLE, sol: null, t: 0, broken: false, playing: false, last: 0, method: 'segment', shown: { segment: 0, whole: 0 } };
+  // t < 0：绳断前随气球上升；t = 0：绳断；t > 0：竖直上抛
+  const state = { ...EXAMPLE, sol: null, t: 0, started: false, playing: false, ff: false, last: 0, method: 'segment', shown: { segment: 0, whole: 0 } };
+  const FF_END = 1.5;          // 绳断前最后 1.5 s 以正常速度播放，之前快进
+  const FF_REAL = 3;           // 快进段约用 3 s 真实时间
 
   /* ---------- 数字格式 ---------- */
   const N = (x, d = 2) => {
@@ -16,10 +19,9 @@
 
   /* ---------- 参数 ---------- */
   const inputs = [['v0', 'v0Range'], ['h', 'hRange']];
-  function readParams(src) {
-    const v0 = clampNum(+$('v0').value, 0, 30, state.v0);
-    const h = clampNum(+$('h').value, 10, 300, state.h);
-    if (src) { state.v0 = v0; state.h = h; }
+  function readParams() {
+    state.v0 = clampNum(+$('v0').value, 0, 30, state.v0);
+    state.h = clampNum(+$('h').value, 10, 300, state.h);
     state.g = +$('g').value;
   }
   function clampNum(x, lo, hi, fallback) { return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : fallback; }
@@ -33,46 +35,68 @@
 
   function recompute() {
     state.sol = solve(state.v0, state.h, state.g);
-    state.t = 0; state.broken = false; state.playing = false;
+    state.t = -state.sol.t0; state.started = false; state.playing = false;
     $('durationLabel').textContent = N(state.sol.T) + ' s';
+    $('skip').hidden = state.sol.t0 <= 2;
     clearQuiz();
     buildSteps();
     render();
   }
 
   inputs.forEach(([num, range]) => {
-    $(range).addEventListener('input', () => { $(num).value = $(range).value; readParams(true); syncFields(); recompute(); });
-    $(num).addEventListener('change', () => { readParams(true); syncFields(); recompute(); });
+    $(range).addEventListener('input', () => { $(num).value = $(range).value; readParams(); syncFields(); recompute(); });
+    $(num).addEventListener('change', () => { readParams(); syncFields(); recompute(); });
   });
-  $('g').addEventListener('change', () => { readParams(true); syncFields(); recompute(); });
+  $('g').addEventListener('change', () => { readParams(); syncFields(); recompute(); });
   $('resetExample').addEventListener('click', () => { Object.assign(state, EXAMPLE); syncFields(); recompute(); });
 
   /* ---------- 播放 ---------- */
-  function setTime(t, keepPlaying) {
-    state.t = Math.min(Math.max(t, 0), state.sol.T);
-    if (state.t > 0) state.broken = true;
-    if (!keepPlaying) state.playing = false;
+  const tMin = () => -state.sol.t0;
+  const ropeIntact = () => state.t < 0 || (state.t === 0 && !state.started);
+  function setTime(t) {
+    state.t = Math.min(Math.max(t, tMin()), state.sol.T);
+    state.started = true; state.playing = false;
     render();
   }
   function togglePlay() {
     const s = state.sol;
     if (state.playing) { state.playing = false; render(); return; }
-    if (state.t >= s.T - 1e-9) { state.t = 0; }
-    state.broken = true; state.playing = true; state.last = performance.now();
+    if (state.t >= s.T - 1e-9) state.t = tMin();
+    state.started = true; state.playing = true; state.last = performance.now();
     render();
     requestAnimationFrame(tick);
   }
   function tick(now) {
     if (!state.playing) return;
+    const s = state.sol, rate = +$('rate').value;
     const dt = Math.min((now - state.last) / 1000, 0.05);
     state.last = now;
-    state.t += dt * +$('rate').value;
-    if (state.t >= state.sol.T) { state.t = state.sol.T; state.playing = false; }
+    // 绳断前较远的一段快进，临近绳断恢复正常速度
+    const ffSpeed = (s.t0 - FF_END) / FF_REAL;
+    state.ff = state.t < -FF_END && ffSpeed > rate;
+    let next = state.t + dt * (state.ff ? ffSpeed : rate);
+    if (state.ff && next > -FF_END) next = -FF_END;
+    if (next >= s.T) { next = s.T; state.playing = false; state.ff = false; }
+    state.t = next;
     render();
     if (state.playing) requestAnimationFrame(tick);
   }
   $('play').addEventListener('click', togglePlay);
-  $('timeline').addEventListener('input', e => setTime(state.sol.T * e.target.value / 1000));
+  $('skip').addEventListener('click', () => { setTime(-Math.min(2, state.sol.t0)); });
+
+  // 时间轴：前 25% 为绳断前的上升，后 75% 为绳断后
+  const PRE = 0.25;
+  function toSlider(t) {
+    const s = state.sol;
+    if (s.t0 <= 0) return 1000 * t / s.T;
+    return t < 0 ? 1000 * PRE * (t + s.t0) / s.t0 : 1000 * (PRE + (1 - PRE) * t / s.T);
+  }
+  function fromSlider(u) {
+    const s = state.sol, f = u / 1000;
+    if (s.t0 <= 0) return f * s.T;
+    return f < PRE ? -s.t0 + s.t0 * f / PRE : (f - PRE) / (1 - PRE) * s.T;
+  }
+  $('timeline').addEventListener('input', e => setTime(fromSlider(+e.target.value)));
   ['strobe', 'arrow'].forEach(id => $(id).addEventListener('change', render));
   document.addEventListener('keydown', e => {
     if (e.code !== 'Space' || /INPUT|SELECT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) return;
@@ -95,146 +119,203 @@
     return 10 * p;
   }
   function arrow(ctx, x, y1, y2, color, width = 3) {
+    if (Math.abs(y2 - y1) < 1) return;
     const dir = Math.sign(y2 - y1) || 1, head = Math.min(10, Math.abs(y2 - y1));
     ctx.strokeStyle = ctx.fillStyle = color; ctx.lineWidth = width;
     ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2 - dir * head * 0.6); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x, y2); ctx.lineTo(x - 6, y2 - dir * head); ctx.lineTo(x + 6, y2 - dir * head); ctx.closePath(); ctx.fill();
   }
-  const FONT = '"Inter","PingFang SC","Microsoft YaHei",sans-serif';
-  const COLORS = { ink: '#17212f', muted: '#647084', grid: '#e3e9f0', orange: '#c68116', blue: '#2576d6', green: '#14936f', red: '#c8453b', navy: '#264761' };
-
-  /* ---------- 主动画 ---------- */
-  function drawMotion() {
-    const { ctx, w, h } = fit($('motion'));
-    const s = state.sol, p = s.at(state.t);
-    const top = 26, ground = h - 42, left = 58;
-    const yTopWorld = Math.max(s.peak * 1.12, s.h + 25);
-    const k = (ground - top) / yTopWorld;
-    const Y = y => ground - y * k;
-    const cx = left + (w - left) * 0.46;
-
-    // 天空与地面
-    const sky = ctx.createLinearGradient(0, 0, 0, ground);
-    sky.addColorStop(0, '#dcebf8'); sky.addColorStop(1, '#f6fafd');
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, ground);
-    ctx.fillStyle = '#9cc58a'; ctx.fillRect(0, ground, w, 7);
-    ctx.fillStyle = '#e7dccb'; ctx.fillRect(0, ground + 7, w, h - ground - 7);
-
-    // 标尺
-    const step = niceStep(yTopWorld, 8);
-    ctx.font = `11px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    for (let y = 0; y <= yTopWorld; y += step) {
-      ctx.strokeStyle = '#ffffffb0'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(w, Y(y)); ctx.stroke();
-      ctx.strokeStyle = COLORS.muted; ctx.beginPath(); ctx.moveTo(left - 6, Y(y)); ctx.lineTo(left, Y(y)); ctx.stroke();
-      ctx.fillStyle = COLORS.muted; ctx.fillText(N(y, 0), left - 9, Y(y));
-    }
-    ctx.strokeStyle = COLORS.muted; ctx.beginPath(); ctx.moveTo(left, Y(0)); ctx.lineTo(left, top - 8); ctx.stroke();
-    ctx.textAlign = 'left'; ctx.fillText('y / m', 8, top - 12);
-
-    // 参考线：断绳处、最高点
-    const refLine = (y, color, text, below) => {
-      ctx.setLineDash([6, 5]); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(w - 8, Y(y)); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = color; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'right';
-      ctx.fillText(text, w - 10, Y(y) + (below ? 11 : -10));
-    };
-    refLine(s.h, COLORS.navy, `断绳处 h = ${N(s.h)} m`, true);
-    if (state.broken && state.t >= s.tUp - 1e-6 && s.rise > 0) refLine(s.peak, COLORS.green, `最高点 H = ${N(s.peak)} m`, false);
-
-    // 频闪位置（每 1 s）
-    if ($('strobe').checked && state.broken) {
-      ctx.font = `11px ${FONT}`; ctx.textBaseline = 'middle';
-      for (let n = 0; n <= Math.floor(state.t + 1e-9); n++) {
-        const q = s.at(n), up = n < s.tUp - 1e-9 || (n === 0);
-        const x = cx + (up ? -24 : 24);
-        ctx.fillStyle = up ? '#c681163a' : '#2576d63a'; ctx.strokeStyle = up ? '#c68116aa' : '#2576d6aa'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.arc(x, Y(q.y), 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = COLORS.muted; ctx.textAlign = up ? 'right' : 'left';
-        ctx.fillText(`${n} s`, x + (up ? -9 : 9), Y(q.y));
-      }
-      if (s.T % 1 > 1e-6 && state.t >= s.T - 1e-9) { /* 落地点单独标出 */
-        ctx.fillStyle = COLORS.red; ctx.textAlign = 'left'; ctx.fillText(`${N(s.T)} s`, cx + 33, Y(0) - 8);
-      }
-    }
-
-    // 轨迹（竖直线）
-    if (state.broken) {
-      const yMaxReached = state.t >= s.tUp ? s.peak : p.y;
-      ctx.strokeStyle = '#c6811666'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(cx - 3, Y(s.h)); ctx.lineTo(cx - 3, Y(yMaxReached)); ctx.stroke();
-      if (state.t > s.tUp) { ctx.strokeStyle = '#2576d666'; ctx.beginPath(); ctx.moveTo(cx + 3, Y(s.peak)); ctx.lineTo(cx + 3, Y(p.y)); ctx.stroke(); }
-    }
-
-    // 气球
-    const rope = 30, boxH = 16, boxW = 22;
-    const wy = Y(p.y) - boxH / 2;               // 重物中心
-    const balloonY = state.broken ? Y(s.h + s.v0 * state.t) - boxH / 2 : wy;
-    const bx = cx + (state.broken ? 0 : 0);
-    const bcy = balloonY - rope - 26;
-    if (bcy > -40) {
-      ctx.globalAlpha = state.broken ? Math.max(0.35, 1 - state.t / (s.T * 1.2)) : 1;
-      // 绳
-      ctx.strokeStyle = '#6d5a44'; ctx.lineWidth = 1.5; ctx.beginPath();
-      ctx.moveTo(bx, bcy + 26);
-      ctx.lineTo(bx + (state.broken ? 3 : 0), state.broken ? bcy + 26 + rope * 0.45 : wy - boxH / 2);
-      ctx.stroke();
-      // 球体
-      const grad = ctx.createRadialGradient(bx - 7, bcy - 9, 3, bx, bcy, 28);
-      grad.addColorStop(0, '#ff9d8f'); grad.addColorStop(1, '#d9463a');
-      ctx.fillStyle = grad; ctx.beginPath(); ctx.ellipse(bx, bcy, 21, 26, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#b8372d'; ctx.beginPath(); ctx.moveTo(bx - 4, bcy + 30); ctx.lineTo(bx + 4, bcy + 30); ctx.lineTo(bx, bcy + 24); ctx.fill();
-      if (state.broken && bcy > 12) {
-        ctx.fillStyle = COLORS.muted; ctx.font = `11px ${FONT}`; ctx.textAlign = 'left';
-        ctx.fillText('气球继续上升', bx + 26, bcy);
-      }
-      ctx.globalAlpha = 1;
-    }
-    if (state.broken) { // 重物上的残绳
-      ctx.strokeStyle = '#6d5a44'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(cx, wy - boxH / 2); ctx.lineTo(cx - 2, wy - boxH / 2 - 9); ctx.stroke();
-    }
-
-    // 重物
-    ctx.fillStyle = '#34414f'; roundRect(ctx, cx - boxW / 2, wy - boxH / 2, boxW, boxH, 3); ctx.fill();
-    ctx.fillStyle = '#ffffff30'; roundRect(ctx, cx - boxW / 2 + 3, wy - boxH / 2 + 3, boxW - 6, 4, 2); ctx.fill();
-    if (p.phase === 'landed') {
-      ctx.strokeStyle = '#9b8a72'; ctx.lineWidth = 1.5;
-      for (const dx of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx + dx * 14, ground - 2); ctx.lineTo(cx + dx * 26, ground - 10); ctx.stroke(); }
-    }
-
-    // 速度箭头
-    if ($('arrow').checked && Math.abs(p.v) > 1e-6) {
-      const scale = 110 / Math.max(s.v0, s.vLand);
-      const len = p.v * scale;
-      const x0 = cx + boxW / 2 + 60;
-      let y0 = wy;
-      if (y0 - len > h - 6) y0 = h - 6 + len;       // 箭头不超出画布底部
-      if (y0 - len < 6) y0 = 6 + len;               // 也不超出顶部
-      arrow(ctx, x0, y0, y0 - len, COLORS.orange);
-      ctx.fillStyle = COLORS.orange; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(`v = ${N(Math.abs(p.v), 1)} m/s ${p.v > 0 ? '↑' : '↓'}`, x0 + 10, y0 - len / 2);
-      ctx.strokeStyle = '#c6811655'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
-      ctx.beginPath(); ctx.moveTo(cx + boxW / 2 + 2, wy); ctx.lineTo(x0 - 2, y0); ctx.stroke(); ctx.setLineDash([]);
-    }
-    // 加速度提示
-    if (state.broken && p.phase !== 'landed') {
-      ctx.fillStyle = COLORS.navy; ctx.font = `12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      ctx.fillText(`a = g ↓`, cx - boxW / 2 - 48, wy);
-    }
-  }
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
+  const FONT = '"Inter","PingFang SC","Microsoft YaHei",sans-serif';
+  const COLORS = { ink: '#17212f', muted: '#647084', grid: '#e3e9f0', orange: '#c68116', blue: '#2576d6', green: '#14936f', red: '#c8453b', navy: '#264761', balloon: '#d9463a' };
+
+  /* ---------- 气球与重物 ---------- */
+  // (x, yWeight) 为重物中心；yBalloonAttach 为气球绳结的像素位置；size 为缩放
+  function drawBalloon(ctx, x, attachY, size, intact, weightTopY) {
+    const rx = 21 * size, ry = 26 * size, rope = 30 * size;
+    const cy = attachY - rope - ry;
+    ctx.strokeStyle = '#6d5a44'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, cy + ry);
+    if (intact) ctx.lineTo(x, weightTopY); else ctx.lineTo(x + 3 * size, cy + ry + rope * 0.45);
+    ctx.stroke();
+    const grad = ctx.createRadialGradient(x - 7 * size, cy - 9 * size, 2, x, cy, 28 * size);
+    grad.addColorStop(0, '#ff9d8f'); grad.addColorStop(1, COLORS.balloon);
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.ellipse(x, cy, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#b8372d'; ctx.beginPath(); ctx.moveTo(x - 4 * size, cy + ry + 4 * size); ctx.lineTo(x + 4 * size, cy + ry + 4 * size); ctx.lineTo(x, cy + ry - 2 * size); ctx.fill();
+    return cy;
+  }
+  function drawWeight(ctx, x, cyW, size, intact) {
+    const bw = 22 * size, bh = 16 * size;
+    if (!intact) {
+      ctx.strokeStyle = '#6d5a44'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x, cyW - bh / 2); ctx.lineTo(x - 2, cyW - bh / 2 - 9 * size); ctx.stroke();
+    }
+    ctx.fillStyle = '#34414f'; roundRect(ctx, x - bw / 2, cyW - bh / 2, bw, bh, 3 * size); ctx.fill();
+    ctx.fillStyle = '#ffffff30'; roundRect(ctx, x - bw / 2 + 3, cyW - bh / 2 + 3 * size, bw - 6, 4 * size, 2); ctx.fill();
+  }
+
+  /* ---------- 主动画：左侧全景 + 右侧局部放大 ---------- */
+  function zoomWindow(s) {
+    // 下方留出绳断前的一段上升；上方容纳“重物到最高点时气球的位置”，便于对比两者分离
+    const below = Math.max(2.2 * s.rise, 16);
+    const above = 2 * s.rise + Math.max(0.6 * s.rise, 12);
+    return { lo: Math.max(s.h - below, 0), hi: s.h + above };
+  }
+
+  function drawMotion() {
+    const { ctx, w, h } = fit($('motion'));
+    const s = state.sol, p = s.at(state.t), intact = ropeIntact(), cut = !intact;
+    const pw = Math.max(118, Math.round(w * 0.36));           // 全景宽度
+    const gap = 26, zx = pw + gap, zw = w - zx - 8;            // 放大区
+    const narrow = zw < 330;
+    const top = 22, ground = h - 36;
+    const zw0 = zoomWindow(s);
+
+    /* ===== 全景 ===== */
+    const yTopWorld = Math.max(s.peak * 1.12, s.h + 25);
+    const k = (ground - top) / yTopWorld, Y = y => ground - y * k;
+    const left = 34, cx = left + (pw - left) * 0.52;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, pw, h); ctx.clip();
+    const sky = ctx.createLinearGradient(0, 0, 0, ground);
+    sky.addColorStop(0, '#dcebf8'); sky.addColorStop(1, '#f6fafd');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, pw, ground);
+    ctx.fillStyle = '#9cc58a'; ctx.fillRect(0, ground, pw, 6);
+    ctx.fillStyle = '#e7dccb'; ctx.fillRect(0, ground + 6, pw, h - ground - 6);
+    const step = niceStep(yTopWorld, 7);
+    ctx.font = `10px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let y = 0; y <= yTopWorld; y += step) {
+      ctx.strokeStyle = '#ffffffb0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(left, Y(y)); ctx.lineTo(pw, Y(y)); ctx.stroke();
+      ctx.fillStyle = COLORS.muted; ctx.fillText(N(y, 0), left - 5, Y(y));
+    }
+    ctx.strokeStyle = COLORS.muted; ctx.beginPath(); ctx.moveTo(left, Y(0)); ctx.lineTo(left, top - 6); ctx.stroke();
+    ctx.textAlign = 'left'; ctx.fillText('y / m', 4, top - 12);
+    ctx.fillStyle = COLORS.navy; ctx.font = `bold 11px ${FONT}`; ctx.textAlign = 'left'; ctx.fillText('全景', left + 6, top + 2);
+    // 放大区域框
+    ctx.fillStyle = '#f5b94218'; ctx.strokeStyle = '#d99a2a'; ctx.setLineDash([4, 3]); ctx.lineWidth = 1.2;
+    ctx.fillRect(left, Y(zw0.hi), pw - left - 2, Y(zw0.lo) - Y(zw0.hi));
+    ctx.strokeRect(left, Y(zw0.hi), pw - left - 2, Y(zw0.lo) - Y(zw0.hi)); ctx.setLineDash([]);
+    // 断绳高度
+    ctx.setLineDash([5, 4]); ctx.strokeStyle = COLORS.navy; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(left, Y(s.h)); ctx.lineTo(pw, Y(s.h)); ctx.stroke(); ctx.setLineDash([]);
+    // 轨迹
+    if (state.started || state.t > tMin()) {
+      ctx.strokeStyle = '#8f9bab88'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx - 3, Y(0)); ctx.lineTo(cx - 3, Y(state.t < 0 ? p.y : s.h)); ctx.stroke();
+      if (cut) {
+        ctx.strokeStyle = '#c68116aa'; ctx.beginPath(); ctx.moveTo(cx - 3, Y(s.h)); ctx.lineTo(cx - 3, Y(state.t >= s.tUp ? s.peak : p.y)); ctx.stroke();
+        if (state.t > s.tUp) { ctx.strokeStyle = '#2576d6aa'; ctx.beginPath(); ctx.moveTo(cx + 3, Y(s.peak)); ctx.lineTo(cx + 3, Y(p.y)); ctx.stroke(); }
+      }
+    }
+    const sp = 0.55, wbh = 16 * sp;
+    const wy = Y(p.y) - wbh / 2;
+    const attach = cut ? Y(s.h + s.v0 * state.t) - wbh / 2 - 8 * sp : wy - wbh / 2;
+    ctx.globalAlpha = cut ? 0.55 : 1;
+    drawBalloon(ctx, cx, attach, sp, intact, wy - wbh / 2);
+    ctx.globalAlpha = 1;
+    drawWeight(ctx, cx, wy, sp, intact);
+    if ($('arrow').checked && Math.abs(p.v) > 1e-6) {
+      const len = p.v * 55 / Math.max(s.v0, s.vLand);
+      let y0 = wy; if (y0 - len > h - 4) y0 = h - 4 + len;
+      arrow(ctx, cx + 16, y0, y0 - len, COLORS.orange, 2.5);
+    }
+    ctx.restore();
+
+    /* ===== 局部放大 ===== */
+    const zTop = 8, zBot = h - 8;
+    const zk = (zBot - zTop) / (zw0.hi - zw0.lo), Z = y => zBot - (y - zw0.lo) * zk;
+    // 连接线
+    ctx.strokeStyle = '#d99a2a88'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(pw - 2, Y(zw0.hi)); ctx.lineTo(zx, zTop); ctx.moveTo(pw - 2, Y(zw0.lo)); ctx.lineTo(zx, zBot); ctx.stroke(); ctx.setLineDash([]);
+    ctx.save(); ctx.beginPath(); ctx.rect(zx, zTop, zw, zBot - zTop); ctx.clip();
+    const zsky = ctx.createLinearGradient(0, zTop, 0, zBot);
+    zsky.addColorStop(0, '#d6e8f7'); zsky.addColorStop(1, '#eef5fb');
+    ctx.fillStyle = zsky; ctx.fillRect(zx, zTop, zw, zBot - zTop);
+    const zl = zx + (narrow ? 32 : 40), zcx = zl + (zw - (zl - zx)) * (narrow ? 0.38 : 0.42);
+    // 刻度
+    const zs = niceStep(zw0.hi - zw0.lo, 8);
+    ctx.font = `11px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let y = Math.ceil(zw0.lo / zs) * zs; y <= zw0.hi; y += zs) {
+      ctx.strokeStyle = '#ffffffc0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(zl, Z(y)); ctx.lineTo(zx + zw, Z(y)); ctx.stroke();
+      ctx.fillStyle = COLORS.muted; ctx.fillText(N(y, 1), zl - 6, Z(y));
+    }
+    ctx.strokeStyle = COLORS.muted; ctx.beginPath(); ctx.moveTo(zl, zTop); ctx.lineTo(zl, zBot); ctx.stroke();
+    const ref = (y, color, text, below) => {
+      ctx.setLineDash([6, 5]); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(zl, Z(y)); ctx.lineTo(zx + zw, Z(y)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = color; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, zx + zw - 8, Z(y) + (below ? 11 : -10));
+    };
+    ref(s.h, COLORS.navy, `断绳处 ${N(s.h)} m`, true);
+    if (cut && state.t >= s.tUp - 1e-6 && s.rise > 0) ref(s.peak, COLORS.green, `最高点 ${N(s.peak)} m`, false);
+    ctx.fillStyle = '#9a6511'; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(`局部放大 ×${N(zk / k, 0)}`, zl + 8, zTop + 6);
+
+    // 频闪：每 1 s 重物的位置（绳断前灰色，上升橙色，下降蓝色）
+    if ($('strobe').checked && (state.started || state.t > tMin())) {
+      ctx.font = `11px ${FONT}`; ctx.textBaseline = 'middle';
+      for (let n = Math.ceil(tMin() - 1e-9); n <= Math.floor(state.t + 1e-9); n++) {
+        const q = s.at(n); if (q.y < zw0.lo - 1 || q.y > zw0.hi) continue;
+        const pre = n < 0, up = n < s.tUp - 1e-9 || n === 0;
+        const x = zcx + (up ? -30 : 30);
+        const col = pre ? '#8f9bab' : up ? '#c68116' : '#2576d6';
+        ctx.fillStyle = col + '40'; ctx.strokeStyle = col; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(x, Z(q.y), 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = pre ? COLORS.muted : col; ctx.textAlign = up ? 'right' : 'left';
+        ctx.fillText(`${N(n, 0)} s`, x + (up ? -9 : 9), Z(q.y));
+      }
+    }
+
+    // 气球与重物（放大）
+    const bh = 16, zwy = Z(p.y) - bh / 2;
+    const zAttach = cut ? Z(s.h + s.v0 * state.t) - bh / 2 - 8 : zwy - bh / 2;
+    const balloonCy = drawBalloon(ctx, zcx, zAttach, 1, intact, zwy - bh / 2);
+    drawWeight(ctx, zcx, zwy, 1, intact);
+
+    // 速度箭头：气球（左）与重物（右），同一比例
+    if ($('arrow').checked) {
+      const kv = Math.min(7, 95 / Math.max(s.v0, 1));
+      const clampLen = L => Math.max(-170, Math.min(170, L));
+      if (s.v0 > 0 && balloonCy > zTop - 20) {
+        const bx = zcx - 36, L = clampLen(s.v0 * kv);
+        arrow(ctx, bx, balloonCy, balloonCy - L, COLORS.balloon, 3);
+        ctx.fillStyle = COLORS.balloon; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText(`${narrow ? '' : '气球 '}${N(s.v0, 1)} m/s ↑`, bx - 8, balloonCy - L / 2);
+      }
+      if (Math.abs(p.v) > 1e-6 && zwy < zBot + 10) {
+        const wx = zcx + 36, L = clampLen(p.v * kv);
+        arrow(ctx, wx, zwy, zwy - L, COLORS.orange, 3);
+        ctx.fillStyle = COLORS.orange; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(`${narrow ? '' : '重物 '}${N(Math.abs(p.v), 1)} m/s ${p.v > 0 ? '↑' : '↓'}`, wx + 8, zwy - L / 2);
+      }
+    }
+    if (cut && p.phase !== 'landed' && zwy > zTop && zwy < zBot) {
+      ctx.fillStyle = COLORS.navy; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText('a = g ↓', zcx - 20, zwy + 22);
+    }
+    // 提示：物体不在放大区内
+    const note = (text, y) => {
+      ctx.font = `bold 13px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(text).width + 24;
+      ctx.fillStyle = '#ffffffdd'; roundRect(ctx, zcx - tw / 2 + 20, y - 15, tw, 30, 15); ctx.fill();
+      ctx.fillStyle = COLORS.navy; ctx.fillText(text, zcx + 20, y);
+    };
+    if (state.t < 0 && Z(p.y) > zBot + 4) note(`↑ 气球带着重物上升中，离地 ${N(p.y, 0)} m`, zBot - 30);
+    else if (cut && Z(p.y) > zBot + 4) note(p.phase === 'landed' ? '重物已落地（见左侧全景）' : '↓ 重物落出放大区，继续下落（见左侧全景）', zBot - 30);
+    ctx.restore();
+    ctx.strokeStyle = '#d99a2a'; ctx.lineWidth = 1.2; ctx.strokeRect(zx + 0.5, zTop + 0.5, zw - 1, zBot - zTop - 1);
+  }
 
   /* ---------- 图像 ---------- */
-  function plotFrame(canvas, yMin, yMax, yLabel) {
+  const preWindow = () => Math.min(2, state.sol.t0);   // 图像中显示绳断前 2 s
+  function plotFrame(canvas, yMin, yMax) {
     const { ctx, w, h } = fit(canvas);
     const s = state.sol;
     const box = { l: 50, r: w - 18, t: 16, b: h - 30 };
-    const tMax = s.T * 1.06;
-    const X = t => box.l + (t / tMax) * (box.r - box.l);
+    const t0 = -preWindow(), tMax = s.T * 1.06;
+    const X = t => box.l + ((t - t0) / (tMax - t0)) * (box.r - box.l);
     const Y = v => box.b - (v - yMin) / (yMax - yMin) * (box.b - box.t);
     ctx.font = `11px ${FONT}`; ctx.lineWidth = 1;
     const ys = niceStep(yMax - yMin, 6);
@@ -243,70 +324,87 @@
       ctx.strokeStyle = COLORS.grid; ctx.beginPath(); ctx.moveTo(box.l, Y(v)); ctx.lineTo(box.r, Y(v)); ctx.stroke();
       ctx.fillStyle = COLORS.muted; ctx.fillText(N(v, 1), box.l - 6, Y(v));
     }
-    const ts = niceStep(tMax, 8);
+    const ts = niceStep(tMax - t0, 9);
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    for (let t = 0; t <= tMax + 1e-9; t += ts) {
+    for (let t = Math.ceil(t0 / ts) * ts; t <= tMax + 1e-9; t += ts) {
       ctx.strokeStyle = COLORS.grid; ctx.beginPath(); ctx.moveTo(X(t), box.t); ctx.lineTo(X(t), box.b); ctx.stroke();
       ctx.fillStyle = COLORS.muted; ctx.fillText(N(t, 1), X(t), box.b + 6);
     }
-    ctx.strokeStyle = '#8f9bab'; ctx.beginPath(); ctx.moveTo(box.l, box.t); ctx.lineTo(box.l, box.b); ctx.lineTo(box.r, box.b); ctx.stroke();
-    ctx.fillStyle = COLORS.muted; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('t / s', box.r, box.b - 3);
-    return { ctx, box, X, Y, s };
+    // 绳断前区域
+    if (t0 < 0) {
+      ctx.fillStyle = '#8f9bab1c'; ctx.fillRect(box.l, box.t, X(0) - box.l, box.b - box.t);
+      ctx.strokeStyle = COLORS.navy; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(X(0), box.t); ctx.lineTo(X(0), box.b); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = COLORS.muted; ctx.font = `11px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText('绳断前', (box.l + X(0)) / 2, box.b - 4);
+      ctx.fillStyle = COLORS.navy; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillText('绳断 t = 0', X(0) + 4, box.b - 4);
+    }
+    ctx.strokeStyle = '#8f9bab'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(box.l, box.t); ctx.lineTo(box.l, box.b); ctx.lineTo(box.r, box.b); ctx.stroke();
+    ctx.fillStyle = COLORS.muted; ctx.font = `11px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('t / s', box.r, box.b - 3);
+    return { ctx, box, X, Y, s, t0 };
   }
+  // 当前时刻在图像时间窗内的位置（早于窗口时停在左端）
+  const tPlot = t0 => Math.max(state.t, t0);
+  const hasMoved = () => state.started || state.t > tMin();
 
   function drawVT() {
     const s0 = state.sol;
     const vMax = Math.max(s0.v0 * 1.15, s0.vLand * 0.18), vMin = -s0.vLand * 1.12;
-    const { ctx, box, X, Y, s } = plotFrame($('vt'), vMin, vMax);
-    // v = 0 轴
+    const { ctx, box, X, Y, s, t0 } = plotFrame($('vt'), vMin, vMax);
+    const vAt = t => t < 0 ? s.v0 : s.v0 - s.g * t;
     ctx.strokeStyle = '#5b6878'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(box.l, Y(0)); ctx.lineTo(box.r, Y(0)); ctx.stroke();
-    const tNow = state.broken ? state.t : 0;
-    // 面积（到当前时刻为止）
-    const fillArea = (t0, t1, color) => {
-      if (t1 <= t0) return;
-      ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(X(t0), Y(0));
-      ctx.lineTo(X(t0), Y(s.v0 - s.g * t0)); ctx.lineTo(X(t1), Y(s.v0 - s.g * t1)); ctx.lineTo(X(t1), Y(0)); ctx.closePath(); ctx.fill();
+    const tNow = tPlot(t0), after = Math.max(tNow, 0);
+    const cut = !ropeIntact();
+    // 面积（绳断后）
+    const fillArea = (a, b, color) => {
+      if (b <= a) return;
+      ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(X(a), Y(0));
+      ctx.lineTo(X(a), Y(vAt(a))); ctx.lineTo(X(b), Y(vAt(b))); ctx.lineTo(X(b), Y(0)); ctx.closePath(); ctx.fill();
     };
-    fillArea(0, Math.min(tNow, s.tUp), '#f0c67c99');
-    fillArea(s.tUp, tNow, '#9cc3f099');
-    // 全程直线（虚线）+ 已走过部分
+    if (cut) { fillArea(0, Math.min(after, s.tUp), '#f0c67c99'); fillArea(s.tUp, after, '#9cc3f099'); }
+    // 全程（虚线）+ 已走过部分
     ctx.setLineDash([5, 4]); ctx.strokeStyle = '#aab6c4'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(X(0), Y(s.v0)); ctx.lineTo(X(s.T), Y(-s.vLand)); ctx.stroke(); ctx.setLineDash([]);
-    ctx.strokeStyle = COLORS.orange; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(X(0), Y(s.v0)); ctx.lineTo(X(tNow), Y(s.v0 - s.g * tNow)); ctx.stroke();
-    // 标注
+    ctx.beginPath(); ctx.moveTo(X(t0), Y(s.v0)); ctx.lineTo(X(0), Y(s.v0)); ctx.lineTo(X(s.T), Y(-s.vLand)); ctx.stroke(); ctx.setLineDash([]);
+    if (hasMoved() && tNow > t0) {
+      ctx.strokeStyle = '#8f9bab'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(X(t0), Y(s.v0)); ctx.lineTo(X(Math.min(tNow, 0)), Y(s.v0)); ctx.stroke();
+      if (tNow > 0) { ctx.strokeStyle = COLORS.orange; ctx.beginPath(); ctx.moveTo(X(0), Y(s.v0)); ctx.lineTo(X(tNow), Y(vAt(tNow))); ctx.stroke(); }
+    }
     ctx.font = `bold 12px ${FONT}`; ctx.textBaseline = 'middle';
-    if (tNow >= s.tUp && s.rise > 0) {
-      ctx.fillStyle = '#9a6511'; ctx.textAlign = 'left';
-      ctx.fillText(`+${N(s.rise)} m`, X(s.tUp) + 8, Y(s.v0 * 0.55));
+    if (t0 < 0 && s.v0 > 0) {
+      ctx.fillStyle = COLORS.navy; ctx.font = `11px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(`v = ${N(s.v0)} m/s 不突变`, X(0), Y(s.v0) - 6);
+    }
+    if (tNow >= s.tUp && s.rise > 0 && cut) {
+      ctx.fillStyle = '#9a6511'; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(`+${N(s.rise)} m`, X(s.tUp) + 8, Y(s.v0 * 0.45));
     }
     if (tNow > s.tUp + 0.3) {
-      const x = s.at(tNow).s - s.rise;       // 下降部分的位移（负）
-      ctx.fillStyle = '#1e5ea9'; ctx.textAlign = 'center';
+      const x = s.at(tNow).s - s.rise;
+      ctx.fillStyle = '#1e5ea9'; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       const tc = s.tUp + (tNow - s.tUp) * 0.62;
       ctx.fillText(`${N(x, 1)} m`, X(tc), Y(-(s.g * (tc - s.tUp)) * 0.4));
     }
-    if (tNow >= s.tUp && s.v0 > 0) {
+    if (tNow >= s.tUp && s.v0 > 0 && cut) {
       ctx.fillStyle = COLORS.green; ctx.beginPath(); ctx.arc(X(s.tUp), Y(0), 4, 0, 7); ctx.fill();
       ctx.font = `11px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
       ctx.fillText(`t₁ = ${N(s.tUp)} s`, X(s.tUp) - 5, Y(0) + 5);
     }
     ctx.fillStyle = COLORS.muted; ctx.font = `12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-    ctx.fillText(`斜率 k = −g = −${N(s.g)} m/s²`, box.r, box.t + 4);
+    ctx.fillText(`绳断后斜率 k = −g = −${N(s.g)} m/s²`, box.r, box.t + 4);
     if (state.t >= s.T - 1e-9) {
       ctx.fillStyle = COLORS.red; ctx.font = `bold 12px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       ctx.fillText(`−${N(s.vLand)} m/s`, X(s.T) - 8, Y(-s.vLand));
     }
-    // 当前点
-    const v = s.v0 - s.g * tNow;
-    ctx.fillStyle = COLORS.orange; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(X(tNow), Y(v), 5.5, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = tNow < 0 ? '#8f9bab' : COLORS.orange; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(X(tNow), Y(vAt(tNow)), 5.5, 0, 7); ctx.fill(); ctx.stroke();
   }
 
   function drawYT() {
     const s0 = state.sol;
     const yTop = s0.peak * 1.12;
-    const { ctx, box, X, Y, s } = plotFrame($('yt'), 0, yTop);
+    const { ctx, box, X, Y, s, t0 } = plotFrame($('yt'), 0, yTop);
     const ref = (y, color, label) => {
       ctx.setLineDash([5, 4]); ctx.strokeStyle = color; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(box.l, Y(y)); ctx.lineTo(box.r, Y(y)); ctx.stroke(); ctx.setLineDash([]);
@@ -314,15 +412,16 @@
       ctx.fillText(label, box.r - 2, Y(y) - 2);
     };
     ref(s.h, COLORS.navy, `h = ${N(s.h)} m`);
-    const tNow = state.broken ? state.t : 0;
-    const curve = (t1, color, width, dash) => {
+    const tNow = tPlot(t0);
+    const curve = (a, b, color, width, dash) => {
+      if (b <= a) return;
       ctx.setLineDash(dash); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.beginPath();
-      for (let i = 0; i <= 160; i++) { const t = t1 * i / 160, q = s.at(t); i ? ctx.lineTo(X(t), Y(q.y)) : ctx.moveTo(X(t), Y(q.y)); }
+      for (let i = 0; i <= 160; i++) { const t = a + (b - a) * i / 160, q = s.at(t); i ? ctx.lineTo(X(t), Y(q.y)) : ctx.moveTo(X(t), Y(q.y)); }
       ctx.stroke(); ctx.setLineDash([]);
     };
-    curve(s.T, '#aab6c4', 1.5, [5, 4]);
-    if (tNow > 0) curve(tNow, COLORS.blue, 2.5, []);
-    if (tNow >= s.tUp && s.rise > 0) {
+    curve(t0, s.T, '#aab6c4', 1.5, [5, 4]);
+    if (hasMoved()) { curve(t0, Math.min(tNow, 0), '#8f9bab', 2.5, []); curve(0, tNow, COLORS.blue, 2.5, []); }
+    if (tNow >= s.tUp && s.rise > 0 && !ropeIntact()) {
       ctx.fillStyle = COLORS.green; ctx.beginPath(); ctx.arc(X(s.tUp), Y(s.peak), 4, 0, 7); ctx.fill();
       ctx.font = `bold 11px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText(`H = ${N(s.peak)} m`, X(s.tUp) + 6, Y(s.peak) - 2);
@@ -332,7 +431,7 @@
       ctx.fillText(`t = ${N(s.T)} s`, X(s.T) - 12, Y(0) - 8);
     }
     const q = s.at(tNow);
-    ctx.fillStyle = COLORS.blue; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.fillStyle = tNow < 0 ? '#8f9bab' : COLORS.blue; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(X(tNow), Y(q.y), 5.5, 0, 7); ctx.fill(); ctx.stroke();
   }
 
@@ -340,23 +439,27 @@
   function describe() {
     const s = state.sol, p = s.at(state.t);
     const nearPeak = s.v0 > 0 && Math.abs(state.t - s.tUp) < 0.06;
-    let phase, cls, text;
-    if (!state.broken) {
-      phase = '匀速上升'; cls = '';
-      text = `重物随气球以 ${N(s.v0)} m/s 匀速上升，此刻离地 ${N(s.h)} m。点击「剪断绳子」。`;
+    let phase, cls = '', text;
+    if (state.t < 0) {
+      phase = state.ff && state.playing ? '上升中 · 快进' : '随气球上升';
+      text = state.t > -FF_END
+        ? `即将到达 ${N(s.h)} m，绳子马上断裂。注意：此刻重物和气球一起以 ${N(s.v0)} m/s 向上运动。`
+        : `气球带着重物以 ${N(s.v0)} m/s 匀速上升，重物的速度与气球相同。离地 ${N(p.y, 1)} m，${N(-state.t, 1)} s 后绳断。`;
+    } else if (!state.started && state.t === 0) {
+      phase = '悬停'; text = '气球静止在空中（v₀ = 0）。点击「播放」剪断绳子。';
     } else if (p.phase === 'landed') {
       phase = '落地'; cls = 'landed';
-      text = `落地！全程用时 t = ${N(s.T)} s，落地速度 ${N(s.vLand)} m/s，方向竖直向下。`;
+      text = `落地！绳断后用时 t = ${N(s.T)} s，落地速度 ${N(s.vLand)} m/s，方向竖直向下。`;
     } else if (state.t === 0) {
       phase = '绳断瞬间'; cls = 'rising';
-      text = s.v0 > 0 ? `绳断瞬间，重物由于惯性仍有 ${N(s.v0)} m/s 的向上速度，并不会立即下落；此后只受重力，a = g，方向向下。`
+      text = s.v0 > 0 ? `绳断瞬间，重物由于惯性保持 ${N(s.v0)} m/s 的向上速度——速度没有突变，并不会立即下落；此后只受重力，a = g，方向向下。`
                       : '绳断瞬间重物速度为零，接下来做自由落体运动。';
     } else if (nearPeak) {
       phase = '最高点'; cls = 'peak';
-      text = `到达最高点：v = 0，用时 t₁ = ${N(s.tUp)} s，比断绳处又高了 ${N(s.rise)} m，离地 H = ${N(s.peak)} m。加速度仍是 g。`;
+      text = `到达最高点：v = 0，绳断后用时 t₁ = ${N(s.tUp)} s，比断绳处又高了 ${N(s.rise)} m，离地 H = ${N(s.peak)} m。`;
     } else if (p.phase === 'rising') {
-      phase = '减速上升'; cls = 'rising';
-      text = `重物仍在上升，但速度每秒减少 ${N(s.g)} m/s（加速度向下）。`;
+      phase = '惯性上升'; cls = 'rising';
+      text = `绳已断，但重物由于惯性仍在向上运动，速度每秒减少 ${N(s.g)} m/s；气球则继续匀速上升，两者逐渐分开。`;
     } else {
       phase = '自由下落'; cls = 'falling';
       text = `从最高点开始自由下落，速度每秒增加 ${N(s.g)} m/s。已下落 ${N(s.peak - p.y, 1)} m。`;
@@ -367,10 +470,9 @@
     $('rV').textContent = signed(p.v, 1) + ' m/s';
     $('rY').textContent = N(p.y, 1) + ' m';
     $('rS').textContent = signed(p.s, 1) + ' m';
-    $('timeLabel').textContent = N(p.t) + ' s';
-    $('timeline').value = Math.round(1000 * state.t / s.T);
-    const btn = $('play');
-    btn.textContent = state.playing ? '❚❚ 暂停' : !state.broken ? '▶ 剪断绳子' : state.t >= s.T - 1e-9 ? '↻ 重新播放' : '▶ 继续';
+    $('timeLabel').textContent = N(p.t, 1) + ' s';
+    $('timeline').value = Math.round(toSlider(state.t));
+    $('play').textContent = state.playing ? '❚❚ 暂停' : state.t >= s.T - 1e-9 ? '↻ 重新播放' : (state.t <= tMin() + 1e-9 && !state.started) ? '▶ 播放' : '▶ 继续';
   }
 
   function render() {
@@ -497,7 +599,7 @@
   }
   $('steps').addEventListener('click', e => {
     const b = e.target.closest('.jump'); if (!b) return;
-    setTime(+b.dataset.t); state.broken = true; render();
+    setTime(+b.dataset.t); render();
     if (window.innerWidth < 720) $('motion').scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
   $('nextStep').addEventListener('click', () => {
@@ -507,7 +609,7 @@
     state.shown[state.method] = i + 1;
     buildSteps();
     $('steps').children[i].classList.add('fresh');
-    if (steps[i].time != null) { setTime(steps[i].time); state.broken = true; render(); }
+    if (steps[i].time != null) { setTime(steps[i].time); render(); }
   });
   $('allSteps').addEventListener('click', () => { state.shown[state.method] = stepsFor(state.method).length; buildSteps(); });
   $('hideSteps').addEventListener('click', () => { state.shown[state.method] = 0; buildSteps(); });

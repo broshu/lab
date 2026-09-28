@@ -53,18 +53,19 @@
     <!-- 中栏：动画 -->
     <section class="panel stage-panel">
       <div class="stage-header">
-        <div><h2>运动观察</h2><p>地面参考系 · 取竖直向上为正 · 灰点为每隔 1 s 的频闪位置</p></div>
+        <div><h2>运动观察</h2><p>地面参考系 · 取竖直向上为正 · t = 0 为绳断时刻 · 左：全景　右：断绳处附近放大</p></div>
         <span id="phase" class="pill" role="status">准备</span>
       </div>
-      <canvas id="motion" aria-label="气球带着重物上升，绳断后重物先减速上升到最高点，再自由下落到地面；实时数值见下方">浏览器需要支持 Canvas 才能显示动画。</canvas>
+      <canvas id="motion" aria-label="气球带着重物从地面匀速上升，绳断后重物由于惯性先减速上升到最高点，再自由下落到地面；左侧为全景，右侧为断绳处附近的放大图；实时数值见下方">浏览器需要支持 Canvas 才能显示动画。</canvas>
       <div class="transport">
-        <button id="play" class="primary-button" type="button">▶ 剪断绳子</button>
+        <button id="play" class="primary-button" type="button">▶ 播放</button>
+        <button id="skip" class="secondary-button" type="button">跳到绳断前 2 s</button>
         <label class="playback">速度<select id="rate"><option value="0.5">0.5 ×</option><option value="1" selected>1 ×</option><option value="2">2 ×</option></select></label>
-        <label class="check-row"><input type="checkbox" id="strobe" checked>频闪</label>
+        <label class="check-row"><input type="checkbox" id="strobe" checked>频闪（每 1 s）</label>
         <label class="check-row"><input type="checkbox" id="arrow" checked>速度箭头</label>
       </div>
       <div class="timeline"><span id="timeLabel">0.00 s</span><input id="timeline" type="range" min="0" max="1000" value="0" step="1" aria-label="时间轴"><span id="durationLabel">—</span></div>
-      <p class="narrative" id="narrative">点击「剪断绳子」，或拖动时间轴观察任意时刻。</p>
+      <p class="narrative" id="narrative">点击「播放」：气球带着重物从地面匀速上升，到达断绳高度时绳子断裂。</p>
       <div class="readouts">
         <div><span>时间 <i>t</i></span><strong id="rT">—</strong></div>
         <div><span>速度 <i>v</i>（向上为正）</span><strong id="rV">—</strong></div>
