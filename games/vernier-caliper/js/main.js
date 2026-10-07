@@ -500,7 +500,7 @@
     const revealBtn = document.getElementById("revealBtn");
     revealBtn.addEventListener("click", function () {
         revealed = !revealed;
-        revealBtn.textContent = revealed ? "Hide answer" : "Show answer";
+        revealBtn.textContent = revealed ? "隐藏答案" : "显示答案";
         revealBtn.classList.toggle("hidden-state", !revealed);
         updateReadout();
     });

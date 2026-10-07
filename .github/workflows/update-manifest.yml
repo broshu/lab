@@ -7,7 +7,8 @@ on:
     paths:
       - "index.html"
       - "library.html"
-      - "library-data.js"
+      - "site.css"
+      - "site.js"
       - "icon.png"
       - "CNAME"
       - "ppt/**"
@@ -39,13 +40,23 @@ jobs:
         with:
           node-version: 20
 
+      - name: Run game tests
+        run: |
+          for t in games/*/tests/*.test.js; do
+            echo "== $t"
+            node "$t"
+          done
+
+      - name: Build homework answers
+        run: python3 tutor/build.py
+
       - name: Build manifest
         run: node scripts/build-manifest.mjs
 
       - name: Prepare site
         run: |
           mkdir _site
-          cp index.html library.html library-data.js icon.png CNAME manifest.json _site/
+          cp index.html library.html site.css site.js icon.png CNAME manifest.json _site/
           cp -R ppt games resources _site/
           mkdir -p _site/tutor
           cp tutor/index.html tutor/data.js _site/tutor/

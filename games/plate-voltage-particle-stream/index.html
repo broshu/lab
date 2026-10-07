@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Particle Between Plates</title>
+    <title>交变电压下板间的带电粒子</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="top-bar">
         <div>
-            <h1>Particle Between Plates</h1>
+            <h1>交变电压下板间的带电粒子</h1>
         </div>
         <div class="readout">
-            <span>Release time</span>
+            <span>释放时刻</span>
             <strong id="phaseReadout">T/4</strong>
         </div>
     </header>
@@ -20,8 +20,8 @@
     <main class="layout">
         <section class="panel controls-panel">
             <div class="section-title">
-                <h2>Controls</h2>
-                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+                <h2>控制</h2>
+                <button id="resetBtn" class="ghost-button" type="button">重置</button>
             </div>
 
             <label class="slider-row">
@@ -37,36 +37,36 @@
             </div>
 
             <div class="button-row">
-                <button id="releaseBtn" class="primary-button" type="button">Release</button>
-                <button id="pauseBtn" class="ghost-button" type="button">Pause</button>
+                <button id="releaseBtn" class="primary-button" type="button">释放</button>
+                <button id="pauseBtn" class="ghost-button" type="button">暂停</button>
             </div>
 
             <div class="formula-box">
-                <h3>Readout</h3>
-                <p>Exit point:<strong id="exitReadout">plate P edge</strong></p>
-                <p>UPQ:<strong id="voltageReadout">+U0</strong></p>
-                <p>Status:<strong id="statusReadout">ready</strong></p>
+                <h3>读数</h3>
+                <p>出射位置：<strong id="exitReadout">P 板边缘</strong></p>
+                <p>UPQ：<strong id="voltageReadout">+U0</strong></p>
+                <p>状态：<strong id="statusReadout">就绪</strong></p>
             </div>
         </section>
 
         <section class="panel field-panel">
             <div class="section-title">
-                <h2>Motion</h2>
+                <h2>运动过程</h2>
                 <div class="legend">
-                    <span><i class="field-swatch"></i>Field</span>
-                    <span><i class="particle-swatch"></i>Particle</span>
-                    <span><i class="path-swatch"></i>Path</span>
-                    <span><i class="switch-swatch"></i>Switch</span>
+                    <span><i class="field-swatch"></i>电场</span>
+                    <span><i class="particle-swatch"></i>粒子</span>
+                    <span><i class="path-swatch"></i>轨迹</span>
+                    <span><i class="switch-swatch"></i>换向点</span>
                 </div>
             </div>
-            <canvas id="motionCanvas" width="1100" height="540" aria-label="Single particle in alternating voltage plates"></canvas>
+            <canvas id="motionCanvas" width="1100" height="540" aria-label="交变电压平行板间的粒子"></canvas>
         </section>
 
         <section class="panel graph-panel">
             <div class="section-title">
-                <h2>Graphs</h2>
+                <h2>图像</h2>
             </div>
-            <canvas id="graphCanvas" width="1300" height="430" aria-label="Voltage-time and vertical velocity graphs"></canvas>
+            <canvas id="graphCanvas" width="1300" height="430" aria-label="电压-时间与竖直速度图像"></canvas>
         </section>
     </main>
 

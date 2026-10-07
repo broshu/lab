@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>电流的微观解释</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">电流的微观解释</p>
+      <h1>金属中的电流是怎样形成的</h1>
+      <p class="lede">自由电子本来就在高速做无规则热运动。加上电场后，电子在无规则运动之外叠加了一个很小的定向漂移速度，于是形成宏观电流。</p>
+    </div>
+    <a class="back-link" href="../../index.html">返回首页</a>
+  </header>
+
+  <main class="app">
+    <section class="panel controls-panel">
+      <div class="mode-tabs" role="group" aria-label="显示模式">
+        <button class="mode-button active" id="diagramMode" type="button">示意模式</button>
+        <button class="mode-button" id="realMode" type="button">真实比例</button>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>电场</h2>
+          <span class="status-pill" id="fieldStatus">电场关闭</span>
+        </div>
+        <button class="field-switch" id="fieldToggle" type="button" aria-pressed="false">
+          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <span id="fieldToggleText">打开电场</span>
+        </button>
+        <label class="slider-row">
+          <span>电场强度</span>
+          <input id="fieldStrength" type="range" min="0" max="100" value="55">
+          <strong id="fieldValue">55%</strong>
+        </label>
+      </div>
+
+      <div class="control-block">
+        <div class="block-heading">
+          <h2>观察</h2>
+          <span class="status-pill neutral" id="timeScaleText">时间 ×1</span>
+        </div>
+        <label class="slider-row">
+          <span>时间倍率</span>
+          <input id="timeScale" type="range" min="0" max="4" step="1" value="1">
+          <strong id="timeValue">×3</strong>
+        </label>
+        <label class="slider-row">
+          <span>温度</span>
+          <input id="temperatureControl" type="range" min="80" max="900" step="10" value="300">
+          <strong id="temperatureValue">300 K</strong>
+        </label>
+        <button class="secondary-button" id="resetButton" type="button">重新随机热运动</button>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <span>平均漂移速率</span>
+          <strong id="driftMetric">0.000 mm/s</strong>
+        </div>
+        <div class="metric">
+          <span>热运动速率</span>
+          <strong id="thermalMetric">约 1.6 × 10⁶ m/s</strong>
+        </div>
+        <div class="metric">
+          <span>电流方向</span>
+          <strong id="currentMetric">无净电流</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage-panel">
+      <div class="stage-header">
+        <div>
+          <h2 id="stageTitle">示意模式</h2>
+          <p id="stageSubtitle">电子、原子大小和漂移速度都经过放大，便于看清无规则运动与定向漂移的关系。</p>
+        </div>
+        <div class="legend">
+          <span><i class="legend-dot nucleus"></i>金属正离子</span>
+          <span><i class="legend-dot electron"></i>自由电子</span>
+          <span><i class="legend-line"></i>漂移方向</span>
+        </div>
+      </div>
+      <canvas id="currentCanvas" width="1100" height="650"></canvas>
+      <div class="readout-strip">
+        <span id="scaleReadout">示意：大小和速度为教学需要做了放大</span>
+        <span id="motionReadout">当前状态：只有无规则热运动</span>
+      </div>
+    </section>
+
+    <section class="panel explanation-panel">
+      <h2>要点</h2>
+      <div class="concept-grid">
+        <div>
+          <h3>没有电场时</h3>
+          <p>电子向各个方向快速运动。温度越高，无规则热运动越快，但沿任一方向的平均速度仍约为零。</p>
+        </div>
+        <div>
+          <h3>有电场时</h3>
+          <p>电子仍在无规则运动，但叠加了一个与电场方向相反、非常小的漂移速度。电流方向与电子漂移方向相反。</p>
+        </div>
+        <div>
+          <h3>真实比例模式</h3>
+          <p>按铜的数据取比例：原子半径约 1.28 × 10⁻¹⁰ m，原子核半径约 4.8 × 10⁻¹⁵ m，核半径约为原子半径的 1/27000。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

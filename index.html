@@ -1,34 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Physics Lab</title>
+  <title>物理实验室</title>
   <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="site.css">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg: #f7f7f5;
-      --card: #fff;
-      --ink: #111;
-      --muted: #646464;
-      --line: #d9d9d4;
-      --soft-line: #ececea;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-    }
-
     main {
-      width: min(1120px, calc(100% - 32px));
-      margin: 0 auto;
       padding: 36px 0;
     }
 
@@ -62,12 +42,11 @@
       font-size: 15px;
       line-height: 1.35;
       font-weight: 600;
-      letter-spacing: 0;
       text-decoration: none;
     }
 
-    .card-title:hover,
-    .card-title:focus-visible {
+    a.card-title:hover,
+    a.card-title:focus-visible {
       text-decoration: underline;
       outline: none;
     }
@@ -82,84 +61,7 @@
       padding: 0 22px;
     }
 
-    .item-list {
-      display: grid;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .item-row {
-      height: 60px;
-      padding: 12px 0;
-      border-top: 1px solid var(--soft-line);
-    }
-
-    .item-row:first-child {
-      border-top: 0;
-    }
-
-    .item-link {
-      display: block;
-      width: 100%;
-      overflow: hidden;
-      padding: 9px 0;
-      border: 0;
-      color: var(--ink);
-      background: transparent;
-      font-size: 15px;
-      font-family: inherit;
-      font-weight: 600;
-      line-height: 1.35;
-      text-align: left;
-      text-decoration: none;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .folder-link {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .folder-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .item-link:hover,
-    .item-link:focus-visible {
-      text-decoration: underline;
-      outline: none;
-    }
-
-    .item-note {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.2;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .folder-icon {
-      display: inline-block;
-      width: 15px;
-      height: 11px;
-      margin-right: 8px;
-      border: 1px solid currentColor;
-      border-radius: 2px;
-      border-top-left-radius: 1px;
-      box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 0 currentColor;
-      flex: 0 0 auto;
-    }
-
-    .ask-link {
+    .homework-link {
       display: grid;
       place-items: center;
       height: 180px;
@@ -167,7 +69,7 @@
       text-decoration: none;
     }
 
-    .ask-mark {
+    .homework-mark {
       display: grid;
       place-items: center;
       width: 96px;
@@ -178,8 +80,8 @@
       font-weight: 700;
     }
 
-    .ask-link:hover,
-    .ask-link:focus-visible {
+    .homework-link:hover,
+    .homework-link:focus-visible {
       color: #fff;
       background: var(--ink);
       outline: none;
@@ -187,12 +89,8 @@
 
     @media (max-width: 560px) {
       main {
-        width: min(100% - 24px, 1120px);
+        width: calc(100% - 24px);
         padding: 24px 0;
-      }
-
-      .card {
-        height: 240px;
       }
 
       .grid {
@@ -206,10 +104,6 @@
       .card-body {
         padding: 0 18px;
       }
-
-      .item-link {
-        white-space: nowrap;
-      }
     }
   </style>
 </head>
@@ -218,108 +112,45 @@
     <div class="grid" id="cards"></div>
   </main>
 
-  <script src="library-data.js?v=html-folder-order"></script>
+  <script src="site.js"></script>
   <script>
-    const homeworkCard = {
-      title: "作业答案与详解",
-      mark: "解析",
-      href: "tutor/"
-    };
+    const { el, countText, sectionUrl, itemRow } = window.Lab;
 
-    const cardsRoot = document.querySelector("#cards");
+    function renderCard(section) {
+      const card = el("section", "card");
+      const header = el("div", "card-header");
+      const title = el("a", "card-title", section.title);
+      title.href = sectionUrl(section.id);
+      header.append(title, el("span", "card-count", countText(section.items.length)));
 
-    function createElement(tag, className, text) {
-      const element = document.createElement(tag);
-      if (className) {
-        element.className = className;
+      const list = el("ul", "item-list");
+      section.items.slice(0, 3).forEach((item) => list.append(itemRow(item, section, [])));
+      if (section.items.length === 0) {
+        list.append(el("li", "empty-note", "暂无内容"));
       }
-      if (text) {
-        element.textContent = text;
-      }
-      return element;
-    }
 
-    function itemCount(card) {
-      return card.items.length;
-    }
-
-    function shouldDownloadItem(item, card) {
-      if (item.action === "download") {
-        return true;
-      }
-      if (item.action === "open") {
-        return false;
-      }
-      return card.type === "download";
-    }
-
-    function makeFileLink(item, card) {
-      const action = createElement("a", "item-link", item.name);
-      action.href = item.href;
-      action.title = item.name;
-      if (shouldDownloadItem(item, card)) {
-        action.download = "";
-      } else {
-        action.target = "_blank";
-        action.rel = "noopener";
-      }
-      return action;
-    }
-
-    function makeFolderPreview(folder) {
-      const link = createElement("a", "item-link folder-link");
-      const icon = createElement("span", "folder-icon");
-      const name = createElement("span", "folder-name", folder.name);
-      const note = createElement("span", "item-note", `${folder.children.length} items`);
-      link.href = `library.html?section=resources&path=${encodeURIComponent(folder.name)}`;
-      link.title = folder.name;
-      name.prepend(icon);
-      link.append(name, note);
-      return link;
-    }
-
-    function renderCard(card) {
-      const section = createElement("section", "card");
-      const header = createElement("div", "card-header");
-      const title = createElement("a", "card-title", card.title);
-      title.href = `library.html?section=${encodeURIComponent(card.id)}`;
-      header.append(title, createElement("span", "card-count", `${itemCount(card)} items`));
-
-      const body = createElement("div", "card-body");
-      const list = createElement("ul", "item-list");
-      card.items.forEach((item) => {
-        const row = createElement("li", "item-row");
-        if (item.type === "folder") {
-          row.append(makeFolderPreview(item));
-        } else {
-          row.append(makeFileLink(item, card));
-        }
-        list.append(row);
-      });
+      const body = el("div", "card-body");
       body.append(list);
-      section.append(header, body);
-      return section;
+      card.append(header, body);
+      return card;
     }
 
     function renderHomeworkCard() {
-      const section = createElement("section", "card homework-card");
-      const header = createElement("div", "card-header");
-      header.append(createElement("span", "card-title", homeworkCard.title));
+      const card = el("section", "card");
+      const header = el("div", "card-header");
+      header.append(el("span", "card-title", "作业答案与详解"));
 
-      const link = createElement("a", "ask-link");
-      link.href = homeworkCard.href;
-      link.append(createElement("span", "ask-mark", homeworkCard.mark));
+      const link = el("a", "homework-link");
+      link.href = "tutor/";
+      link.append(el("span", "homework-mark", "解析"));
 
-      section.append(header, link);
-      return section;
+      card.append(header, link);
+      return card;
     }
 
-    async function init() {
-      const data = await window.loadLabData();
-      cardsRoot.replaceChildren(...data.map(renderCard), renderHomeworkCard());
-    }
-
-    init();
+    window.Lab.loadSections().then((sections) => {
+      document.querySelector("#cards").replaceChildren(...sections.map(renderCard), renderHomeworkCard());
+    });
   </script>
 </body>
 </html>

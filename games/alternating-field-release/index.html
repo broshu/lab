@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alternating Field Release</title>
+    <title>交变电场中粒子的释放</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="top-bar">
         <div>
-            <h1>Alternating Field Release</h1>
+            <h1>交变电场中粒子的释放</h1>
         </div>
         <div class="readout">
-            <span>Release time</span>
+            <span>释放时刻</span>
             <strong id="phaseReadout">5T/8</strong>
         </div>
     </header>
@@ -20,8 +20,8 @@
     <main class="layout">
         <section class="panel controls-panel">
             <div class="section-title">
-                <h2>Controls</h2>
-                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+                <h2>控制</h2>
+                <button id="resetBtn" class="ghost-button" type="button">重置</button>
             </div>
 
             <label class="slider-row">
@@ -31,35 +31,35 @@
             </label>
 
             <div class="button-row">
-                <button id="releaseBtn" class="primary-button" type="button">Release</button>
-                <button id="pauseBtn" class="ghost-button" type="button">Pause</button>
+                <button id="releaseBtn" class="primary-button" type="button">释放</button>
+                <button id="pauseBtn" class="ghost-button" type="button">暂停</button>
             </div>
 
             <div class="formula-box">
-                <h3>Readout</h3>
-                <p>Net drift:<strong id="driftReadout">to plate A</strong></p>
-                <p>Result:<strong id="resultReadout">ready</strong></p>
-                <p>Speed:<strong id="speedReadout">0.00</strong></p>
+                <h3>读数</h3>
+                <p>净漂移：<strong id="driftReadout">向 A 板</strong></p>
+                <p>结果：<strong id="resultReadout">就绪</strong></p>
+                <p>速度：<strong id="speedReadout">0.00</strong></p>
             </div>
         </section>
 
         <section class="panel field-panel">
             <div class="section-title">
-                <h2>Motion</h2>
+                <h2>运动过程</h2>
                 <div class="legend">
-                    <span><i class="field-swatch"></i>Field</span>
-                    <span><i class="flame-swatch"></i>Trail</span>
-                    <span><i class="path-swatch"></i>Path</span>
+                    <span><i class="field-swatch"></i>电场</span>
+                    <span><i class="flame-swatch"></i>拖尾</span>
+                    <span><i class="path-swatch"></i>轨迹</span>
                 </div>
             </div>
-            <canvas id="motionCanvas" width="980" height="500" aria-label="Positive particle motion in an alternating electric field"></canvas>
+            <canvas id="motionCanvas" width="980" height="500" aria-label="交变电场中正粒子的运动"></canvas>
         </section>
 
         <section class="panel graph-panel">
             <div class="section-title">
-                <h2>Graphs</h2>
+                <h2>图像</h2>
             </div>
-            <canvas id="graphCanvas" width="1300" height="420" aria-label="Voltage-time and velocity-time graphs"></canvas>
+            <canvas id="graphCanvas" width="1300" height="420" aria-label="电压-时间与速度-时间图像"></canvas>
         </section>
     </main>
 

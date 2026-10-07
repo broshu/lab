@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 function git(args) {
   return execFileSync("git", args, { encoding: "utf8" }).trim();
@@ -9,16 +9,16 @@ function cleanFileName(fileName) {
   return fileName.replace(/\.[^/.]+$/, "").trim();
 }
 
-function titleFromSlug(slug) {
-  return slug
-    .split(/[-_]+/)
-    .filter(Boolean)
-    .map((word) => (/\d/.test(word) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1)))
-    .join(" ");
+// 互动实验的名字取自页面 <title>，只保留第一个 “ · ” 之前的部分；没有标题时退回文件夹名。
+function gameTitle(indexPath, folderName) {
+  const html = readFileSync(indexPath, "utf8");
+  const title = (html.match(/<title>([^<]*)<\/title>/i)?.[1] || "").split(" · ")[0].trim();
+  return title || folderName;
 }
 
+// 隐藏文件、Office 临时文件和模板不在网站上列出。
 function isHiddenName(name) {
-  return !name || name.startsWith(".");
+  return !name || name.startsWith(".") || name.startsWith("~$") || /^template/i.test(name) || name === "__pycache__";
 }
 
 function trackedFiles() {
@@ -76,7 +76,7 @@ function directDirectories(files, directory) {
 
 function buildPpt(files) {
   const items = directFiles(files, "ppt/")
-    .filter((path) => /\.(pptx|pdf|html)$/i.test(path) && !path.split("/").pop().startsWith("~$"))
+    .filter((path) => /\.(pptx|pdf|html)$/i.test(path))
     .map((path) => ({
       name: cleanFileName(path.split("/").pop()),
       href: path,
@@ -94,7 +94,7 @@ function buildGames(files) {
       const folderName = directory.split("/").filter(Boolean).pop();
       const indexPath = `${directory}index.html`;
       return {
-        name: titleFromSlug(folderName),
+        name: gameTitle(indexPath, folderName),
         href: indexPath,
         updatedAt: latestCommitDate(indexPath) || latestCommitDate(directory)
       };
@@ -115,7 +115,7 @@ function buildResources(files, directory = "resources/") {
     };
   });
 
-  const fileItems = directFiles(files, directory).map((path) => ({
+  const fileItems = directFiles(files, directory).filter((path) => !/\.(pyc|py)$/i.test(path)).map((path) => ({
     name: cleanFileName(path.split("/").pop()),
     href: path,
     updatedAt: latestCommitDate(path)
@@ -130,19 +130,19 @@ const manifest = {
   sections: [
     {
       id: "ppt",
-      title: "PPT",
+      title: "课件",
       type: "download",
       items: buildPpt(files)
     },
     {
       id: "games",
-      title: "Games",
+      title: "互动实验",
       type: "open",
       items: buildGames(files)
     },
     {
       id: "resources",
-      title: "Resources",
+      title: "资料",
       type: "resources",
       items: buildResources(files)
     }

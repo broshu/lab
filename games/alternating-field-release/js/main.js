@@ -99,7 +99,7 @@
     function syncLabels() {
         const text = phaseText(state.selectedPhase);
         const drift = driftForPhase(state.selectedPhase);
-        const direction = drift < 0 ? "to plate A" : "to plate B";
+        const direction = drift < 0 ? "向 A 板" : "向 B 板";
         ui.phaseLabel.textContent = text;
         ui.phaseReadout.textContent = text;
         ui.driftReadout.textContent = direction;
@@ -117,8 +117,8 @@
         state.paused = false;
         state.result = keepResult ? state.result : null;
         state.trail = [];
-        ui.pauseBtn.textContent = "Pause";
-        ui.resultReadout.textContent = state.result || "ready";
+        ui.pauseBtn.textContent = "暂停";
+        ui.resultReadout.textContent = state.result || "就绪";
         syncLabels();
         drawMotion();
     }
@@ -133,8 +133,8 @@
         state.result = null;
         state.trail = [];
         state.lastFrame = 0;
-        ui.pauseBtn.textContent = "Pause";
-        ui.resultReadout.textContent = "running";
+        ui.pauseBtn.textContent = "暂停";
+        ui.resultReadout.textContent = "运动中";
         syncLabels();
     }
 
@@ -165,7 +165,7 @@
 
         if (state.x <= -C.plateLimit || state.x >= C.plateLimit) {
             state.x = clamp(state.x, -C.plateLimit, C.plateLimit);
-            state.result = state.x < 0 ? "hit plate A" : "hit plate B";
+            state.result = state.x < 0 ? "打在 A 板" : "打在 B 板";
             state.running = false;
             ui.resultReadout.textContent = state.result;
         }
@@ -515,7 +515,7 @@
             gctx.fillRect(x - 1, midV - 4, 2, 8);
             gctx.fillText(label, x, midU + 22);
         });
-        gctx.fillText("time", startX + graphW - 22, midV + 26);
+        gctx.fillText("时间", startX + graphW - 22, midV + 26);
     }
 
     function onPhaseChange(value) {
@@ -542,7 +542,7 @@
     ui.pauseBtn.addEventListener("click", () => {
         if (!state.running || state.result) return;
         state.paused = !state.paused;
-        ui.pauseBtn.textContent = state.paused ? "Resume" : "Pause";
+        ui.pauseBtn.textContent = state.paused ? "继续" : "暂停";
     });
     ui.resetBtn.addEventListener("click", () => resetMotion(false));
     window.addEventListener("resize", () => {

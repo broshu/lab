@@ -1,55 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oscilloscope Principle Demo</title>
+    <title>示波管原理</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="top-bar">
         <div>
-            <h1>Oscilloscope Principle Demo</h1>
+            <h1>示波管原理</h1>
         </div>
     </header>
 
     <main class="layout">
         <section class="panel controls-panel">
             <div class="section-title">
-                <h2>Voltage Controls</h2>
-                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+                <h2>电压控制</h2>
+                <button id="resetBtn" class="ghost-button" type="button">重置</button>
             </div>
 
-            <div class="preset-group" aria-label="X voltage mode">
-                <span>X mode</span>
+            <div class="preset-group" aria-label="X 电压模式">
+                <span>X 模式</span>
                 <div class="segmented-control">
-                    <button class="mode-button active" type="button" data-axis="x" data-mode="manual">Manual</button>
-                    <button class="mode-button" type="button" data-axis="x" data-mode="sweep">Sweep</button>
+                    <button class="mode-button active" type="button" data-axis="x" data-mode="manual">手动</button>
+                    <button class="mode-button" type="button" data-axis="x" data-mode="sweep">扫描</button>
                 </div>
             </div>
 
             <label class="slider-row">
-                <span>X voltage</span>
+                <span>X 偏转电压</span>
                 <input id="voltageX" type="range" min="-120" max="120" step="1" value="0">
                 <output id="voltageXLabel">0 V</output>
             </label>
 
-            <div class="preset-group" aria-label="Y voltage mode">
-                <span>Y mode</span>
+            <div class="preset-group" aria-label="Y 电压模式">
+                <span>Y 模式</span>
                 <div class="segmented-control">
-                    <button class="mode-button active" type="button" data-axis="y" data-mode="manual">Manual</button>
-                    <button class="mode-button" type="button" data-axis="y" data-mode="sine">Sine</button>
+                    <button class="mode-button active" type="button" data-axis="y" data-mode="manual">手动</button>
+                    <button class="mode-button" type="button" data-axis="y" data-mode="sine">正弦</button>
                 </div>
             </div>
 
             <label class="slider-row">
-                <span>Y voltage</span>
+                <span>Y 偏转电压</span>
                 <input id="voltageY" type="range" min="-120" max="120" step="1" value="0">
                 <output id="voltageYLabel">0 V</output>
             </label>
 
             <label class="slider-row">
-                <span>Beam intensity</span>
+                <span>亮度</span>
                 <input id="intensity" type="range" min="10" max="100" step="1" value="72">
                 <output id="intensityLabel">72%</output>
             </label>
@@ -57,48 +57,48 @@
             <div class="toggles">
                 <label class="check-row">
                     <input id="traceToggle" type="checkbox" checked>
-                    <span>Keep phosphor trace</span>
+                    <span>保留荧光余迹</span>
                 </label>
                 <label class="check-row">
                     <input id="animateToggle" type="checkbox" checked>
-                    <span>Animate ion beam</span>
+                    <span>显示粒子束动画</span>
                 </label>
             </div>
 
             <div class="formula-box">
-                <h3>Screen Readout</h3>
-                <p>X shift:<strong id="xShift">0.0</strong> div</p>
-                <p>Y shift:<strong id="yShift">0.0</strong> div</p>
+                <h3>荧光屏读数</h3>
+                <p>X 偏移：<strong id="xShift">0.0</strong> 格</p>
+                <p>Y 偏移：<strong id="yShift">0.0</strong> 格</p>
             </div>
         </section>
 
         <section class="panel screen-panel">
             <div class="section-title">
-                <h2>Fluorescent Screen</h2>
+                <h2>荧光屏</h2>
                 <div class="legend">
-                    <span><i class="spot-swatch"></i>Ion spot</span>
-                    <span><i class="trace-swatch"></i>Trace</span>
+                    <span><i class="spot-swatch"></i>亮点</span>
+                    <span><i class="trace-swatch"></i>余迹</span>
                 </div>
             </div>
             <div class="scope-shell">
-                <canvas id="screenCanvas" width="720" height="520" aria-label="Oscilloscope fluorescent screen"></canvas>
+                <canvas id="screenCanvas" width="720" height="520" aria-label="示波管荧光屏"></canvas>
             </div>
         </section>
 
         <section class="panel beam-panel">
             <div class="section-title">
-                <h2>Beam Deflection</h2>
+                <h2>粒子束偏转</h2>
                 <div class="beam-readout">
                     <span id="fieldXLabel">Ex = 0.00</span>
                     <span id="fieldYLabel">Ey = 0.00</span>
                 </div>
             </div>
-            <canvas id="beamCanvas" width="1100" height="360" aria-label="Ion beam through deflection plates"></canvas>
+            <canvas id="beamCanvas" width="1100" height="360" aria-label="粒子束穿过偏转极板"></canvas>
         </section>
     </main>
 
     <footer>
-        <p>This simplified model ignores gravity and collisions, focusing only on voltage-driven beam deflection.</p>
+        <p>简化模型：忽略重力和碰撞，只考虑偏转电压引起的粒子束偏转。</p>
     </footer>
 
     <script src="js/main.js"></script>

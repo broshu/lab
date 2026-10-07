@@ -108,12 +108,12 @@
     }
 
     function exitText(y) {
-        if (Math.abs(y) < 0.035) return "plate P edge";
-        if (Math.abs(y - 0.5) < 0.04) return "midline";
-        if (Math.abs(y - 1) < 0.04) return "plate Q edge";
-        if (y < 0) return "above plate P";
-        if (y > 1) return "below plate Q";
-        return `${y.toFixed(2)}d from P`;
+        if (Math.abs(y) < 0.035) return "P 板边缘";
+        if (Math.abs(y - 0.5) < 0.04) return "中线";
+        if (Math.abs(y - 1) < 0.04) return "Q 板边缘";
+        if (y < 0) return "P 板上方";
+        if (y > 1) return "Q 板下方";
+        return `距 P 板 ${y.toFixed(2)}d`;
     }
 
     function syncLabels() {
@@ -130,10 +130,10 @@
     }
 
     function statusText() {
-        if (state.running && !state.paused) return "moving";
-        if (state.paused) return "paused";
-        if (state.time >= state.selectedPhase + 1) return "exited";
-        return "ready";
+        if (state.running && !state.paused) return "运动中";
+        if (state.paused) return "已暂停";
+        if (state.time >= state.selectedPhase + 1) return "已射出";
+        return "就绪";
     }
 
     function resetParticle() {
@@ -141,7 +141,7 @@
         state.running = false;
         state.paused = false;
         state.particle = { trail: [] };
-        ui.pauseBtn.textContent = "Pause";
+        ui.pauseBtn.textContent = "暂停";
         syncLabels();
         drawMotion();
     }
@@ -151,7 +151,7 @@
         state.running = true;
         state.paused = false;
         state.particle = { trail: [] };
-        ui.pauseBtn.textContent = "Pause";
+        ui.pauseBtn.textContent = "暂停";
         syncLabels();
     }
 
@@ -465,7 +465,7 @@
     function drawMarkers(startX, midU, midV, graphW) {
         const releaseX = xForTime(startX, graphW, state.selectedPhase);
         const nowX = xForTime(startX, graphW, clamp(state.time, 0, C.graphDuration));
-        drawMarker(releaseX, midU, midV, "#d64f62", `release ${phaseText(state.selectedPhase)}`);
+        drawMarker(releaseX, midU, midV, "#d64f62", `释放 ${phaseText(state.selectedPhase)}`);
         drawMarker(nowX, midU, midV, "#e69d28", `t = ${phaseText(clamp(state.time, 0, C.graphDuration))}`);
     }
 
@@ -512,7 +512,7 @@
             gctx.fillRect(x - 1, midV - 4, 2, 8);
             gctx.fillText(label, x, midU + 22);
         });
-        gctx.fillText("time", startX + graphW - 22, midV + 26);
+        gctx.fillText("时间", startX + graphW - 22, midV + 26);
     }
 
     function onPhaseChange(value) {
@@ -540,7 +540,7 @@
     ui.pauseBtn.addEventListener("click", () => {
         if (!state.running) return;
         state.paused = !state.paused;
-        ui.pauseBtn.textContent = state.paused ? "Resume" : "Pause";
+        ui.pauseBtn.textContent = state.paused ? "继续" : "暂停";
         syncLabels();
     });
     ui.resetBtn.addEventListener("click", resetParticle);

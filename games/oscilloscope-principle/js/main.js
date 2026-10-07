@@ -260,11 +260,11 @@
         bctx.fillStyle = "#14212f";
         bctx.font = "13px Avenir Next, Segoe UI, sans-serif";
         bctx.textAlign = "left";
-        bctx.fillText("Ion source", 38, mid + 62);
+        bctx.fillText("粒子源", 38, mid + 62);
 
         bctx.fillStyle = "#253d54";
         bctx.fillRect(width - 92, mid - 74, 18, 148);
-        bctx.fillText("Screen", width - 118, mid + 100);
+        bctx.fillText("荧光屏", width - 118, mid + 100);
     }
 
     function drawPlates(width, height, layer) {
@@ -273,7 +273,7 @@
         const plateX = width * 0.58;
 
         if (layer === "rear") {
-            drawPlatePair(plateY, mid, true, state.vy, "Y plates");
+            drawPlatePair(plateY, mid, true, state.vy, "Y 偏转板");
         }
         drawXPlates3D(plateX, mid, state.vx, layer);
     }
@@ -308,7 +308,7 @@
             bctx.font = "13px Avenir Next, Segoe UI, sans-serif";
             bctx.textAlign = "center";
             bctx.fillStyle = "#34465a";
-            bctx.fillText("X plates", x, mid + 108);
+            bctx.fillText("X 偏转板", x, mid + 108);
         }
     }
 
@@ -468,9 +468,9 @@
         bctx.fillStyle = "#14212f";
         bctx.font = "13px Avenir Next, Segoe UI, sans-serif";
         bctx.textAlign = "left";
-        bctx.fillText("The accelerated ion beam enters two perpendicular deflection fields", 132, mid - 116);
+        bctx.fillText("加速后的粒子束依次穿过两组相互垂直的偏转电场", 132, mid - 116);
         bctx.textAlign = "right";
-        bctx.fillText(`Spot voltage: X ${signed(state.vx)} V, Y ${signed(state.vy)} V`, width - 74, mid - 96);
+        bctx.fillText(`亮点对应电压：X ${signed(state.vx)} V，Y ${signed(state.vy)} V`, width - 74, mid - 96);
     }
 
     function drawFrame(now) {

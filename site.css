@@ -1,0 +1,99 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f7f7f5;
+  --card: #fff;
+  --ink: #111;
+  --muted: #646464;
+  --line: #d9d9d4;
+  --soft-line: #ececea;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+main {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.item-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-row {
+  height: 60px;
+  padding: 12px 0;
+  border-top: 1px solid var(--soft-line);
+}
+
+.item-row:first-child {
+  border-top: 0;
+}
+
+.item-link {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  padding: 9px 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-link:hover,
+.item-link:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.folder-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.folder-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.folder-icon {
+  display: inline-block;
+  width: 15px;
+  height: 11px;
+  margin-right: 8px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  border-top-left-radius: 1px;
+  box-shadow: 4px -4px 0 -1px #fff, 4px -4px 0 0 currentColor;
+}
+
+.empty-note {
+  padding: 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+}

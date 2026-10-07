@@ -939,7 +939,7 @@ $('vy0').oninput = (e) => {
 
 $('btn-play').onclick = () => {
   state.running = !state.running;
-  $('btn-play').textContent = state.running ? '❚❚ pause' : '▶ start';
+  $('btn-play').textContent = state.running ? '❚❚ 暂停' : '▶ 开始';
   $('btn-play').classList.toggle('running', state.running);
 };
 $('btn-reset').onclick = () => {
