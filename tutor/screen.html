@@ -73,7 +73,7 @@
       min-height: calc(var(--u) * 3.6); min-width: calc(var(--u) * 3.6);
       padding: 0 calc(var(--u) * 1.1);
       border: 1px solid var(--rule); border-radius: calc(var(--u) * .5);
-      background: var(--sheet); font-size: calc(var(--u) * 1.3); color: var(--ink-2);
+      background: var(--sheet); font-size: calc(var(--u) * 1.3); color: var(--ink-2); white-space: nowrap;
     }
     .tool:active { background: var(--scope-soft); }
 
@@ -181,7 +181,7 @@
       font-size: calc(var(--u) * 1.55);
     }
     .msg.note { color: var(--alert); font-size: calc(var(--u) * 1.4); }
-    .msg.note button { margin-left: calc(var(--u) * .6); }
+    .msg.note .retry { margin-left: calc(var(--u) * .6); min-height: calc(var(--u) * 3.4); padding: 0 calc(var(--u) * 1.2); border: 1px solid var(--alert); border-radius: calc(var(--u) * .45); background: transparent; color: var(--alert); font-size: calc(var(--u) * 1.3); }
     .thinking { display: inline-flex; gap: calc(var(--u) * .5); align-items: center; color: var(--ink-3); font-size: calc(var(--u) * 1.4); }
     .thinking span { width: calc(var(--u) * .7); height: calc(var(--u) * .7); border-radius: 50%; background: var(--scope); opacity: .25; animation: blink 1.2s infinite; }
     .thinking span:nth-child(2) { animation-delay: .2s; }
@@ -197,17 +197,7 @@
     }
     .choice:active { background: var(--scope-soft); border-color: var(--scope); }
     .choice:disabled { opacity: .4; }
-    .actions { display: flex; gap: calc(var(--u) * .8); flex-wrap: wrap; }
-    .act {
-      min-height: calc(var(--u) * 4); padding: 0 calc(var(--u) * 1.4);
-      border: 1px solid var(--rule); border-radius: calc(var(--u) * .45); background: transparent;
-      font-size: calc(var(--u) * 1.4); color: var(--ink-2);
-    }
-    .act.primary { border-color: var(--scope); color: var(--scope); font-weight: 700; }
-    .act:active { background: var(--scope-soft); }
-    .act:disabled { opacity: .4; }
-    .act.right { margin-left: auto; }
-    .write { display: flex; gap: calc(var(--u) * .8); margin-bottom: calc(var(--u) * .9); }
+    .write { display: flex; gap: calc(var(--u) * .8); }
     .write textarea {
       flex: 1; min-height: calc(var(--u) * 4.8); max-height: calc(var(--u) * 10); resize: none;
       padding: calc(var(--u) * .7) calc(var(--u) * 1); border: 2px solid var(--scope); border-radius: calc(var(--u) * .45);
@@ -237,6 +227,8 @@
       .log { max-height: none; overflow: visible; }
       .choices { grid-template-columns: 1fr; }
       .brand .crumbs { display: none; }
+      .bar { gap: calc(var(--u) * .6); padding: calc(var(--u) * .8) calc(var(--u) * 1.2); }
+      #smaller, #bigger, #full { display: none; }
       .toc, .picker { padding: calc(var(--u) * 1.6) calc(var(--u) * 1.2) calc(var(--u) * 3); height: auto; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -251,6 +243,7 @@
         <strong>作业问答</strong>
         <span class="crumbs" id="crumbs">选一道题，我们一步步把它想明白</span>
       </div>
+      <button class="tool" type="button" id="other" hidden>换一道题</button>
       <button class="tool" type="button" id="home" hidden>回目录</button>
       <button class="tool" type="button" id="smaller" aria-label="字小一点">A−</button>
       <button class="tool" type="button" id="bigger" aria-label="字大一点">A+</button>
@@ -298,16 +291,10 @@
           <div class="log" id="log" aria-live="polite"></div>
           <div class="answer-zone">
             <div class="choices" id="choices"></div>
-            <form class="write" id="write" hidden>
-              <textarea id="input" rows="1" maxlength="300" placeholder="写下你的想法（可以用手写输入）" aria-label="你的回答"></textarea>
+            <form class="write" id="write">
+              <textarea id="input" rows="1" maxlength="300" placeholder="输入你的问题或想法" aria-label="输入你的问题或想法"></textarea>
               <button type="submit">发送</button>
             </form>
-            <div class="actions">
-              <button class="act primary" type="button" id="hint">给我一点提示</button>
-              <button class="act" type="button" id="type">我想自己写</button>
-              <button class="act" type="button" id="restart">这题重新来</button>
-              <button class="act right" type="button" id="other">换一道题</button>
-            </div>
           </div>
         </section>
       </div>
@@ -376,6 +363,7 @@
     function show(view) {
       for (const v of ["toc", "pick", "talk"]) $("view-" + v).hidden = v !== view;
       $("home").hidden = view === "toc";
+      $("other").hidden = view !== "talk";
       const crumbs = [];
       if (view !== "toc" && state.chapter) crumbs.push(state.book.title, state.chapter.title);
       if (view === "talk" && state.question) crumbs.push(`第 ${state.question.no} 题`);
@@ -556,7 +544,7 @@
 
     function setBusy(on) {
       state.busy = on;
-      for (const b of document.querySelectorAll(".choice, #hint, #type, #restart, #write button")) b.disabled = on;
+      for (const b of document.querySelectorAll(".choice, #write button")) b.disabled = on;
       setThinking(on);
     }
 
@@ -626,7 +614,6 @@
       text = text.trim();
       if (!silent) addMessage("me", text);
       $("choices").replaceChildren();
-      $("write").hidden = true;
       state.messages.push({ role: "user", content: text });
       setBusy(true);
       const token = state.token;
@@ -659,7 +646,7 @@
         note.textContent = err.message;
         const retry = document.createElement("button");
         retry.type = "button";
-        retry.className = "act";
+        retry.className = "retry";
         retry.textContent = "再试一次";
         retry.addEventListener("click", () => { note.remove(); send(text, { silent: true }); });
         note.append(retry);
@@ -690,7 +677,6 @@
       $("problem").scrollTop = 0;
       $("log").replaceChildren();
       $("choices").replaceChildren();
-      $("write").hidden = true;
       renderRail();
       show("talk");
       send("老师好，我选了这道题，我们开始吧。", { silent: true });
@@ -698,11 +684,6 @@
 
     // ------------------------------------------------------------ 按钮
 
-    $("hint").addEventListener("click", () => send("我卡住了，给我一点提示。"));
-    $("type").addEventListener("click", () => {
-      $("write").hidden = !$("write").hidden;
-      if (!$("write").hidden) $("input").focus();
-    });
     $("write").addEventListener("submit", (e) => {
       e.preventDefault();
       const v = $("input").value;
@@ -712,7 +693,6 @@
     $("input").addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("write").requestSubmit(); }
     });
-    $("restart").addEventListener("click", () => openQuestion(state.question));
     $("other").addEventListener("click", () => { state.token += 1; setBusy(false); openChapter(state.chapter); });
     $("home").addEventListener("click", goHome);
 
