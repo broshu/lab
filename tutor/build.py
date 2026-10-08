@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "data.js"
 PAGE = ROOT / "index.html"
+SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
 BOOKS = [
@@ -169,15 +170,29 @@ def parse_topic(path):
 
         after = body[a.end():]
         after = re.sub(r"^\s*\*\*解析\*\*\s*", "", after, count=1)
+        # 可选的「**问答脚本**」块（guides/ 里写好、insert_guides.py 插入）：给大屏 AI 用的提问路线，答案页不显示
+        guide = None
+        g = re.search(r"\n\*\*问答脚本\*\*\s*\n", after)
+        if g:
+            guide = after[g.end():].strip()
+            after = after[:g.start()]
 
-        questions.append({
+        question = {
             "no": int(h.group(1)),
             "type": (h.group(2) or "").strip(),
             "section": (h.group(3) or "").strip(),
             # 计算题的答案本身含 LaTeX，会以 innerHTML 插入页面，这里先转义
             "answer": html.escape(a.group(1).strip(), quote=False),
             "html": md_to_html(after),
-        })
+        }
+        # 可选的题干：「**答案：**」上方的「**题目**」块（extract_stems.py 从作业本 docx 提取）。
+        # 答案页不显示它，大屏问答页（screen.html）用它出题。
+        stem = re.match(r"\s*\*\*题目\*\*\s*\n(.*)", body[:a.start()], re.S)
+        if stem and stem.group(1).strip():
+            question["stem"] = md_to_html(stem.group(1).strip())
+        if guide:
+            question["guide"] = guide
+        questions.append(question)
 
     return meta, questions
 
@@ -240,20 +255,21 @@ def main():
     # 给 data.js 打指纹，并写进 index.html 的 script 标签。
     # 不这么做的话，浏览器会一直用缓存里的旧 data.js，新加的章节死活出不来。
     stamp = hashlib.md5(payload.encode("utf8")).hexdigest()[:8]
-    page = PAGE.read_text(encoding="utf8")
-    page, n = re.subn(
-        r'<script src="data\.js(?:\?v=[0-9a-f]+)?"></script>',
-        f'<script src="data.js?v={stamp}"></script>',
-        page,
-    )
-    if n != 1:
-        raise SystemExit("index.html 里没找到唯一的 data.js script 标签，缓存指纹没写进去")
-    PAGE.write_text(page, encoding="utf8")
+    for page_path in (PAGE, SCREEN):
+        page = page_path.read_text(encoding="utf8")
+        page, n = re.subn(
+            r'<script src="data\.js(?:\?v=[0-9a-f]+)?"></script>',
+            f'<script src="data.js?v={stamp}"></script>',
+            page,
+        )
+        if n != 1:
+            raise SystemExit(f"{page_path.name} 里没找到唯一的 data.js script 标签，缓存指纹没写进去")
+        page_path.write_text(page, encoding="utf8")
 
     done = sum(1 for c in chapters if c["ready"])
     total = sum(len(c["questions"]) for c in chapters)
     print(f"已写入 {OUT.name}：{done}/{len(chapters)} 个章节，共 {total} 题")
-    print(f"index.html 已更新为 data.js?v={stamp}（构建时间 {built}）")
+    print(f"index.html、screen.html 已更新为 data.js?v={stamp}（构建时间 {built}）")
 
 
 if __name__ == "__main__":

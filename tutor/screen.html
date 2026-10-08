@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9eef1">
+  <title>作业问答</title>
+  <link rel="icon" type="image/png" href="../icon.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+        integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <style>
+    /*
+      大屏苏格拉底问答。设计：坐标纸 + 作业本目录 + 荧光笔。
+      - 纸：带淡网格的冷灰蓝，像物理坐标纸，大屏强光下不刺眼；
+      - 墨：深海军蓝，正文和题目；
+      - 荧光黄：只标「现在要回答的那个问题」；
+      - 示波器绿：学生自己的话、进度。
+      字号全部跟视口走（--u），一体机 1920 宽时正文约 26px，后排也看得清；右上角 A−/A+ 还能整体缩放。
+    */
+    :root {
+      --paper: #e9eef1;
+      --grid: rgba(27, 42, 58, .055);
+      --sheet: #fbfcfc;
+      --ink: #1b2a3a;
+      --ink-2: #4c5c6b;
+      --ink-3: #7d8a96;
+      --rule: #cdd6dc;
+      --scope: #0c7a6f;
+      --scope-soft: #dcefeb;
+      --marker: #ffe066;
+      --alert: #b3412e;
+      --scale: 1;
+      --u: calc(clamp(9px, .74vw + .35vh, 22px) * var(--scale));
+      --font: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC",
+              "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      font-size: calc(var(--u) * 1.6);
+      line-height: 1.65;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: calc(var(--u) * 2.4) calc(var(--u) * 2.4);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      overflow: hidden;
+    }
+    button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+    :focus-visible { outline: calc(var(--u) * .22) solid var(--scope); outline-offset: calc(var(--u) * .18); }
+    [hidden] { display: none !important; }
+
+    .app { height: 100dvh; display: grid; grid-template-rows: auto 1fr; }
+
+    /* ---------------------------------------------------------- 顶栏 */
+    .bar {
+      display: flex; align-items: center; gap: calc(var(--u) * 1.2);
+      padding: calc(var(--u) * 1) calc(var(--u) * 2.4);
+      border-bottom: 1px solid var(--rule);
+      background: rgba(233, 238, 241, .92);
+    }
+    .brand { display: flex; align-items: baseline; gap: calc(var(--u) * .9); margin-right: auto; min-width: 0; }
+    .brand strong { font-size: calc(var(--u) * 1.9); font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+    .crumbs { color: var(--ink-2); font-size: calc(var(--u) * 1.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tool {
+      min-height: calc(var(--u) * 3.6); min-width: calc(var(--u) * 3.6);
+      padding: 0 calc(var(--u) * 1.1);
+      border: 1px solid var(--rule); border-radius: calc(var(--u) * .5);
+      background: var(--sheet); font-size: calc(var(--u) * 1.3); color: var(--ink-2);
+    }
+    .tool:active { background: var(--scope-soft); }
+
+    .view { min-height: 0; overflow: hidden; }
+
+    /* ---------------------------------------------------------- 选章节：作业本目录 */
+    .toc { height: 100%; overflow-y: auto; padding: calc(var(--u) * 2.4) calc(var(--u) * 4) calc(var(--u) * 4); }
+    .toc-head { max-width: calc(var(--u) * 88); margin: 0 auto calc(var(--u) * 2); }
+    .toc-head h1 { margin: 0; font-size: calc(var(--u) * 3.6); line-height: 1.2; font-weight: 800; letter-spacing: .02em; }
+    .toc-head p { margin: calc(var(--u) * .6) 0 0; color: var(--ink-2); font-size: calc(var(--u) * 1.55); }
+    .books { display: flex; gap: calc(var(--u) * .8); max-width: calc(var(--u) * 88); margin: 0 auto calc(var(--u) * 1.6); flex-wrap: wrap; }
+    .book {
+      min-height: calc(var(--u) * 3.8); padding: 0 calc(var(--u) * 1.6);
+      border: 1px solid var(--rule); border-radius: 999px; background: var(--sheet);
+      font-size: calc(var(--u) * 1.45); color: var(--ink-2);
+    }
+    .book[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .book:disabled { opacity: .45; cursor: default; }
+    .sheet-list {
+      max-width: calc(var(--u) * 88); margin: 0 auto;
+      background: var(--sheet); border: 1px solid var(--rule); border-radius: calc(var(--u) * .4);
+      padding: calc(var(--u) * .6) calc(var(--u) * 2.4);
+    }
+    .group-title { margin: calc(var(--u) * 1.4) 0 calc(var(--u) * .2); color: var(--scope); font-size: calc(var(--u) * 1.35); font-weight: 700; }
+    .toc-row {
+      display: flex; align-items: baseline; gap: calc(var(--u) * .8); width: 100%;
+      min-height: calc(var(--u) * 4.4); padding: calc(var(--u) * .7) 0;
+      border: 0; border-bottom: 1px dashed var(--rule); background: none; text-align: left;
+      font-size: calc(var(--u) * 1.75);
+    }
+    .toc-row:last-child { border-bottom: 0; }
+    .toc-row .leader { flex: 1; border-bottom: 2px dotted var(--ink-3); transform: translateY(-.3em); min-width: calc(var(--u) * 2); }
+    .toc-row .count { color: var(--ink-2); font-size: calc(var(--u) * 1.4); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .toc-row:active { background: var(--scope-soft); }
+    .toc-empty { padding: calc(var(--u) * 2) 0; color: var(--ink-2); font-size: calc(var(--u) * 1.6); }
+
+    /* ---------------------------------------------------------- 选题号 */
+    .picker { height: 100%; overflow-y: auto; padding: calc(var(--u) * 2.4) calc(var(--u) * 4) calc(var(--u) * 4); }
+    .picker-inner { max-width: calc(var(--u) * 100); margin: 0 auto; }
+    .picker h2 { margin: 0 0 calc(var(--u) * .4); font-size: calc(var(--u) * 3); line-height: 1.25; font-weight: 800; }
+    .picker .hint { margin: 0 0 calc(var(--u) * 2); color: var(--ink-2); font-size: calc(var(--u) * 1.5); }
+    .qgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 21), 1fr)); gap: calc(var(--u) * 1.1); }
+    .qtile {
+      display: grid; grid-template-columns: auto 1fr; align-items: center; gap: calc(var(--u) * 1.1);
+      min-height: calc(var(--u) * 7.2); padding: calc(var(--u) * .9) calc(var(--u) * 1.3);
+      border: 1px solid var(--rule); border-radius: calc(var(--u) * .4); background: var(--sheet); text-align: left;
+    }
+    .qtile:active { border-color: var(--scope); background: var(--scope-soft); }
+    .qtile .no { font-size: calc(var(--u) * 3.6); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); min-width: 1.3em; text-align: center; }
+    .qtile .what { font-size: calc(var(--u) * 1.4); line-height: 1.45; color: var(--ink-2); }
+    .qtile .what b { display: block; color: var(--ink); font-weight: 700; font-size: calc(var(--u) * 1.3); }
+
+    /* ---------------------------------------------------------- 问答 */
+    .talk { height: 100%; display: grid; grid-template-columns: minmax(0, 43fr) minmax(0, 57fr); }
+
+    .problem {
+      position: relative; min-height: 0; overflow-y: auto;
+      margin: calc(var(--u) * 1.6) 0 calc(var(--u) * 1.6) calc(var(--u) * 2.4);
+      padding: calc(var(--u) * 2.2) calc(var(--u) * 2.6) calc(var(--u) * 3) calc(var(--u) * 9);
+      background: var(--sheet); border: 1px solid var(--rule); border-radius: calc(var(--u) * .4);
+      box-shadow: 0 calc(var(--u) * .2) 0 var(--rule);
+      font-size: calc(var(--u) * 1.62);
+    }
+    /* 题号：坐在页边距里的大号空心数字，整页唯一的「大动作」 */
+    .problem .big-no {
+      position: absolute; left: calc(var(--u) * .6); top: calc(var(--u) * 1.4);
+      width: calc(var(--u) * 7); text-align: center; letter-spacing: -.04em;
+      font-size: calc(var(--u) * 5.4); line-height: 1; font-weight: 900; font-variant-numeric: tabular-nums;
+      color: transparent; -webkit-text-stroke: calc(var(--u) * .14) var(--ink);
+    }
+    .problem .big-no small { display: block; margin-top: calc(var(--u) * .5); font-size: calc(var(--u) * 1.2); font-weight: 600; color: var(--ink-2); -webkit-text-stroke: 0; }
+    .problem .margin-line { position: absolute; left: calc(var(--u) * 7.8); top: 0; bottom: 0; border-left: 2px solid rgba(179, 65, 46, .35); }
+    .problem .source { margin: 0 0 calc(var(--u) * 1); color: var(--ink-2); font-size: calc(var(--u) * 1.3); }
+    .stem p { margin: 0 0 calc(var(--u) * .9); }
+    .stem ul { list-style: none; margin: 0 0 calc(var(--u) * 1); padding: 0; }
+    .stem li { padding: calc(var(--u) * .25) 0; }
+    .stem figure { margin: calc(var(--u) * .4) 0 calc(var(--u) * 1.2); }
+    .stem figure img { display: block; max-width: 100%; max-height: 46vh; height: auto; width: auto; cursor: zoom-in; }
+    .stem figcaption { display: none; }
+
+    .dialog { min-height: 0; display: grid; grid-template-rows: auto 1fr auto; padding: calc(var(--u) * 1.6) calc(var(--u) * 2.4) calc(var(--u) * 1.6) calc(var(--u) * 2); }
+
+    .steps { display: flex; align-items: center; gap: calc(var(--u) * .9); margin-bottom: calc(var(--u) * 1); color: var(--ink-2); font-size: calc(var(--u) * 1.3); }
+    .rail { display: flex; gap: calc(var(--u) * .45); }
+    .rail i { width: calc(var(--u) * 2.6); height: calc(var(--u) * .6); border-radius: 99px; background: var(--rule); transition: background .4s; }
+    .rail i.on { background: var(--scope); }
+    .steps .done-tag { margin-left: auto; color: var(--scope); font-weight: 700; }
+
+    .log { min-height: 0; overflow-y: auto; padding: calc(var(--u) * .4) calc(var(--u) * .6) calc(var(--u) * 1.4) 0; scroll-behavior: smooth; }
+    .msg { max-width: 92%; margin: 0 0 calc(var(--u) * 1.3); }
+    .msg p { margin: 0 0 calc(var(--u) * .55); }
+    .msg p:last-child { margin-bottom: 0; }
+    .msg.ai { font-size: calc(var(--u) * 1.75); line-height: 1.7; }
+    .msg.ai.old { color: var(--ink-2); font-size: calc(var(--u) * 1.5); }
+    /* 现在要回答的那个问题：荧光笔 */
+    .msg.ai.current .ask {
+      background: linear-gradient(transparent 52%, var(--marker) 52%, var(--marker) 92%, transparent 92%);
+      -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 .1em;
+    }
+    .msg.me {
+      margin-left: auto; width: fit-content; max-width: 78%;
+      padding: calc(var(--u) * .7) calc(var(--u) * 1.3);
+      border-left: calc(var(--u) * .35) solid var(--scope);
+      background: var(--scope-soft); border-radius: 0 calc(var(--u) * .4) calc(var(--u) * .4) 0;
+      font-size: calc(var(--u) * 1.55);
+    }
+    .msg.note { color: var(--alert); font-size: calc(var(--u) * 1.4); }
+    .msg.note button { margin-left: calc(var(--u) * .6); }
+    .thinking { display: inline-flex; gap: calc(var(--u) * .5); align-items: center; color: var(--ink-3); font-size: calc(var(--u) * 1.4); }
+    .thinking span { width: calc(var(--u) * .7); height: calc(var(--u) * .7); border-radius: 50%; background: var(--scope); opacity: .25; animation: blink 1.2s infinite; }
+    .thinking span:nth-child(2) { animation-delay: .2s; }
+    .thinking span:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 40% { opacity: 1; } }
+
+    .answer-zone { border-top: 1px solid var(--rule); padding-top: calc(var(--u) * 1.2); }
+    .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--u) * .8); margin-bottom: calc(var(--u) * .9); }
+    .choice {
+      min-height: calc(var(--u) * 4.8); padding: calc(var(--u) * .6) calc(var(--u) * 1.3);
+      border: 2px solid var(--ink); border-radius: calc(var(--u) * .45); background: var(--sheet);
+      font-size: calc(var(--u) * 1.5); line-height: 1.4; text-align: left;
+    }
+    .choice:active { background: var(--scope-soft); border-color: var(--scope); }
+    .choice:disabled { opacity: .4; }
+    .actions { display: flex; gap: calc(var(--u) * .8); flex-wrap: wrap; }
+    .act {
+      min-height: calc(var(--u) * 4); padding: 0 calc(var(--u) * 1.4);
+      border: 1px solid var(--rule); border-radius: calc(var(--u) * .45); background: transparent;
+      font-size: calc(var(--u) * 1.4); color: var(--ink-2);
+    }
+    .act.primary { border-color: var(--scope); color: var(--scope); font-weight: 700; }
+    .act:active { background: var(--scope-soft); }
+    .act:disabled { opacity: .4; }
+    .act.right { margin-left: auto; }
+    .write { display: flex; gap: calc(var(--u) * .8); margin-bottom: calc(var(--u) * .9); }
+    .write textarea {
+      flex: 1; min-height: calc(var(--u) * 4.8); max-height: calc(var(--u) * 10); resize: none;
+      padding: calc(var(--u) * .7) calc(var(--u) * 1); border: 2px solid var(--scope); border-radius: calc(var(--u) * .45);
+      font: inherit; font-size: calc(var(--u) * 1.55); color: var(--ink); background: #fff;
+      -webkit-user-select: text; user-select: text;
+    }
+    .write button { min-width: calc(var(--u) * 7); border: 0; border-radius: calc(var(--u) * .45); background: var(--scope); color: #fff; font-size: calc(var(--u) * 1.5); font-weight: 700; }
+
+    /* ---------------------------------------------------------- 放大看图、闲置提醒 */
+    .overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(27, 42, 58, .78); }
+    .overlay img { max-width: 92vw; max-height: 88vh; background: #fff; padding: calc(var(--u) * 1); border-radius: calc(var(--u) * .4); }
+    .idle-card { width: min(calc(var(--u) * 46), 90vw); padding: calc(var(--u) * 2.6); background: var(--sheet); border-radius: calc(var(--u) * .5); text-align: center; }
+    .idle-card h3 { margin: 0 0 calc(var(--u) * .6); font-size: calc(var(--u) * 2.4); }
+    .idle-card p { margin: 0 0 calc(var(--u) * 1.6); color: var(--ink-2); font-size: calc(var(--u) * 1.5); }
+    .idle-card button { min-height: calc(var(--u) * 4.4); padding: 0 calc(var(--u) * 2.4); border: 0; border-radius: calc(var(--u) * .45); background: var(--scope); color: #fff; font-size: calc(var(--u) * 1.6); font-weight: 700; }
+
+    .katex { font-size: 1.04em; }
+
+    /* 竖屏或手机：上下排 */
+    @media (max-aspect-ratio: 1/1), (max-width: 760px) {
+      :root { --u: calc(clamp(9px, 1.6vw + .2vh, 20px) * var(--scale)); }
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100dvh; }
+      .talk { display: block; height: auto; }
+      .problem { margin: calc(var(--u) * 1.2); max-height: none; }
+      .dialog { display: block; padding: 0 calc(var(--u) * 1.2) calc(var(--u) * 2); }
+      .log { max-height: none; overflow: visible; }
+      .choices { grid-template-columns: 1fr; }
+      .brand .crumbs { display: none; }
+      .toc, .picker { padding: calc(var(--u) * 1.6) calc(var(--u) * 1.2) calc(var(--u) * 3); height: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="bar">
+      <div class="brand">
+        <strong>作业问答</strong>
+        <span class="crumbs" id="crumbs">选一道题，我们一步步把它想明白</span>
+      </div>
+      <button class="tool" type="button" id="home" hidden>回目录</button>
+      <button class="tool" type="button" id="smaller" aria-label="字小一点">A−</button>
+      <button class="tool" type="button" id="bigger" aria-label="字大一点">A+</button>
+      <button class="tool" type="button" id="full">全屏</button>
+    </header>
+
+    <!-- 1. 目录 -->
+    <section class="view" id="view-toc">
+      <div class="toc">
+        <div class="toc-head">
+          <h1>今天想弄懂哪道题？</h1>
+          <p>选好题以后，我不会直接告诉你答案，而是一步步问你问题，帮你自己想出来。</p>
+        </div>
+        <div class="books" id="books"></div>
+        <div class="sheet-list" id="toc"></div>
+      </div>
+    </section>
+
+    <!-- 2. 题号 -->
+    <section class="view" id="view-pick" hidden>
+      <div class="picker">
+        <div class="picker-inner">
+          <h2 id="pick-title"></h2>
+          <p class="hint">点一道题开始。</p>
+          <div class="qgrid" id="qgrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 问答 -->
+    <section class="view" id="view-talk" hidden>
+      <div class="talk">
+        <article class="problem" id="problem" aria-label="题目">
+          <div class="margin-line" aria-hidden="true"></div>
+          <div class="big-no" id="big-no"></div>
+          <p class="source" id="source"></p>
+          <div class="stem" id="stem"></div>
+        </article>
+        <section class="dialog" aria-label="问答">
+          <div class="steps">
+            <span>思路进度</span>
+            <div class="rail" id="rail" aria-hidden="true"></div>
+            <span class="done-tag" id="done-tag" hidden>这道题你想明白了</span>
+          </div>
+          <div class="log" id="log" aria-live="polite"></div>
+          <div class="answer-zone">
+            <div class="choices" id="choices"></div>
+            <form class="write" id="write" hidden>
+              <textarea id="input" rows="1" maxlength="300" placeholder="写下你的想法（可以用手写输入）" aria-label="你的回答"></textarea>
+              <button type="submit">发送</button>
+            </form>
+            <div class="actions">
+              <button class="act primary" type="button" id="hint">给我一点提示</button>
+              <button class="act" type="button" id="type">我想自己写</button>
+              <button class="act" type="button" id="restart">这题重新来</button>
+              <button class="act right" type="button" id="other">换一道题</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <div class="overlay" id="zoom" hidden><img alt=""></div>
+  <div class="overlay" id="idle" hidden>
+    <div class="idle-card">
+      <h3>还有人在吗？</h3>
+      <p><span id="idle-left">20</span> 秒后回到目录，给下一位同学用。</p>
+      <button type="button" id="stay">我还在</button>
+    </div>
+  </div>
+
+  <script src="data.js?v=70d9dab7"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+          integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+  <script>
+  (() => {
+    "use strict";
+
+    // AI 走 Cloudflare 上已有的 p-ai-tutor（DeepSeek）。先试同域的 /api/chat（在 Cloudflare 给 Worker 加了
+    // p.phylab.uk/api/* 路由后就通），不通再退回 workers.dev 地址。
+    const ENDPOINTS = ["/api/chat", "https://p-ai-tutor.dgxwmk9dbm.workers.dev/api/chat"];
+    const IDLE_SECONDS = 150;   // 多久没人碰屏幕就问「还有人在吗」
+    const IDLE_GRACE = 20;      // 再等多少秒回目录
+
+    const data = window.HOMEWORK_DATA || { books: [] };
+    const $ = (id) => document.getElementById(id);
+    const state = { book: null, chapter: null, question: null, messages: [], steps: 3, step: 0, busy: false, session: "", finished: false, token: 0 };
+
+    // ------------------------------------------------------------ 工具
+
+    function typeset(node) {
+      if (!window.renderMathInElement) return;
+      window.renderMathInElement(node, {
+        delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
+        throwOnError: false
+      });
+    }
+    function escapeHtml(s) {
+      return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+    // AI 的话：先转义，再处理 **粗体** 和换行；公式交给 KaTeX。
+    function richText(s) {
+      return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    }
+    function textOf(html) {
+      const box = document.createElement("div");
+      box.innerHTML = html;
+      box.querySelectorAll(".figure-hint").forEach((n) => n.remove());
+      box.querySelectorAll("figure").forEach((f) => {
+        const cap = f.querySelector("figcaption");
+        f.replaceWith(document.createTextNode(`\n［图：${cap ? cap.textContent.trim() : "原题配图"}］\n`));
+      });
+      box.querySelectorAll("p, li, blockquote, tr").forEach((n) => n.append("\n"));
+      return box.textContent.replace(/\n{3,}/g, "\n\n").trim();
+    }
+    function newSession() {
+      const bytes = crypto.getRandomValues(new Uint8Array(12));
+      return "screen-" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    }
+    function show(view) {
+      for (const v of ["toc", "pick", "talk"]) $("view-" + v).hidden = v !== view;
+      $("home").hidden = view === "toc";
+      const crumbs = [];
+      if (view !== "toc" && state.chapter) crumbs.push(state.book.title, state.chapter.title);
+      if (view === "talk" && state.question) crumbs.push(`第 ${state.question.no} 题`);
+      $("crumbs").textContent = crumbs.length ? crumbs.join("　/　") : "选一道题，我们一步步把它想明白";
+    }
+
+    // 只有带题干和问答脚本的题才放上大屏：AI 照着老师写好的脚本问，不容易出错。
+    const ready = (q) => q.stem && q.guide;
+    const usable = (chapter) => chapter.ready && chapter.questions.some(ready);
+
+    // ------------------------------------------------------------ 1. 目录
+
+    function renderBooks() {
+      const box = $("books");
+      box.replaceChildren();
+      for (const book of data.books) {
+        if (!book.chapters.some(usable)) continue;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "book";
+        b.textContent = book.title;
+        b.setAttribute("aria-pressed", String(state.book === book));
+        b.addEventListener("click", () => { state.book = book; renderBooks(); renderToc(); });
+        box.append(b);
+      }
+    }
+    function renderToc() {
+      const box = $("toc");
+      box.replaceChildren();
+      const chapters = (state.book ? state.book.chapters : []).filter(usable);
+      if (!chapters.length) {
+        const p = document.createElement("p");
+        p.className = "toc-empty";
+        p.textContent = "这本作业本的题目还在整理，先选上面能点的那一本。";
+        box.append(p);
+        return;
+      }
+      let group = null;
+      for (const ch of chapters) {
+        if (ch.group && ch.group !== group) {
+          group = ch.group;
+          const g = document.createElement("div");
+          g.className = "group-title";
+          g.textContent = group;
+          box.append(g);
+        }
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "toc-row";
+        const n = ch.questions.filter(ready).length;
+        row.innerHTML = `<span></span><span class="leader" aria-hidden="true"></span><span class="count">${n} 题</span>`;
+        row.firstChild.textContent = ch.title;
+        row.addEventListener("click", () => openChapter(ch));
+        box.append(row);
+      }
+    }
+
+    // ------------------------------------------------------------ 2. 题号
+
+    function openChapter(ch) {
+      state.chapter = ch;
+      $("pick-title").textContent = ch.title;
+      const grid = $("qgrid");
+      grid.replaceChildren();
+      for (const q of ch.questions.filter(ready)) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "qtile";
+        b.innerHTML = `<span class="no"></span><span class="what"><b></b><span></span></span>`;
+        b.querySelector(".no").textContent = q.no;
+        b.querySelector("b").textContent = q.type || "题目";
+        b.querySelector(".what > span").textContent = q.section || "";
+        b.addEventListener("click", () => openQuestion(q));
+        grid.append(b);
+      }
+      show("pick");
+      $("view-pick").querySelector(".picker").scrollTop = 0;
+    }
+
+    // ------------------------------------------------------------ 3. 问答
+
+    // 进度条的格数 = 问答脚本「提问路线」的步数
+    function stepsIn(guide) {
+      const n = (guide.match(/^\d+\.\s*问/gm) || []).length;
+      return Math.min(7, Math.max(2, n || 3));
+    }
+
+    function systemPrompt(q) {
+      return [
+        "你是一位耐心的高中物理老师，正在教室的触摸大屏上，用苏格拉底式提问陪一名高中生想明白一道作业题。学生站在屏幕前，用手指点选或手写回答。",
+        "下面给你这道题的题目、标准答案、完整解析，以及老师预先写好的【问答脚本】。题目已经由老师彻底解完，你不需要自己重新解题，也不要怀疑或改动标准答案和解析里的数值。",
+        "",
+        "【规则】",
+        "1. 按【问答脚本】的“提问路线”一步一步问，每次只问一个问题。脚本里的“期望”是学生这一步应该说出的内容，用它判断学生答得对不对。",
+        "2. 学生答对：用半句话具体肯定他对在哪里，然后问脚本的下一步。学生答错或选了脚本“常见错误”里列出的想法：不要说“错了”，改用脚本里对应的“追问”，让他自己发现问题；他还想不通，就退回到上一步更基础的问题。",
+        "3. 学生说不会或要提示：只给当前这一步的提示，先提示概念，再提示规律或公式，最后提示代入方向，每次只给一层。直接说提示内容，不要写“提示一层”之类的字样。",
+        "4. 绝不直接说出正确选项、最终数值或完整解题过程。学生直接要答案时，也只给更具体的一层提示。",
+        "5. 学生自己说出最终答案后，确认他做对了，再请他用一句话总结这类题的方法；他总结完，你结合脚本的“总结句”简短点评，然后结束。",
+        "6. 正文 1～3 句话，不超过 90 个字（大屏上字很大）。公式和物理量都用 LaTeX，行内写在 $...$ 里，带下标的写成 $V_1$、$R_2$、$\\Delta U_3$。不要用标题、表格、代码块。",
+        "7. 只谈这道题和相关的物理。学生聊别的，友好地拉回来。",
+        "",
+        "【输出格式】严格按下面写，不要多写别的：",
+        "第一部分：给学生看的话。要学生回答的那个问题单独放在最后一行。",
+        "@@选项",
+        "- 学生对你最后那个问题可能给出的回答（2～4 条，站在学生角度用第一人称，每条不超过 22 个字；其中一条是脚本“期望”的正确想法，至少一条取自脚本“常见错误”，顺序打乱）",
+        `@@步骤 k/${state.steps}（k 是学生已经走完提问路线的第几步，从 0 开始）`,
+        "学生总结完、整道题结束时，不写 @@选项，改写一行 @@完成。",
+        "",
+        "【题目】",
+        `${state.book.title} ${state.chapter.title} 第 ${q.no} 题（${q.type || "题目"}）`,
+        textOf(q.stem),
+        "",
+        "【标准答案】（只给你看，绝不直接告诉学生）",
+        textOf(`<p>${q.answer}</p>`),
+        "",
+        "【完整解析】（只给你看）",
+        textOf(q.html),
+        "",
+        "【问答脚本】（老师写好的提问路线，照着走）",
+        q.guide
+      ].join("\n");
+    }
+
+    function parseReply(raw) {
+      let text = raw.replace(/\r/g, "");
+      const finished = /@@\s*完成/.test(text);
+      let step = null;
+      const sm = text.match(/@@\s*步骤\s*(\d+)\s*(?:\/\s*\d+)?/);
+      if (sm) step = parseInt(sm[1], 10);
+      let options = [];
+      const om = text.match(/@@\s*选项\s*\n([\s\S]*?)(?=@@|$)/);
+      if (om) {
+        options = om[1].split("\n").map((l) => l.replace(/^\s*(?:[-*•]|\d+[.、)])\s*/, "").trim()).filter(Boolean).slice(0, 4);
+      }
+      text = text.replace(/@@[\s\S]*$/, "").trim();
+      return { text, options, step, finished };
+    }
+
+    function addMessage(kind, content) {
+      const log = $("log");
+      log.querySelectorAll(".msg.ai.current").forEach((m) => { m.classList.remove("current"); m.classList.add("old"); });
+      const div = document.createElement("div");
+      div.className = "msg " + kind;
+      if (kind === "ai") {
+        div.classList.add("current");
+        const lines = content.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+        lines.forEach((line, i) => {
+          const p = document.createElement("p");
+          // 最后一句问句涂上荧光笔：那是学生现在要回答的问题
+          const ask = i === lines.length - 1
+            ? (line.match(/[^。！!；;？?]*[？?]\s*$/) || line.match(/[^。！!；;？?]+[。！!]?\s*$/))
+            : null;
+          p.innerHTML = ask
+            ? richText(line.slice(0, ask.index)) + `<span class="ask">${richText(ask[0].trim())}</span>`
+            : richText(line);
+          div.append(p);
+        });
+      } else {
+        div.textContent = content;
+      }
+      log.append(div);
+      typeset(div);
+      log.scrollTop = log.scrollHeight;
+      return div;
+    }
+
+    function setThinking(on) {
+      const old = $("log").querySelector(".thinking-row");
+      if (old) old.remove();
+      if (on) {
+        const row = document.createElement("div");
+        row.className = "msg thinking-row";
+        row.innerHTML = `<span class="thinking"><span></span><span></span><span></span>正在想</span>`;
+        $("log").append(row);
+        $("log").scrollTop = $("log").scrollHeight;
+      }
+    }
+
+    function setBusy(on) {
+      state.busy = on;
+      for (const b of document.querySelectorAll(".choice, #hint, #type, #restart, #write button")) b.disabled = on;
+      setThinking(on);
+    }
+
+    function renderRail() {
+      const rail = $("rail");
+      rail.replaceChildren();
+      for (let i = 0; i < state.steps; i++) {
+        const dot = document.createElement("i");
+        if (i < state.step || state.finished) dot.className = "on";
+        rail.append(dot);
+      }
+      $("done-tag").hidden = !state.finished;
+    }
+
+    function renderChoices(options) {
+      const box = $("choices");
+      box.replaceChildren();
+      for (const text of options) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "choice";
+        b.textContent = text;
+        b.addEventListener("click", () => send(text));
+        box.append(b);
+        typeset(b);
+      }
+    }
+
+    async function callAI(question) {
+      const q = state.question;
+      const body = JSON.stringify({
+        question,
+        sessionId: state.session,
+        context: {
+          bookId: "screen-" + state.book.id,
+          bookTitle: "大屏问答：" + state.book.title,
+          chapterId: state.chapter.id,
+          chapterTitle: state.chapter.title,
+          questionNo: q.no,
+          questionType: q.type || null
+        },
+        messages: state.messages
+      });
+      let lastError = new Error("连不上 AI，检查一下网络。");
+      const preferred = sessionStorage.getItem("screen-endpoint");
+      const list = preferred ? [preferred, ...ENDPOINTS.filter((e) => e !== preferred)] : ENDPOINTS;
+      for (const url of list) {
+        let res;
+        try {
+          res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body, signal: AbortSignal.timeout(45000) });
+        } catch (err) {
+          lastError = new Error(err && err.name === "TimeoutError" ? "AI 想太久了，再点一次试试。" : "连不上 AI，检查一下网络。");
+          continue;
+        }
+        const type = res.headers.get("Content-Type") || "";
+        if (!type.includes("application/json")) continue; // 同域路由还没配好时，这里拿到的是网页
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || "AI 暂时用不了，稍后再试。");
+        try { sessionStorage.setItem("screen-endpoint", url); } catch (_) { /* 无痕模式等 */ }
+        return json.answer;
+      }
+      throw lastError;
+    }
+
+    async function send(text, { silent = false } = {}) {
+      if (state.busy || !text.trim()) return;
+      text = text.trim();
+      if (!silent) addMessage("me", text);
+      $("choices").replaceChildren();
+      $("write").hidden = true;
+      state.messages.push({ role: "user", content: text });
+      setBusy(true);
+      const token = state.token;
+      try {
+        let raw;
+        try {
+          raw = await callAI(text);
+        } catch (err) {
+          // 超时、服务商偶尔卡一下：悄悄再试一次，学生不用手动点
+          if (token !== state.token || !/太久|超时|故障|多/.test(err.message)) throw err;
+          raw = await callAI(text);
+        }
+        if (token !== state.token) return; // 这期间换了题或重来了
+        state.messages.push({ role: "assistant", content: raw });
+        const reply = parseReply(raw);
+        setBusy(false);
+        addMessage("ai", reply.text || "我们换个角度：你觉得这道题的关键量是哪一个？");
+        if (reply.step !== null) state.step = Math.min(state.steps, Math.max(state.step, reply.step));
+        state.finished = reply.finished;
+        renderRail();
+        renderChoices(reply.finished ? [] : reply.options);
+        // 选项出来后对话区会变矮，等排版完成再滚到底，免得 AI 的问题被挡住
+        requestAnimationFrame(() => { $("log").scrollTop = $("log").scrollHeight; });
+      } catch (err) {
+        if (token !== state.token) return;
+        state.messages.pop();
+        setBusy(false);
+        const note = document.createElement("div");
+        note.className = "msg note";
+        note.textContent = err.message;
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "act";
+        retry.textContent = "再试一次";
+        retry.addEventListener("click", () => { note.remove(); send(text, { silent: true }); });
+        note.append(retry);
+        $("log").append(note);
+        $("log").scrollTop = $("log").scrollHeight;
+      }
+    }
+
+    function openQuestion(q) {
+      state.question = q;
+      state.token += 1;
+      setBusy(false);
+      state.session = newSession();
+      state.steps = stepsIn(q.guide);
+      state.step = 0;
+      state.finished = false;
+      state.messages = [{ role: "system", content: systemPrompt(q) }];
+
+      $("big-no").innerHTML = `${q.no}<small></small>`;
+      $("big-no").querySelector("small").textContent = q.type || "";
+      $("source").textContent = state.chapter.title;
+      $("stem").innerHTML = q.stem;
+      $("stem").querySelectorAll("a").forEach((a) => a.replaceWith(...a.childNodes));
+      // 题图挪到题干文字后、选项前：大屏上不用往下翻就能看到图
+      const firstList = $("stem").querySelector("ul");
+      if (firstList) $("stem").querySelectorAll("figure").forEach((f) => firstList.before(f));
+      typeset($("stem"));
+      $("problem").scrollTop = 0;
+      $("log").replaceChildren();
+      $("choices").replaceChildren();
+      $("write").hidden = true;
+      renderRail();
+      show("talk");
+      send("老师好，我选了这道题，我们开始吧。", { silent: true });
+    }
+
+    // ------------------------------------------------------------ 按钮
+
+    $("hint").addEventListener("click", () => send("我卡住了，给我一点提示。"));
+    $("type").addEventListener("click", () => {
+      $("write").hidden = !$("write").hidden;
+      if (!$("write").hidden) $("input").focus();
+    });
+    $("write").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const v = $("input").value;
+      $("input").value = "";
+      send(v);
+    });
+    $("input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("write").requestSubmit(); }
+    });
+    $("restart").addEventListener("click", () => openQuestion(state.question));
+    $("other").addEventListener("click", () => { state.token += 1; setBusy(false); openChapter(state.chapter); });
+    $("home").addEventListener("click", goHome);
+
+    function goHome() {
+      state.token += 1;
+      setBusy(false);
+      state.question = null;
+      state.messages = [];
+      show("toc");
+    }
+
+    // 字号
+    let scale = 1;
+    try { scale = parseFloat(localStorage.getItem("screen-scale")) || 1; } catch (_) {}
+    function applyScale() {
+      document.documentElement.style.setProperty("--scale", scale);
+      try { localStorage.setItem("screen-scale", String(scale)); } catch (_) {}
+    }
+    $("smaller").addEventListener("click", () => { scale = Math.max(.7, +(scale - .1).toFixed(2)); applyScale(); });
+    $("bigger").addEventListener("click", () => { scale = Math.min(1.6, +(scale + .1).toFixed(2)); applyScale(); });
+    applyScale();
+
+    // 全屏
+    $("full").addEventListener("click", () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => {});
+    });
+    document.addEventListener("fullscreenchange", () => { $("full").textContent = document.fullscreenElement ? "退出全屏" : "全屏"; });
+
+    // 点题图放大
+    $("stem").addEventListener("click", (e) => {
+      const img = e.target.closest("img");
+      if (!img) return;
+      const zoom = $("zoom");
+      zoom.querySelector("img").src = img.src;
+      zoom.querySelector("img").alt = img.alt;
+      zoom.hidden = false;
+    });
+    $("zoom").addEventListener("click", () => { $("zoom").hidden = true; });
+
+    // 没人用就回目录，给下一位同学
+    let idleTimer = 0, graceTimer = 0;
+    function poke() {
+      clearTimeout(idleTimer);
+      if (!$("idle").hidden) return;
+      idleTimer = setTimeout(() => {
+        if ($("view-toc").hidden === false) { poke(); return; }
+        let left = IDLE_GRACE;
+        $("idle-left").textContent = left;
+        $("idle").hidden = false;
+        graceTimer = setInterval(() => {
+          left -= 1;
+          $("idle-left").textContent = left;
+          if (left <= 0) { clearInterval(graceTimer); $("idle").hidden = true; $("zoom").hidden = true; goHome(); poke(); }
+        }, 1000);
+      }, IDLE_SECONDS * 1000);
+    }
+    $("stay").addEventListener("click", () => { clearInterval(graceTimer); $("idle").hidden = true; poke(); });
+    for (const ev of ["pointerdown", "keydown", "input"]) document.addEventListener(ev, poke, { passive: true });
+
+    // ------------------------------------------------------------ 开始
+
+    state.book = data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
+    renderBooks();
+    renderToc();
+    show("toc");
+    poke();
+    window.addEventListener("load", () => typeset(document.body));
+  })();
+  </script>
+</body>
+</html>
