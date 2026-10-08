@@ -239,9 +239,9 @@
 <body>
   <div class="app">
     <header class="bar">
-      <div class="brand">
-        <strong>作业问答</strong>
-        <span class="crumbs" id="crumbs">选一道题，我们一步步把它想明白</span>
+      <div class="brand" id="brand">
+        <strong>作业问答系统</strong>
+        <span class="crumbs" id="crumbs"></span>
       </div>
       <button class="tool" type="button" id="other" hidden>换一道题</button>
       <button class="tool" type="button" id="home" hidden>回目录</button>
@@ -367,7 +367,9 @@
       const crumbs = [];
       if (view !== "toc" && state.chapter) crumbs.push(state.book.title, state.chapter.title);
       if (view === "talk" && state.question) crumbs.push(`第 ${state.question.no} 题`);
-      $("crumbs").textContent = crumbs.length ? crumbs.join("　/　") : "选一道题，我们一步步把它想明白";
+      $("crumbs").textContent = crumbs.join("　/　");
+      // 首页已有大标题，左上角不再重复；进入章节和题目后才显示，兼作当前位置
+      $("brand").style.visibility = view === "toc" ? "hidden" : "visible";
     }
 
     // 只有带题干和问答脚本的题才放上大屏：AI 照着老师写好的脚本问，不容易出错。
