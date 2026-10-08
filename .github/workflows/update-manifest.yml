@@ -13,7 +13,6 @@ on:
       - "CNAME"
       - "ppt/**"
       - "games/**"
-      - "resources/**"
       - "tutor/**"
       - "scripts/build-manifest.mjs"
       - ".github/workflows/update-manifest.yml"
@@ -57,7 +56,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html library.html site.css site.js icon.png CNAME manifest.json _site/
-          cp -R ppt games resources _site/
+          cp -R ppt games _site/
           mkdir -p _site/tutor
           cp tutor/index.html tutor/screen.html tutor/data.js _site/tutor/
           cp -R tutor/assets _site/tutor/

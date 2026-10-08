@@ -135,21 +135,26 @@
       return card;
     }
 
-    function renderHomeworkCard() {
+    // 单个入口的卡片：作业问答系统、作业答案与详解
+    function renderLinkCard(titleText, href, mark) {
       const card = el("section", "card");
       const header = el("div", "card-header");
-      header.append(el("span", "card-title", "作业答案与详解"));
+      header.append(el("span", "card-title", titleText));
 
       const link = el("a", "homework-link");
-      link.href = "tutor/";
-      link.append(el("span", "homework-mark", "解析"));
+      link.href = href;
+      link.append(el("span", "homework-mark", mark));
 
       card.append(header, link);
       return card;
     }
 
     window.Lab.loadSections().then((sections) => {
-      document.querySelector("#cards").replaceChildren(...sections.map(renderCard), renderHomeworkCard());
+      document.querySelector("#cards").replaceChildren(
+        ...sections.map(renderCard),
+        renderLinkCard("作业问答系统", "tutor/screen.html", "问答"),
+        renderLinkCard("作业答案与详解", "tutor/", "解析")
+      );
     });
   </script>
 </body>

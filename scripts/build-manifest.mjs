@@ -139,13 +139,8 @@ const manifest = {
       title: "互动实验",
       type: "open",
       items: buildGames(files)
-    },
-    {
-      id: "resources",
-      title: "资料",
-      type: "resources",
-      items: buildResources(files)
     }
+    // 「资料」栏目已停用，首页这个位置换成了作业问答系统（tutor/screen.html）。
   ]
 };
 
