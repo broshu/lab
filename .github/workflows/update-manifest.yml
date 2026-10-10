@@ -58,11 +58,9 @@ jobs:
           cp tutor/index.html tutor/screen.html tutor/data.js _site/tutor/
           cp -R tutor/assets _site/tutor/
 
-      # 课件文件名可以照常用中文；这一步把网站上的链接改成拼音，页面上仍显示中文名。
+      # 课件文件名可以照常用中文；这一步按 ppt/links.json 把网站上的链接改成英文，页面上仍显示中文名。
       - name: Build manifest
-        run: |
-          npm install --no-save --no-package-lock pinyin-pro@3.29.5
-          node scripts/build-manifest.mjs _site
+        run: node scripts/build-manifest.mjs _site
 
       - name: Check links have no Chinese
         run: |

@@ -37,7 +37,7 @@ window.Lab = (() => {
     link.title = item.name;
     const download = item.action ? item.action === "download" : section.type !== "open";
     if (download) {
-      // 链接是拼音文件名，下载下来的文件仍用中文名。
+      // 链接是英文文件名，下载下来的文件仍用中文名。
       const ext = (item.href.match(/\.[^/.]+$/) || [""])[0];
       link.download = item.name ? `${item.name}${ext}` : "";
     } else {

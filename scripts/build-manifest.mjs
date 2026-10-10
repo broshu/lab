@@ -4,17 +4,13 @@ import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 // 用法：node scripts/build-manifest.mjs [站点目录]
-// 传入站点目录（工作流里是 _site）时，会把其中 ppt/ 下含中文、空格等字符的文件改成拼音文件名，
+// 传入站点目录（工作流里是 _site）时，会按 ppt/links.json 把其中 ppt/ 下的中文文件名改成英文链接名，
 // 网站上显示的仍是原来的中文名。仓库里的文件名不用改，照常放中文名即可。
 const siteDir = process.argv[2] || null;
 
-// 拼音库在工作流里安装（npm install --no-save pinyin-pro）；本地没装时退回用哈希命名。
-let toPinyin = null;
-try {
-  ({ pinyin: toPinyin } = await import("pinyin-pro"));
-} catch {
-  console.warn("未找到 pinyin-pro，含中文的文件名将改用哈希命名");
-}
+// ppt/links.json：{"中文文件名.pptx": "english-link-name"}，新课件在这里加一行英文名。
+const LINKS_FILE = "ppt/links.json";
+const englishNames = existsSync(LINKS_FILE) ? JSON.parse(readFileSync(LINKS_FILE, "utf8")) : {};
 
 const SAFE_NAME = /^[A-Za-z0-9._-]+$/;
 
@@ -22,16 +18,17 @@ function shortHash(text) {
   return createHash("sha1").update(text).digest("hex").slice(0, 8);
 }
 
-function slugify(base) {
-  const tokens = toPinyin
-    ? toPinyin(base, { toneType: "none", type: "array", nonZh: "consecutive", v: true })
-    : [base];
-  const slug = tokens
-    .map((token) => token.toLowerCase().replace(/[^a-z0-9]+/g, "-"))
-    .join("-")
-    .replace(/-+/g, "-")
+function englishSlug(fileName) {
+  const slug = String(englishNames[fileName] || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  return toPinyin && slug ? slug : `file-${shortHash(base)}`;
+  if (slug) {
+    return slug;
+  }
+  // 还没起英文名的课件先用编号链接，并在部署日志里提醒补到 links.json。
+  console.log(`::warning::${fileName} 还没有英文链接名，请在 ${LINKS_FILE} 里补上`);
+  return `courseware-${shortHash(fileName)}`;
 }
 
 // 给 ppt/ 里每个文件一个只含英文字母、数字和 - 的链接名；已经安全的文件名保持不变。
@@ -45,9 +42,9 @@ function linkNames(paths) {
       continue;
     }
     const ext = (fileName.match(/\.[^/.]+$/)?.[0] || "").toLowerCase();
-    let name = `${slugify(cleanFileName(fileName))}${ext}`;
+    let name = `${englishSlug(fileName)}${ext}`;
     if (used.has(name)) {
-      name = `${slugify(cleanFileName(fileName))}-${shortHash(fileName)}${ext}`;
+      name = `${englishSlug(fileName)}-${shortHash(fileName)}${ext}`;
     }
     used.add(name);
     result.set(path, name);
