@@ -26,6 +26,8 @@ BOOKS = [
     {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1"},
     {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3"},
     {"id": "summer2026", "title": "高二暑假作业", "dir": "content"},
+    # mode=explain：学生手上已有答案，大屏 AI 不隐藏答案，改为解释学生提出的问题
+    {"id": "exams", "title": "考试讲评", "dir": "content/exams", "mode": "explain"},
 ]
 
 # ---------------------------------------------------------------- markdown
@@ -234,7 +236,10 @@ def build_book(book):
         if cid not in dict(order):
             raise SystemExit(f"{book['id']}：{cid} 不在 chapters.txt 里，请先补上章节清单")
 
-    return {"id": book["id"], "title": book["title"], "chapters": chapters}
+    out = {"id": book["id"], "title": book["title"], "chapters": chapters}
+    if book.get("mode"):
+        out["mode"] = book["mode"]
+    return out
 
 
 def main():

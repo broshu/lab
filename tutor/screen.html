@@ -161,6 +161,9 @@
     .rail i { width: calc(var(--u) * 2.6); height: calc(var(--u) * .6); border-radius: 99px; background: var(--rule); transition: background .4s; }
     .rail i.on { background: var(--scope); }
     .steps .done-tag { margin-left: auto; color: var(--scope); font-weight: 700; }
+    /* 考试讲评（答疑模式）：学生手上有答案，题目下方直接亮出答案 */
+    .problem .key { margin: calc(var(--u) * 1.2) 0 0; padding: calc(var(--u) * .7) calc(var(--u) * 1.1); border-left: 4px solid var(--scope); background: rgba(0, 0, 0, .04); font-size: calc(var(--u) * 1.4); line-height: 1.7; }
+    .problem .key b { margin-right: calc(var(--u) * .6); }
 
     .log { min-height: 0; overflow-y: auto; padding: calc(var(--u) * .4) calc(var(--u) * .6) calc(var(--u) * 1.4) 0; scroll-behavior: smooth; }
     .msg { max-width: 92%; margin: 0 0 calc(var(--u) * 1.3); }
@@ -255,7 +258,7 @@
       <div class="toc">
         <div class="toc-head">
           <h1>作业问答系统</h1>
-          <p>选好题以后，我不会直接告诉你答案，而是一步步问你问题，帮你自己想出来。</p>
+          <p id="toc-tip">选好题以后，我不会直接告诉你答案，而是一步步问你问题，帮你自己想出来。</p>
         </div>
         <div class="books" id="books"></div>
         <div class="sheet-list" id="toc"></div>
@@ -281,10 +284,11 @@
           <div class="big-no" id="big-no"></div>
           <p class="source" id="source"></p>
           <div class="stem" id="stem"></div>
+          <div class="key" id="key" hidden></div>
         </article>
         <section class="dialog" aria-label="问答">
           <div class="steps">
-            <span>思路进度</span>
+            <span id="steps-label">思路进度</span>
             <div class="rail" id="rail" aria-hidden="true"></div>
             <span class="done-tag" id="done-tag" hidden>这道题你想明白了</span>
           </div>
@@ -310,7 +314,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=d0fa45f2"></script>
+  <script src="data.js?v=0ba23881"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -372,6 +376,12 @@
       $("brand").style.visibility = view === "toc" ? "hidden" : "visible";
     }
 
+    // 考试讲评这类书（mode=explain）：学生手上已有答案，AI 不藏答案，专门解释学生问的地方
+    const explain = () => !!(state.book && state.book.mode === "explain");
+    const TIP_GUIDE = "选好题以后，我不会直接告诉你答案，而是一步步问你问题，帮你自己想出来。";
+    const TIP_EXPLAIN = "答案已经发给大家了。选一道题，哪一步没看懂、哪个选项想不通，直接问我。";
+    function renderTip() { $("toc-tip").textContent = explain() ? TIP_EXPLAIN : TIP_GUIDE; }
+
     // 只有带题干和问答脚本的题才放上大屏：AI 照着老师写好的脚本问，不容易出错。
     const ready = (q) => q.stem && q.guide;
     const usable = (chapter) => chapter.ready && chapter.questions.some(ready);
@@ -388,7 +398,7 @@
         b.className = "book";
         b.textContent = book.title;
         b.setAttribute("aria-pressed", String(state.book === book));
-        b.addEventListener("click", () => { state.book = book; renderBooks(); renderToc(); });
+        b.addEventListener("click", () => { state.book = book; renderBooks(); renderToc(); renderTip(); });
         box.append(b);
       }
     }
@@ -453,7 +463,44 @@
       return Math.min(7, Math.max(2, n || 3));
     }
 
+    function explainPrompt(q) {
+      return [
+        "你是一位耐心的高中物理老师，正在教室的触摸大屏上给一名高中生答疑。这是一道考试题，学生手上已经有标准答案和解析，所以你不需要隐藏答案；你的任务是弄清他哪里没懂，然后把那一点讲明白。学生站在屏幕前，用手指点选或手写提问。",
+        "下面给你这道题的题目、标准答案、完整解析，以及老师写好的【答疑脚本】（讲解主线、学生常问、易错点）。题目已经由老师彻底解完，你不需要自己重新解题，也不要怀疑或改动标准答案和解析里的数值。",
+        "",
+        "【规则】",
+        "1. 学生的问题含糊（比如只说“不懂”“这题怎么做”）时，先用一句话问清他卡在哪个选项、哪一问或哪一步，并在选项里列出最可能的疑点（优先取自脚本的“学生常问”）。",
+        "2. 学生问得具体时，直接回答：可以说出正确选项、数值和推导，但每次只讲清一个关键环节，讲清“为什么”，不要一口气把整题从头讲到尾。能用脚本“学生常问”里对应的讲法就用它。",
+        "3. 讲完后用一个很短的问题确认他是否懂了，例如让他判断一个相关选项、说出下一步，或问他还有没有别的地方不懂。",
+        "4. 学生说出自己的错误想法时，先说清他错在哪，再给正确的理由；可参考脚本的“易错”。不要只说“你错了”。",
+        "5. 学生指出参考答案里的笔误或不严密的地方时（脚本里提到的），坦然承认并说清正确写法。",
+        "6. 学生表示都懂了、没有别的问题时，用一句话点出这类题的方法（参考脚本“方法一句话”），然后结束。",
+        "7. 正文 1～4 句话，不超过 120 个字（大屏上字很大）。公式和物理量都用 LaTeX，行内写在 $...$ 里，带下标的写成 $v_0$、$E_{\\text{地}}$。不要用标题、表格、代码块。",
+        "8. 只谈这道题和相关的物理。学生聊别的，友好地拉回来。",
+        "",
+        "【输出格式】严格按下面写，不要多写别的：",
+        "第一部分：给学生看的话。你最后要学生回答的那个问题单独放在最后一行。",
+        "@@选项",
+        "- 学生接下来可能说的话（2～4 条，站在学生角度用第一人称，每条不超过 22 个字）：可以是对你最后那个问题的回答，也可以是追问这道题的另一个疑点（取自“学生常问”）；其中一条是“懂了，没有别的问题了”。",
+        "学生说懂了、你已总结完、整道题结束时，不写 @@选项，改写一行 @@完成。",
+        "",
+        "【题目】",
+        `${state.book.title} ${state.chapter.title} 第 ${q.no} 题（${q.type || "题目"}）`,
+        textOf(q.stem),
+        "",
+        "【标准答案】（学生手上也有）",
+        textOf(`<p>${q.answer}</p>`),
+        "",
+        "【完整解析】（学生手上也有）",
+        textOf(q.html),
+        "",
+        "【答疑脚本】（老师写好的讲解参考）",
+        q.guide
+      ].join("\n");
+    }
+
     function systemPrompt(q) {
+      if (explain()) return explainPrompt(q);
       return [
         "你是一位耐心的高中物理老师，正在教室的触摸大屏上，用苏格拉底式提问陪一名高中生想明白一道作业题。学生站在屏幕前，用手指点选或手写回答。",
         "下面给你这道题的题目、标准答案、完整解析，以及老师预先写好的【问答脚本】。题目已经由老师彻底解完，你不需要自己重新解题，也不要怀疑或改动标准答案和解析里的数值。",
@@ -666,6 +713,12 @@
       state.step = 0;
       state.finished = false;
       state.messages = [{ role: "system", content: systemPrompt(q) }];
+      const ex = explain();
+      $("steps-label").textContent = ex ? "答疑：答案已公布，哪里不懂问哪里" : "思路进度";
+      $("rail").hidden = ex;
+      $("done-tag").textContent = ex ? "这道题你弄懂了" : "这道题你想明白了";
+      $("key").hidden = !ex;
+      $("key").innerHTML = ex ? `<b>答案</b>${q.answer}` : "";
 
       $("big-no").innerHTML = `${q.no}<small></small>`;
       $("big-no").querySelector("small").textContent = q.type || "";
@@ -676,12 +729,13 @@
       const firstList = $("stem").querySelector("ul");
       if (firstList) $("stem").querySelectorAll("figure").forEach((f) => firstList.before(f));
       typeset($("stem"));
+      if (ex) typeset($("key"));
       $("problem").scrollTop = 0;
       $("log").replaceChildren();
       $("choices").replaceChildren();
       renderRail();
       show("talk");
-      send("老师好，我选了这道题，我们开始吧。", { silent: true });
+      send(ex ? "老师好，我选了这道题。答案和解析我已经有了，想问问没看懂的地方。" : "老师好，我选了这道题，我们开始吧。", { silent: true });
     }
 
     // ------------------------------------------------------------ 按钮
@@ -760,6 +814,7 @@
     state.book = data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
     renderBooks();
     renderToc();
+    renderTip();
     show("toc");
     poke();
     window.addEventListener("load", () => typeset(document.body));
