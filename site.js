@@ -30,6 +30,23 @@ window.Lab = (() => {
     return `${n} 项`;
   }
 
+  // 链接是英文文件名，下载下来的文件仍用中文名。
+  function downloadName(item) {
+    const ext = (item.href.match(/\.[^/.]+$/) || [""])[0];
+    return item.name ? `${item.name}${ext}` : "";
+  }
+
+  // 课件后面的小下载按钮：教室电脑慢，学生可以提前把课件存到本地。
+  function downloadButton(item) {
+    const link = el("a", "download-btn");
+    link.href = item.href;
+    link.download = downloadName(item);
+    link.title = `下载：${item.name}`;
+    link.setAttribute("aria-label", `下载 ${item.name}`);
+    link.innerHTML = '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>下载</span>';
+    return link;
+  }
+
   // 课件、资料默认下载；互动实验和网页课件在新标签页打开。
   function fileLink(item, section) {
     const link = el("a", "item-link", item.name);
@@ -37,9 +54,7 @@ window.Lab = (() => {
     link.title = item.name;
     const download = item.action ? item.action === "download" : section.type !== "open";
     if (download) {
-      // 链接是英文文件名，下载下来的文件仍用中文名。
-      const ext = (item.href.match(/\.[^/.]+$/) || [""])[0];
-      link.download = item.name ? `${item.name}${ext}` : "";
+      link.download = downloadName(item);
     } else {
       link.target = "_blank";
       link.rel = "noopener";
@@ -70,6 +85,10 @@ window.Lab = (() => {
     row.append(item.type === "folder"
       ? folderLink(item, sectionUrl(section.id, [...pathParts, item.name]))
       : fileLink(item, section));
+    if (section.id === "ppt" && item.type !== "folder") {
+      row.classList.add("has-download");
+      row.append(downloadButton(item));
+    }
     return row;
   }
 

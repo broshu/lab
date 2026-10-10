@@ -60,6 +60,40 @@ main {
   outline: none;
 }
 
+.item-row.has-download {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-row.has-download .item-link {
+  flex: 1;
+  min-width: 0;
+}
+
+.download-btn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.download-btn:hover,
+.download-btn:focus-visible {
+  border-color: var(--ink);
+  color: var(--ink);
+  outline: none;
+}
+
 .folder-link {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
