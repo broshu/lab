@@ -1,5 +1,59 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+// 用法：node scripts/build-manifest.mjs [站点目录]
+// 传入站点目录（工作流里是 _site）时，会把其中 ppt/ 下含中文、空格等字符的文件改成拼音文件名，
+// 网站上显示的仍是原来的中文名。仓库里的文件名不用改，照常放中文名即可。
+const siteDir = process.argv[2] || null;
+
+// 拼音库在工作流里安装（npm install --no-save pinyin-pro）；本地没装时退回用哈希命名。
+let toPinyin = null;
+try {
+  ({ pinyin: toPinyin } = await import("pinyin-pro"));
+} catch {
+  console.warn("未找到 pinyin-pro，含中文的文件名将改用哈希命名");
+}
+
+const SAFE_NAME = /^[A-Za-z0-9._-]+$/;
+
+function shortHash(text) {
+  return createHash("sha1").update(text).digest("hex").slice(0, 8);
+}
+
+function slugify(base) {
+  const tokens = toPinyin
+    ? toPinyin(base, { toneType: "none", type: "array", nonZh: "consecutive", v: true })
+    : [base];
+  const slug = tokens
+    .map((token) => token.toLowerCase().replace(/[^a-z0-9]+/g, "-"))
+    .join("-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return toPinyin && slug ? slug : `file-${shortHash(base)}`;
+}
+
+// 给 ppt/ 里每个文件一个只含英文字母、数字和 - 的链接名；已经安全的文件名保持不变。
+function linkNames(paths) {
+  const used = new Set(paths.map((path) => path.split("/").pop()).filter((name) => SAFE_NAME.test(name)));
+  const result = new Map();
+  for (const path of paths) {
+    const fileName = path.split("/").pop();
+    if (SAFE_NAME.test(fileName)) {
+      result.set(path, fileName);
+      continue;
+    }
+    const ext = (fileName.match(/\.[^/.]+$/)?.[0] || "").toLowerCase();
+    let name = `${slugify(cleanFileName(fileName))}${ext}`;
+    if (used.has(name)) {
+      name = `${slugify(cleanFileName(fileName))}-${shortHash(fileName)}${ext}`;
+    }
+    used.add(name);
+    result.set(path, name);
+  }
+  return result;
+}
 
 function git(args) {
   return execFileSync("git", args, { encoding: "utf8" }).trim();
@@ -75,14 +129,27 @@ function directDirectories(files, directory) {
 }
 
 function buildPpt(files) {
-  const items = directFiles(files, "ppt/")
-    .filter((path) => /\.(pptx|pdf|html)$/i.test(path))
-    .map((path) => ({
+  const allPaths = directFiles(files, "ppt/");
+  const names = linkNames(allPaths);
+  // ppt/ 下所有文件都会发布到网站，不在列表里的也一起改名。
+  if (siteDir) {
+    for (const path of allPaths) {
+      const from = join(siteDir, path);
+      if (names.get(path) !== path.split("/").pop() && existsSync(from)) {
+        renameSync(from, join(siteDir, "ppt", names.get(path)));
+      }
+    }
+  }
+  const paths = allPaths.filter((path) => /\.(pptx|pdf|html)$/i.test(path));
+  const items = paths.map((path) => {
+    const linkName = names.get(path);
+    return {
       name: cleanFileName(path.split("/").pop()),
-      href: path,
+      href: `ppt/${linkName}`,
       action: path.toLowerCase().endsWith(".html") ? "open" : "download",
       updatedAt: latestCommitDate(path)
-    }));
+    };
+  });
 
   return sortByTime(items);
 }
@@ -144,4 +211,8 @@ const manifest = {
   ]
 };
 
-writeFileSync("manifest.json", `${JSON.stringify(manifest, null, 2)}\n`);
+const json = `${JSON.stringify(manifest, null, 2)}\n`;
+writeFileSync("manifest.json", json);
+if (siteDir) {
+  writeFileSync(join(siteDir, "manifest.json"), json);
+}
