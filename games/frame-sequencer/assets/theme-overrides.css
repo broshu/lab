@@ -1,0 +1,208 @@
+/* Keep the compiled app intact. These semantic UI overrides are loaded after
+   index.css and inherit the shared PhyLab light/dark tokens. Video frames,
+   generated images, crop markers, and timeline handles are not recoloured. */
+html,
+body {
+  background: var(--site-bg);
+  color: var(--site-text);
+}
+
+#root {
+  color: var(--site-text);
+}
+
+/* Neutral page chrome, panels, native controls, and readable text. */
+#root .bg-white {
+  background-color: var(--site-surface);
+}
+
+#root .bg-gray-50,
+#root .bg-gray-100,
+#root [class~="bg-gray-50/30"],
+#root [class~="bg-gray-50/50"] {
+  background-color: var(--site-surface-soft);
+}
+
+#root .min-h-screen.bg-gray-50 {
+  background-color: var(--site-bg);
+}
+
+#root .bg-gray-200 {
+  background-color: var(--site-border);
+}
+
+#root [class~="bg-white/90"] {
+  background-color: color-mix(in srgb, var(--site-surface) 94%, transparent);
+}
+
+#root .text-gray-400,
+#root .text-gray-500,
+#root .text-gray-600 {
+  color: var(--site-muted);
+}
+
+#root .text-gray-700,
+#root .text-gray-800,
+#root .text-gray-900 {
+  color: var(--site-text);
+}
+
+#root .border-gray-100 {
+  border-color: var(--site-border-soft);
+}
+
+#root .border-gray-200,
+#root .border-gray-300 {
+  border-color: var(--site-border);
+}
+
+#root select,
+#root option {
+  background-color: var(--site-surface);
+  color: var(--site-text);
+}
+
+#root .shadow-sm:not(img),
+#root .shadow-md:not(img) {
+  box-shadow: var(--site-shadow);
+}
+
+/* Primary UI actions use the site brand. Selection overlays keep their
+   original indigo border/fill because they mark video regions and times. */
+#root .bg-indigo-50,
+#root .bg-indigo-100 {
+  background-color: var(--site-tint-green);
+}
+
+#root .text-indigo-500,
+#root .text-indigo-600,
+#root .text-indigo-700 {
+  color: var(--site-green);
+}
+
+#root .border-indigo-200 {
+  border-color: color-mix(in srgb, var(--site-green) 35%, var(--site-border));
+}
+
+#root button.bg-indigo-600,
+#root button.bg-green-600 {
+  background-color: var(--site-green);
+  color: var(--site-on-accent);
+}
+
+/* Status and fit-control colour families remain green, blue, amber, and red.
+   The plotted data and generated image pixels retain their original palette. */
+#root [class~="bg-green-50/30"],
+#root .bg-green-100 {
+  background-color: var(--site-tint-green);
+}
+
+#root .text-green-700,
+#root .text-green-800 {
+  color: var(--site-success);
+}
+
+#root .border-green-200 {
+  border-color: color-mix(in srgb, var(--site-success) 35%, var(--site-border));
+}
+
+#root .bg-blue-100 {
+  background-color: color-mix(in srgb, var(--site-info) 13%, var(--site-surface));
+}
+
+#root .text-blue-800 {
+  color: var(--site-info);
+}
+
+#root .border-blue-200 {
+  border-color: color-mix(in srgb, var(--site-info) 35%, var(--site-border));
+}
+
+#root .bg-orange-100 {
+  background-color: color-mix(in srgb, var(--site-amber) 13%, var(--site-surface));
+}
+
+#root .text-orange-800 {
+  color: var(--site-amber);
+}
+
+#root .border-orange-200 {
+  border-color: color-mix(in srgb, var(--site-amber) 35%, var(--site-border));
+}
+
+#root .bg-red-50,
+#root .bg-red-100 {
+  background-color: color-mix(in srgb, var(--site-danger) 12%, var(--site-surface));
+}
+
+#root .text-red-700 {
+  color: var(--site-danger);
+}
+
+#root .border-red-200 {
+  border-color: color-mix(in srgb, var(--site-danger) 35%, var(--site-border));
+}
+
+/* State styles must override the compiled utility layer as well. */
+@media (hover: hover) {
+  #root [class~="hover:bg-gray-50"]:hover,
+  #root [class~="hover:bg-gray-100"]:hover {
+    background-color: var(--site-surface-soft);
+  }
+
+  #root [class~="hover:border-gray-900"]:hover {
+    border-color: var(--site-text);
+  }
+
+  #root [class~="hover:bg-indigo-100"]:hover,
+  #root [class~="hover:bg-green-200"]:hover {
+    background-color: color-mix(in srgb, var(--site-green) 18%, var(--site-surface));
+  }
+
+  #root button[class~="hover:bg-indigo-700"]:hover,
+  #root button[class~="hover:bg-green-700"]:hover {
+    background-color: var(--site-green-hover);
+  }
+
+  #root [class~="hover:bg-blue-200"]:hover {
+    background-color: color-mix(in srgb, var(--site-info) 22%, var(--site-surface));
+  }
+
+  #root [class~="hover:bg-orange-200"]:hover {
+    background-color: color-mix(in srgb, var(--site-amber) 22%, var(--site-surface));
+  }
+
+  #root [class~="hover:bg-red-200"]:hover {
+    background-color: color-mix(in srgb, var(--site-danger) 22%, var(--site-surface));
+  }
+
+  #root [class~="hover:text-indigo-800"]:hover,
+  #root .group:hover [class~="group-hover:text-indigo-500"],
+  #root .group:hover [class~="group-hover:text-indigo-600"] {
+    color: var(--site-green-hover);
+  }
+}
+
+#root [class~="focus:ring-indigo-500"]:focus {
+  --tw-ring-color: var(--site-focus);
+}
+
+#root [class~="focus:border-indigo-500"]:focus,
+#root [class~="focus-visible:border-indigo-500"]:focus-visible,
+#root [class~="focus-visible:border-gray-900"]:focus-visible {
+  border-color: var(--site-focus);
+}
+
+#root :where(a, button, select, [role="button"]):focus-visible {
+  outline: 2px solid var(--site-focus);
+  outline-offset: 3px;
+}
+
+#root button[class~="disabled:bg-gray-300"]:disabled {
+  background-color: var(--site-border);
+  color: var(--site-muted);
+}
+
+#root .custom-scrollbar {
+  scrollbar-color: var(--site-border) var(--site-surface-soft);
+}
