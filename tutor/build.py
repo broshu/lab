@@ -22,10 +22,9 @@ SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
 BOOKS = [
-    {"id": "xx1", "title": "选修一作业本", "dir": "content/xx1"},
     {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1"},
     {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3"},
-    {"id": "summer2026", "title": "高二暑假作业", "dir": "content"},
+    {"id": "xx1", "title": "选修一作业本", "dir": "content/xx1"},
     # mode=explain：学生手上已有答案，大屏 AI 不隐藏答案，改为解释学生提出的问题
     {"id": "exams", "title": "考试讲评", "dir": "content/exams", "mode": "explain"},
 ]
