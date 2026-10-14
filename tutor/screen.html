@@ -730,7 +730,8 @@
       $("stem").querySelectorAll("a").forEach((a) => a.replaceWith(...a.childNodes));
       // 题图挪到题干文字后、选项前：大屏上不用往下翻就能看到图
       const firstList = $("stem").querySelector("ul");
-      if (firstList) $("stem").querySelectorAll("figure").forEach((f) => firstList.before(f));
+      // 选修一复合题保留原书各小问的配图位置，避免两组实验的图片混在一起。
+      if (firstList && state.book.id !== "xx1") $("stem").querySelectorAll("figure").forEach((f) => firstList.before(f));
       typeset($("stem"));
       if (ex) typeset($("key"));
       $("problem").scrollTop = 0;
