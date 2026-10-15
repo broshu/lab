@@ -3,7 +3,9 @@
 大屏作业问答（`p.phylab.uk/tutor/screen.html`）的后端 Worker，前端就在本仓库的 `tutor/`。
 
 - `POST /api/chat`：把学生的提问和对话转给 DeepSeek，返回回答。
-- `GET /admin`：老师查看提问记录（密码登录）。
+- `GET /admin`：老师查看提问记录（密码登录），每次会话归为一条，展开查看完整问答。
+- `GET /admin/conversations`：按匿名会话分页，最近交流优先；旧记录自动归并。
+- `GET /admin/conversations/:sessionId`：读取该会话全部问答，按时间顺序返回。
 - `GET /health`：检查配置是否齐全、当前用哪个模型。
 
 每次提问（成功或失败）都匿名记进 D1 表 `tutor_questions`，`model` 列记录 DeepSeek 实际报告的模型，

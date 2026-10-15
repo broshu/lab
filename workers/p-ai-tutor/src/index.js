@@ -236,6 +236,38 @@ async function listQuestions(db, requestedPage, retentionDays) {
   };
 }
 
+/** 分页按完整会话计数，避免一段对话被拆到不同页。 */
+async function listConversations(db, requestedPage, retentionDays) {
+  const page = Math.min(10000, Math.max(1, Math.trunc(requestedPage) || 1));
+  const [countResult, sessionsResult] = await db.batch([
+    db.prepare('SELECT COUNT(DISTINCT session_id) AS total, COUNT(*) AS totalTurns FROM tutor_questions'),
+    db.prepare(
+      `SELECT session_id AS sessionId, MIN(created_at) AS startedAt, MAX(created_at) AS updatedAt,
+        MAX(book_title) AS bookTitle, MAX(chapter_title) AS chapterTitle,
+        MAX(question_no) AS questionNo, MAX(question_type) AS questionType,
+        COUNT(*) AS turnCount, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failedCount
+       FROM tutor_questions GROUP BY session_id
+       ORDER BY MAX(created_at) DESC, session_id ASC LIMIT ? OFFSET ?`,
+    ).bind(PAGE_SIZE, (page - 1) * PAGE_SIZE),
+  ]);
+  const total = Number(countResult.results[0]?.total) || 0;
+  return {
+    conversations: sessionsResult.results,
+    totalTurns: Number(countResult.results[0]?.totalTurns) || 0,
+    pagination: { page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) },
+    retentionDays,
+  };
+}
+
+/** 展开时读取该会话全部问答，按发生顺序显示。 */
+async function conversationDetails(db, sessionId) {
+  const { results } = await db.prepare(
+    `SELECT id, created_at AS createdAt, question, answer, model, status, failure_reason AS failureReason
+     FROM tutor_questions WHERE session_id = ? ORDER BY created_at ASC, rowid ASC`,
+  ).bind(sessionId).all();
+  return { sessionId, records: results };
+}
+
 // ------------------------------------------------------------ 后台登录（HMAC 签名的 cookie，每天换一次）
 
 /** @param {string} a @param {string} b 常数时间比较 */
@@ -400,12 +432,20 @@ export default {
       if (pathname === '/admin/logout' && method === 'POST') {
         return redirectToAdmin(`${ADMIN_COOKIE}=; Max-Age=0; Path=/admin; HttpOnly; Secure; SameSite=Strict`);
       }
-      if ((pathname === '/admin' || pathname === '/admin/questions') && method === 'GET') {
+      const conversationId = pathname.match(/^\/admin\/conversations\/([A-Za-z0-9_-]{8,80})$/)?.[1];
+      if ((pathname === '/admin' || pathname === '/admin/questions' || pathname === '/admin/conversations' || conversationId) && method === 'GET') {
         if (!(await isAdmin(request, env))) {
           return pathname === '/admin' ? html(loginPage(), 401) : json({ error: 'Authentication required.' }, 401);
         }
         if (pathname === '/admin') return html(ADMIN_PAGE);
+        if (conversationId) {
+          const conversation = await conversationDetails(env.TUTOR_DB, conversationId);
+          return conversation.records.length ? json(conversation) : json({ error: '这次对话不存在或已过保留期。' }, 404);
+        }
         const page = Number.parseInt(url.searchParams.get('page') || '1', 10);
+        if (pathname === '/admin/conversations') {
+          return json(await listConversations(env.TUTOR_DB, page, config.retentionDays), 200, { 'X-Robots-Tag': 'noindex, nofollow, noarchive' });
+        }
         return json(await listQuestions(env.TUTOR_DB, page, config.retentionDays), 200, { 'X-Robots-Tag': 'noindex, nofollow, noarchive' });
       }
       return json({ error: 'Not found.' }, 404);
