@@ -317,7 +317,8 @@
     </div>
   </div>
 
-  <script src="data.js?v=3e920c99"></script>
+  <script src="data.js?v=5378f3de"></script>
+  <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -387,7 +388,7 @@
 
     // 只有带题干和问答脚本的题才放上大屏：AI 照着老师写好的脚本问，不容易出错。
     const ready = (q) => q.stem && q.guide;
-    const usable = (chapter) => chapter.ready && chapter.questions.some(ready);
+    const usable = (chapter) => !!chapter.sealed || (chapter.ready && chapter.questions.some(ready));
 
     // ------------------------------------------------------------ 1. 目录
 
@@ -431,7 +432,15 @@
         const n = ch.questions.filter(ready).length;
         row.innerHTML = `<span></span><span class="leader" aria-hidden="true"></span><span class="count">${n} 题</span>`;
         row.firstChild.textContent = ch.title;
-        row.addEventListener("click", () => openChapter(ch));
+        if (ch.sealed) {
+          row.classList.add("locked");
+          row.querySelector(".count").textContent = window.EXAM_RELEASES.label(ch);
+          row.disabled = !window.EXAM_RELEASES.due(ch);
+          row.title = window.EXAM_RELEASES.label(ch) + "（北京时间）";
+          row.addEventListener("click", () => window.EXAM_RELEASES.retry(ch));
+        } else {
+          row.addEventListener("click", () => openChapter(ch));
+        }
         box.append(row);
       }
     }
@@ -439,6 +448,7 @@
     // ------------------------------------------------------------ 2. 题号
 
     function openChapter(ch) {
+      if (ch.sealed || !ch.ready) return;
       state.chapter = ch;
       $("pick-title").textContent = ch.title;
       const grid = $("qgrid");
@@ -815,7 +825,9 @@
 
     // ------------------------------------------------------------ 开始
 
-    state.book = data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
+    window.addEventListener("exam-release-updated", () => { renderBooks(); renderToc(); });
+    const requestedBook = new URLSearchParams(location.search).get("b");
+    state.book = data.books.find((b) => b.id === requestedBook && b.chapters.some(usable)) || data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
     renderBooks();
     renderToc();
     renderTip();

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "s03",
+    "title": "高二10月周练（2026年10月16日）",
+    "group": "",
+    "ready": false,
+    "questions": [],
+    "questionCount": 19,
+    "releaseAt": "2026-10-16T06:43:00.000Z",
+    "sealed": {
+      "format": "tlock-aes256gcm-gzip-v1",
+      "round": 33109872,
+      "chainHash": "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971",
+      "iv": "2Hw+98Ced2ww1/Hc",
+      "key": "-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHRsb2NrIDMzMTA5ODcyIDUyZGI5YmE3\nMGUwY2MwZjZlYWY3ODAzZGQwNzQ0N2ExZjU0Nzc3MzVmZDNmNjYxNzkyYmE5NDYw\nMGM4NGU5NzEKaEwra2E2L3MrQ0xGMDlBK1F0WUVKVTlzSmhoUzMvMEdYYXM1Z0F5\nNmp5N2kxZyswMlI5OGhOL01QOG9ET3BKZwpBR3I1R3Rqd3BHREFQTkNQU0g3NW5x\nUFAzVnFYVWIwdERFWnZYSG5KMi9wZHpxazB3Tm5kbWFmWjBPOWErY2gvCkROeHp5\naG1SNnQ1bFRUb3I2N1RuNDVuTFY4SEEvWDhRU2cwd0FQZ0ZGaGsKLS0tIEZNZXdn\nYUVrcWg4WXlKWEY5VnUwNXE2R2haUXZOc3RNMDdOWXhSWmZGWmMKzk2ZhTti5M8Q\nbzrMzesXFbqnAqFhhyGqL0JSZ6+00Zd2gpTLNkKeUMLMPLS+q/sJob3B/kvLSCCl\nYWp1Sw6SAg==\n-----END AGE ENCRYPTED FILE-----\n",
+      "url": "assets/exams/sealed/s03.bin",
+      "sha256": "e8e6da4e6cd3bc60c4a02b15ac642d1d746a3ac4e5d1fc2f4ca1b18730ad5816"
+    }
+  }
+]
