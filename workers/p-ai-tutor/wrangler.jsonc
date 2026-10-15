@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "p-ai-tutor",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-27",
+  "workers_dev": true,
+  "routes": [{ "pattern": "p.phylab.uk/api/*", "zone_name": "phylab.uk" }],
+  // 后台里另外设置的变量部署时保留，只覆盖下面写明的
+  "keep_vars": true,
+  "vars": {
+    "AI_MODEL": "deepseek-flash"
+  },
+  // 密钥在后台设置，部署不会删：DEEPSEEK_API_KEY、ADMIN_PASSWORD、ADMIN_SESSION_SECRET
+  "d1_databases": [
+    {
+      "binding": "TUTOR_DB",
+      "database_name": "p-ai-tutor-records",
+      "database_id": "a4ed244e-3ef9-40ac-af89-c9acd28573c1"
+    }
+  ],
+  "observability": { "enabled": true }
+}
