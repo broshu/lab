@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "p-ai-tutor",
   "main": "src/index.js",
-  "compatibility_date": "2026-08-27",
+  "compatibility_date": "2026-08-26",
   "workers_dev": true,
   "routes": [{ "pattern": "p.phylab.uk/api/*", "zone_name": "phylab.uk" }],
   // 后台里另外设置的变量部署时保留，只覆盖下面写明的
