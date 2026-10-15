@@ -16,5 +16,5 @@
 
 ## 部署
 
-推到 `main` 后由 Cloudflare Workers Builds 自动部署（已连接：Worker 设置 → Builds，根目录 `workers/p-ai-tutor`，构建 `npm run build`，部署 `npx wrangler deploy`）。
+推到 `main` 后由 Cloudflare Workers Builds 自动部署（已连接：Worker 设置 → Builds，根目录 `workers/p-ai-tutor`，构建 `npm run build`（先跑测试，不通过就不部署），部署 `npx wrangler deploy`）。
 手动部署：`npm install && npx wrangler deploy`。测试：`npm test`。
