@@ -1,433 +1,93 @@
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="用三个弹簧振子和实时曲线，演示简谐运动的初相位 φ、平衡位置偏移 c、振幅与周期。">
-<title>简谐运动：初相位与偏移 · 物理实验室</title>
-<style>
-:root{color-scheme:light;--ink:#202a35;--muted:#596572;--line:#d7dfe5;--accent:#175a83;--paper:#fff;--bg:#f3f5f6}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}button,input{font:inherit}button,a,input{touch-action:manipulation}button{cursor:pointer;background:white;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px 13px;min-height:42px;font-weight:500}button:hover{background:#edf4f8;border-color:#8ca8ba}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #3e92c4;outline-offset:3px}button:disabled{opacity:.45;cursor:wait}button[aria-pressed=true],button[aria-current=step],.primary{background:var(--accent);color:white;border-color:var(--accent)}button.primary:hover{background:#11466a}input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;min-height:32px;margin:0}input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}[hidden]{display:none!important}.wrap{max-width:1440px;margin:auto;padding:22px 28px 28px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:14px}.back{color:var(--muted);font-size:14px;text-decoration:none}.back:hover{text-decoration:underline}h1{margin:4px 0 0;font-size:25px;letter-spacing:.02em;font-weight:650}.formula{font:italic 25px Georgia,"Times New Roman",serif;margin:0;color:var(--accent);white-space:nowrap}.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}.mode{display:flex;gap:4px}.hint{font-size:14px;color:var(--muted);margin:0}.spacer{flex:1}.stage{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}canvas{display:block;width:100%;height:auto}.transport{padding:12px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:9px}.timeline{display:flex;align-items:center;gap:14px;flex:1 1 300px}.timeline input{flex:1;min-width:90px}#time{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap;min-width:115px}.check{display:inline-flex;gap:6px;align-items:center;white-space:nowrap;font-size:14px}.controls{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:16px 18px}h2{font-size:16px;margin:0 0 12px;font-weight:650}.sliders{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}.slider label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}.slider output{font-size:14px;font-variant-numeric:tabular-nums;color:var(--accent);white-space:nowrap}.units{font-size:12px;color:var(--muted);font-weight:400}.presets{display:flex;flex-wrap:wrap;gap:7px}.presets button{font-size:14px;padding:6px 10px}.visibility{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:14px}.blue{color:#0072B2}.orange{color:#b34f00}.green{color:#007e5d}.speed-row{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end;margin-top:12px}.speed-row .slider{max-width:330px}.readout{padding:12px 4px 0}.readout p{margin:2px 0;font-size:15px}.readout #numbers{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}.chapters{background:white;border:1px solid var(--line);border-radius:9px;margin-bottom:10px;padding:10px}#scene-buttons{display:flex;gap:6px;flex-wrap:wrap}#scene-buttons button{font-size:13px;padding:6px 9px}.footer{margin-top:14px;color:var(--muted);font-size:13px}summary{cursor:pointer;width:fit-content}details .export-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}details p{margin:8px 0}.keyboard{margin:10px 0 0}kbd{background:#fff;border:1px solid var(--line);border-radius:3px;padding:1px 5px;font:12px inherit}#demo:fullscreen{overflow:auto;background:var(--bg);max-width:none;padding:12px 22px}#demo:fullscreen .top,#demo:fullscreen .footer{display:none}.presenting{position:fixed;inset:0;z-index:10;overflow:auto;background:var(--bg);max-width:none;padding:12px 22px}.presenting .top,.presenting .footer{display:none}
-@media(min-width:1000px){.workbench{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;align-items:start}.controls{grid-template-columns:1fr;margin-top:0;gap:10px}.panel{padding:12px 14px}.sliders{gap:8px 14px}.slider label{display:block;font-size:14px}.slider output{display:block;font-size:13px}.slider input{min-height:28px}.speed-row{margin-top:8px}.presets{gap:6px}.presets button{font-size:13px;padding:5px 8px;min-height:36px}.visibility{gap:8px 12px;margin-top:10px}.check{font-size:13px}.readout p{font-size:14px}.stage canvas{max-height:calc(100vh - 240px);object-fit:contain;min-height:300px}.transport{padding:10px;gap:7px}.transport button{font-size:14px;padding:7px 10px}.timeline{flex-basis:100%}.top{margin-bottom:10px}.footer{margin-top:10px}#demo:fullscreen .stage canvas,.presenting .stage canvas{max-height:calc(100vh - 150px)}#demo:fullscreen .workbench,.presenting .workbench{grid-template-columns:minmax(0,1fr) 340px}}
-@media(max-width:800px){.wrap{padding:14px 12px}.top{align-items:flex-start;flex-direction:column;gap:4px}h1{font-size:21px}.formula{font-size:21px}.controls{grid-template-columns:1fr}.hint{flex-basis:100%;order:3}.transport{padding:10px}.timeline{flex-basis:100%;order:2}.toolbar .spacer{display:none}.toolbar #fullscreen{margin-left:auto}.sliders{gap:12px 16px}.panel{padding:14px}.speed-row{gap:10px}}
-@media(max-width:480px){.sliders{grid-template-columns:1fr}.slider label{display:flex;justify-content:space-between;gap:10px}.slider label span{white-space:nowrap}.formula{white-space:normal}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHM Phase and Offset</title>
+    <link rel="stylesheet" href="css/theme.css?v=20261014b">
+    <link rel="stylesheet" href="css/style.css?v=20261014b">
 </head>
 <body>
-<main class="wrap" id="demo">
-<header class="top"><div><a class="back" href="../../library.html?section=games">← 互动实验</a><h1>简谐运动：初相位与偏移</h1></div><p class="formula">y = A sin(ωt + φ) + c</p></header>
-<div class="toolbar"><div class="mode" role="group" aria-label="演示模式"><button type="button" data-mode="explore" aria-pressed="true">自由演示</button><button type="button" data-mode="guided" aria-pressed="false">分步讲解</button></div><p class="hint" id="mode-note"></p><span class="spacer"></span><button type="button" id="fullscreen">全屏演示</button></div>
-<section class="chapters" id="chapters" aria-label="讲解片段" hidden><div id="scene-buttons"></div></section>
-<div class="workbench"><section class="stage" aria-label="振子和位移随时间变化的曲线"><canvas id="cv" width="1280" height="800" role="img" aria-label="左侧三个弹簧振子，右侧是对应的位置时间曲线。①为基准，②相位改变，③增加平衡位置偏移；下方可调参数。">需要支持 Canvas 的浏览器才能显示动画。</canvas>
-<div class="transport"><button type="button" class="primary" id="play" aria-pressed="false" title="空格：播放或暂停">播放</button><button type="button" id="restart" title="R：回到起点">回到起点</button><button type="button" id="back" title="暂停并后退四分之一个周期">− T/4</button><button type="button" id="forward" title="暂停并前进四分之一个周期">+ T/4</button><label class="check"><input type="checkbox" id="repeat" checked>循环</label><div class="timeline"><input id="scrub" type="range" min="0" max="60" step="0.01" value="5" aria-label="动画时间（秒）"><output id="time" for="scrub"></output></div></div></section>
-<div class="controls"><section class="panel" aria-labelledby="parameter-title"><h2 id="parameter-title">改变参数 <span class="units">长度为示意单位</span></h2><div class="sliders">
-<div class="slider"><label for="phi"><span>初相位 φ</span><output id="phi-value" for="phi"></output></label><input id="phi" type="range" min="-180" max="180" step="5" value="90"></div>
-<div class="slider"><label for="c"><span>平衡位置偏移 c</span><output id="c-value" for="c"></output></label><input id="c" type="range" min="-80" max="160" step="5" value="150"></div>
-<div class="slider"><label for="A"><span>振幅 A</span><output id="A-value" for="A"></output></label><input id="A" type="range" min="20" max="90" step="5" value="65"></div>
-<div class="slider"><label for="T"><span>周期 T</span><output id="T-value" for="T"></output></label><input id="T" type="range" min="0.8" max="4" step="0.1" value="1.6"></div>
-</div><div class="speed-row"><div class="slider"><label for="speed"><span>播放速度</span><output id="speed-value" for="speed"></output></label><input id="speed" type="range" min="0.25" max="2" step="0.25" value="1"></div><button type="button" id="reset">恢复默认</button></div></section>
-<section class="panel" aria-labelledby="preset-title"><h2 id="preset-title">课堂对比</h2><div class="presets" role="group" aria-label="常用参数组合"><button type="button" data-preset="same">同相</button><button type="button" data-preset="lead">超前 T/4</button><button type="button" data-preset="lag">滞后 T/4</button><button type="button" data-preset="opposite">反相</button><button type="button" data-preset="offset">只改变 c</button><button type="button" data-preset="original">原始对照</button></div>
-<div class="visibility" role="group" aria-label="显示振子和曲线"><label class="check blue"><input type="checkbox" data-visible="0" checked>① 基准</label><label class="check orange"><input type="checkbox" data-visible="1" checked>② 相位</label><label class="check green"><input type="checkbox" data-visible="2" checked>③ 偏移</label></div><div class="visibility"><label class="check"><input type="checkbox" id="show-phi" checked>φ/ω 标注</label><label class="check"><input type="checkbox" id="show-c" checked>c 标注</label></div><div class="readout"><p id="relation" aria-live="polite"></p><p id="numbers"></p></div></section></div></div>
-<footer class="footer"><p class="keyboard">快捷键：<kbd>空格</kbd> 播放 / 暂停　<kbd>←</kbd> <kbd>→</kbd> 微调 T/16　<kbd>R</kbd> 回到起点　<kbd>F</kbd> 全屏。滑块获焦时，方向键调整滑块。页面默认暂停。</p><details><summary>保存画面与视频</summary><div class="export-bar"><button type="button" id="still">保存当前画面 PNG</button><button type="button" id="export">导出视频</button><button type="button" id="cancel-export" hidden>取消录制</button><span id="status" role="status"></span></div><p>自由演示录制 10 秒，分步讲解录制完整 31 秒；按 1×速度导出，保留当前参数。视频格式由浏览器决定。</p></details></footer>
-</main>
-<script>
+    <header class="top-bar">
+        <div>
+            <h1>SHM Phase and Offset</h1>
+        </div>
+        <a class="home-button" href="../../library.html?section=games" aria-label="Back to Interactive Labs" title="Interactive Labs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+    </header>
 
-/* ======================================================================
-   CONFIG — edit here
-   ====================================================================== */
-const CONFIG = {
-  fps: 30,
-  // physics (screen pixels; upward = positive)
-  A: 65,              // amplitude
-  T: 1.6,             // period in seconds (animation time)
-  phi: Math.PI / 2,   // phase of oscillators 2 and 3
-  c: 150,             // how much higher oscillator 3 hangs
-  window: 5,          // seconds of trace visible in the graph
+    <main class="layout">
+        <section class="panel controls-panel">
+            <div class="section-title">
+                <h2>Controls</h2>
+                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+            </div>
 
-  colors: ['#0072B2', '#D55E00', '#009E73'],   // oscillators 1, 2, 3 (colour-blind safe)
-  ink: '#1a1a1a', muted: '#6b6b6b', guide: '#9a9a9a',
+            <div>
+                <p class="group-label">Add to the reference</p>
+                <div class="chip-grid">
+                    <button id="add2" class="ghost-button" type="button" aria-pressed="false">Add 2: phase φ</button>
+                    <button id="add3" class="ghost-button" type="button" aria-pressed="false">Add 3: offset b</button>
+                </div>
+            </div>
 
-  // layout (canvas is 1280 x 720)
-  y0: 430,                      // screen height of y = 0 (equilibrium of 1 and 2)
-  oscX: [130, 270, 410],        // horizontal positions of the three oscillators
-  supportY: 200,                // support height for oscillators 1 and 2 (3 is raised by c)
-  ballR: 22,
-  graph: { x0: 620, x1: 1120, top: 180, bottom: 620 },
-  labelY: 655,                  // row of the ①②③ labels under the oscillators
+            <label class="slider-row is-off" id="phiRow">
+                <span>Phase φ of 2</span>
+                <output id="phiOut" for="phi">90° (0.50π)</output>
+                <input id="phi" type="range" min="-180" max="180" step="5" value="90" disabled>
+            </label>
 
-  formulas: [
-    '①  *y*₁ = *A* sin *ωt*',
-    '②  *y*₂ = *A* sin(*ωt* + *φ*)',
-    '③  *y*₃ = *A* sin(*ωt* + *φ*) + *c*'
-  ],
+            <label class="slider-row is-off" id="bRow">
+                <span>Equilibrium offset b of 3</span>
+                <output id="bOut" for="b">150</output>
+                <input id="b" type="range" min="-80" max="160" step="5" value="150" disabled>
+            </label>
 
-  // timeline: the oscillation never stops; each scene only sets the caption,
-  // which oscillator appears (add: 2 or 3) and which labels are shown (show: 'phi' / 'c')
-  scenes: [
-    { dur: 2, caption: '初相位 φ 和偏移量 c，分别改变了什么？' },
-    { dur: 6, caption: '① 以平衡位置为原点：y₁ = A sin ωt' },
-    { dur: 5, add: 2, caption: '② 振幅、周期相同，初相位不同：y₂ = A sin(ωt + φ)' },
-    { dur: 4, show: ['phi'], caption: '比较①和②：相位差对应时间平移 φ/ω' },
-    { dur: 5, add: 3, caption: '③ 在②的基础上改变平衡位置：y₃ = A sin(ωt + φ) + c' },
-    { dur: 4, show: ['c'], caption: '比较②和③：它们同相，平衡位置相差 c' },
-    { dur: 5, show: ['phi', 'c'], caption: '视频分析中，计时起点的选择影响 φ，坐标原点的选择影响 c。\nφ 和 c 均不改变振幅与周期；图中规定向上为正。' }
-  ],
+            <label class="slider-row">
+                <span>Period T (all)</span>
+                <output id="TOut" for="T">1.6 s</output>
+                <input id="T" type="range" min="0.8" max="4" step="0.1" value="1.6">
+            </label>
 
-  fontSans: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-  fontSerif: '"Times New Roman", "STIX Two Text", Times, serif'
-};
-/* ====================================================================== */
+            <div class="button-row">
+                <button id="playBtn" class="primary-button" type="button">Pause</button>
+                <button id="restartBtn" class="ghost-button" type="button">Restart</button>
+            </div>
 
-const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-const W = cv.width, H = cv.height, C = CONFIG;
-let w = 2 * Math.PI / C.T;
-const TOTAL = C.scenes.reduce((s, x) => s + x.dur, 0);
-// scene start times and the moment each oscillator appears
-{ let acc = 0; for (const sc of C.scenes) { sc.start = acc; acc += sc.dur; } }
-const APPEAR = [0, ...[2, 3].map(n => (C.scenes.find(sc => sc.add === n) || { start: Infinity }).start)];
-let pxPerSec = (C.graph.x1 - C.graph.x0) / C.window;
+            <div>
+                <p class="group-label">Compare phase</p>
+                <div class="chip-grid">
+                    <button class="ghost-button" type="button" data-preset="same">In phase</button>
+                    <button class="ghost-button" type="button" data-preset="opposite">Antiphase</button>
+                    <button class="ghost-button" type="button" data-preset="lead">Lead by T/4</button>
+                    <button class="ghost-button" type="button" data-preset="lag">Lag by T/4</button>
+                </div>
+            </div>
+        </section>
 
-// state of the timeline at global time t (animation time = real time; nothing ever pauses)
-function stateAt(t) {
-  const sc = C.scenes.find(x => t < x.start + x.dur) || C.scenes[C.scenes.length - 1];
-  return { sim: t, scene: sc, frac: Math.min(1, (t - sc.start) / sc.dur) };
-}
-const disp = (i, s) => C.A * Math.sin(w * s + (i === 0 ? 0 : C.phi));
-const eqY = i => C.y0 - (i === 2 ? C.c : 0);          // screen y of equilibrium
-const supY = i => C.supportY - (i === 2 ? C.c : 0);
-let mode = 'explore';
-const visible = [true, true, true];
-const alphaOf = (i, s) => !visible[i] ? 0 : mode === 'explore' || i === 0 ? 1 : Math.max(0, Math.min(1, (s - APPEAR[i]) / 0.5));
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <h2>Spring oscillators</h2>
+                <div class="legend">
+                    <span><i class="swatch blue"></i>1 Reference</span>
+                    <span><i class="swatch orange"></i>2 Phase φ</span>
+                    <span><i class="swatch teal"></i>3 Offset b</span>
+                </div>
+            </div>
+            <div class="figure">
+                <canvas id="stage" width="1280" height="690" role="img" aria-label="Spring oscillators on the left and their position–time graphs on the right"></canvas>
+            </div>
+            <div class="readout-bar">
+                <p><span>ω = 2π/T</span><strong id="vw">3.93 rad/s</strong></p>
+                <p><span>Time shift φ/ω</span><strong id="vd">–</strong></p>
+                <p class="note" id="relation"></p>
+            </div>
+        </section>
+    </main>
 
-// --- rich text: *italic* segments, serif for italics ---
-function richText(str, x, y, size, align = 'left', family = C.fontSans, color = C.ink) {
-  const lines = str.split('\n');
-  lines.forEach((line, li) => {
-    const segs = line.split('*').map((s, k) => ({ s, it: k % 2 === 1 }));
-    const fontOf = sg => sg.it ? `italic ${size}px ${C.fontSerif}` : `${size}px ${family}`;
-    let total = 0;
-    for (const sg of segs) { ctx.font = fontOf(sg); total += ctx.measureText(sg.s).width; }
-    let cx = align === 'center' ? x - total / 2 : x;
-    const yy = y + li * size * 1.35;
-    ctx.fillStyle = color; ctx.textBaseline = 'middle';
-    for (const sg of segs) { ctx.font = fontOf(sg); ctx.fillText(sg.s, cx, yy); cx += ctx.measureText(sg.s).width; }
-  });
-}
+    <footer>
+        <p>φ shifts the motion in time; b shifts the equilibrium position. Neither changes the amplitude or the period. Up is positive, and lengths are in arbitrary units.</p>
+    </footer>
 
-function arrow(x1, y1, x2, y2, both = false, color = C.ink) {
-  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.6;
-  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-  const head = (xa, ya, xb, yb) => {
-    const a = Math.atan2(yb - ya, xb - xa), L = 10;
-    ctx.beginPath(); ctx.moveTo(xb, yb);
-    ctx.lineTo(xb - L * Math.cos(a - 0.4), yb - L * Math.sin(a - 0.4));
-    ctx.lineTo(xb - L * Math.cos(a + 0.4), yb - L * Math.sin(a + 0.4));
-    ctx.closePath(); ctx.fill();
-  };
-  head(x1, y1, x2, y2); if (both) head(x2, y2, x1, y1);
-}
-function dotted(x1, y1, x2, y2, color = C.guide) {
-  ctx.save(); ctx.setLineDash([3, 4]); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore();
-}
-
-function drawSupport(x, y) {
-  ctx.fillStyle = '#555'; ctx.fillRect(x - 45, y - 10, 90, 10);
-  ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
-  for (let k = -45; k < 45; k += 9) { ctx.beginPath(); ctx.moveTo(x + k, y - 10); ctx.lineTo(x + k + 7, y - 18); ctx.stroke(); }
-}
-function drawSpring(x, yTop, yBot) {
-  const n = 18, half = 11, lead = 8;
-  ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.beginPath();
-  ctx.moveTo(x, yTop); ctx.lineTo(x, yTop + lead);
-  const span = (yBot - lead) - (yTop + lead);
-  for (let k = 0; k <= 2 * n; k++) {
-    const yy = yTop + lead + span * k / (2 * n);
-    const xx = (k === 0 || k === 2 * n) ? x : x + (k % 2 ? half : -half);
-    ctx.lineTo(xx, yy);
-  }
-  ctx.lineTo(x, yBot); ctx.stroke();
-}
-function drawBall(x, y, r, color) {
-  const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
-  g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, color); g.addColorStop(1, shade(color, -0.35));
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill();
-  ctx.strokeStyle = shade(color, -0.5); ctx.lineWidth = 1; ctx.stroke();
-}
-function shade(hex, f) {
-  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
-  const m = v => Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f);
-  return `rgb(${m(r)},${m(g)},${m(b)})`;
-}
-
-function render(t) {
-  const { sim: s, scene, frac } = stateAt(t);
-  ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
-
-  // ---------------- left: oscillators ----------------
-  dotted(40, C.y0, 520, C.y0);
-  richText('*y* = 0', 30, C.y0 - 16, 20, 'left', C.fontSans, C.muted);
-  for (let i = 0; i < 3; i++) {
-    const a = alphaOf(i, s); if (a <= 0) continue;
-    ctx.globalAlpha = a;
-    const x = C.oscX[i], yb = eqY(i) - disp(i, s);          // ball centre (screen)
-    drawSupport(x, supY(i));
-    drawSpring(x, supY(i), yb - C.ballR);
-    drawBall(x, yb, C.ballR, C.colors[i]);
-    if (i === 2) dotted(x - 60, eqY(2), x + 60, eqY(2));
-    richText('①②③'[i], x, C.labelY, 28, 'center');
-    ctx.globalAlpha = 1;
-  }
-
-  // ---------------- right: graph ----------------
-  const G = C.graph, now = s;
-  const lo = Math.max(0, now - C.window);
-  const X = tt => G.x0 + (tt - lo) * pxPerSec;
-  ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2; ctx.strokeRect(G.x0, G.top, G.x1 + 60 - G.x0, G.bottom - G.top);
-  dotted(G.x0, C.y0, G.x1 + 60, C.y0);
-  richText('0', G.x0 - 14, C.y0, 22, 'center', C.fontSerif);
-  if (alphaOf(2, s) > 0) { ctx.globalAlpha = alphaOf(2, s);
-    dotted(G.x0, C.y0 - C.c, G.x1 + 60, C.y0 - C.c); ctx.globalAlpha = 1; }
-  richText('*y*', G.x0 - 12, G.top - 18, 26, 'center');
-  richText('时间 *t* / s  →', (G.x0 + G.x1 + 60) / 2, G.bottom + 26, 22, 'center');
-
-  for (let tick = Math.ceil(lo); tick <= now && tick <= lo + C.window; tick++) {
-    richText(String(tick), X(tick), G.bottom - 14, 16, 'center', C.fontSans, C.muted);
-  }
-  ctx.save(); ctx.beginPath(); ctx.rect(G.x0, G.top, G.x1 + 60 - G.x0, G.bottom - G.top); ctx.clip();
-  for (let i = 0; i < 3; i++) {
-    const a = alphaOf(i, s); if (a <= 0) continue;
-    const t0 = Math.max(mode === 'explore' ? 0 : APPEAR[i], lo);
-    ctx.globalAlpha = a; ctx.strokeStyle = C.colors[i]; ctx.lineWidth = 3; ctx.lineJoin = 'round';
-    ctx.beginPath();
-    const n = Math.max(2, Math.ceil((now - t0) * 80));
-    for (let k = 0; k <= n; k++) {
-      const tt = t0 + (now - t0) * k / n, yy = eqY(i) - disp(i, tt);
-      k ? ctx.lineTo(X(tt), yy) : ctx.moveTo(X(tt), yy);
-    }
-    ctx.stroke();
-    ctx.fillStyle = C.colors[i]; ctx.beginPath(); ctx.arc(X(now), eqY(i) - disp(i, now), 6, 0, 2 * Math.PI); ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-  ctx.restore();
-  // pen labels ①②③, nudged apart when two pens are close
-  const tagsNow = [0, 1, 2].filter(i => alphaOf(i, s) > 0).map(i => ({ i, y: eqY(i) - disp(i, now) }))
-                           .sort((p, q) => p.y - q.y);
-  for (let k = 1; k < tagsNow.length; k++) tagsNow[k].y = Math.max(tagsNow[k].y, tagsNow[k - 1].y + 24);
-  for (const tg of tagsNow) {
-    ctx.globalAlpha = alphaOf(tg.i, s); richText('①②③'[tg.i], X(now) + 14, tg.y, 22); ctx.globalAlpha = 1;
-  }
-
-  // ---------------- formulas ----------------
-  for (let i = 0; i < 3; i++) {
-    const a = alphaOf(i, s); if (a <= 0) continue;
-    ctx.globalAlpha = a; ctx.fillStyle = C.colors[i];
-    ctx.fillRect(G.x0, 42 + i * 40, 18, 18);
-    richText(C.formulas[i], G.x0 + 30, 51 + i * 40, 28, 'left', C.fontSerif);
-    ctx.globalAlpha = 1;
-  }
-
-  // Compare corresponding troughs. Positive φ means ② reaches a trough earlier.
-  const shows = (mode === 'explore' ? ['phi', 'c'] : scene.show || [])
-    .filter(name => document.getElementById('show-' + name).checked);
-  if (shows.includes('phi') && alphaOf(0, s) > 0 && alphaOf(1, s) > 0 && Math.abs(C.phi) > 0.001) {
-    const d = C.phi / w;
-    const k = Math.floor((now + Math.min(0, d) - 3 * C.T / 4) / C.T);
-    const t1 = 3 * C.T / 4 + k * C.T, t2 = t1 - d;
-    const earliest = mode === 'explore' ? 0 : APPEAR[1];
-    if (Math.min(t1, t2) >= lo && t2 >= earliest) {
-      const yBot = C.y0 + C.A, ya = yBot + 20;
-      ctx.strokeStyle = C.ink; ctx.lineWidth = 1;
-      [t1, t2].forEach(tt => { ctx.beginPath(); ctx.moveTo(X(tt), yBot); ctx.lineTo(X(tt), ya + 4); ctx.stroke(); });
-      arrow(X(t1), ya, X(t2), ya);
-      richText('*φ*/*ω*', (X(t1) + X(t2)) / 2, ya + 21, 24, 'center');
-    }
-  }
-  if (shows.includes('c') && alphaOf(2, s) > 0 && Math.abs(C.c) > 0.001) {
-    const xa = G.x0 - 34;
-    arrow(xa, C.y0, xa, C.y0 - C.c, true);
-    richText('*c*', xa - 20, C.y0 - C.c / 2, 28, 'center');
-    const xl = C.oscX[2] + 70;
-    arrow(xl, C.y0, xl, C.y0 - C.c, true);
-    richText('*c*', xl + 10, C.y0 - C.c / 2, 28);
-  }
-  const caption = mode === 'explore'
-    ? '① 基准振动　　② 改变初相位　　③ 再平移平衡位置\n向上为正；长度为示意单位。拖动参数滑块，观察振子与曲线的对应变化。'
-    : scene.caption;
-  richText(caption, W / 2, 735 - (caption.includes('\n') ? 16 : 0), 25, 'center');
-}
-
-
-// Playback has a single animation loop, including after repeated pause/resume.
-const $ = id => document.getElementById(id);
-const defaults = { A: 65, T: 1.6, phi: 90, c: 150, speed: 1 };
-let t = 5, playing = false, last = null, raf = null, recording = false, cancelRecording = false;
-const duration = () => mode === 'guided' ? TOTAL : 60;
-const sceneNames = ['问题引入', '① 基准振动', '② 引入初相位', '比较相位 φ', '③ 平移平衡位置', '比较偏移 c', '视频分析中的 φ、c'];
-function syncValues() {
-  w = 2 * Math.PI / C.T;
-  C.window = Math.max(5, C.T * 2);
-  pxPerSec = (C.graph.x1 - C.graph.x0) / C.window;
-  $('A-value').textContent = C.A.toFixed(0);
-  $('T-value').textContent = C.T.toFixed(1) + ' s';
-  const degrees = Math.round(C.phi * 180 / Math.PI);
-  $('phi-value').textContent = degrees + '° / ' + (C.phi / Math.PI).toFixed(2) + 'π';
-  $('c-value').textContent = C.c.toFixed(0);
-  $('speed-value').textContent = Number($('speed').value).toFixed(2).replace(/0$/, '') + '×';
-  const delta = C.phi / w;
-  $('relation').textContent = Math.abs(degrees) === 180
-    ? '②与①反相，相差半个周期；③与②同相。'
-    : degrees === 0 ? '②与①同相；③与②的平衡位置相差 ' + C.c + '。'
-    : '②比①' + (degrees > 0 ? '超前' : '滞后') + ' ' + Math.abs(delta).toFixed(2) + ' s（' + Math.abs(degrees) + '°）；③与②同相。';
-  $('numbers').textContent = 'ω = ' + w.toFixed(2) + ' rad/s　｜　φ/ω = ' + delta.toFixed(2) + ' s　｜　平衡位置：0，0，' + C.c;
-}
-function show(tt) {
-  t = Math.max(0, Math.min(duration(), tt));
-  render(t);
-  $('scrub').max = duration(); $('scrub').value = t;
-  $('time').textContent = t.toFixed(2) + ' / ' + duration() + ' s';
-  const index = C.scenes.indexOf(stateAt(t).scene);
-  document.querySelectorAll('[data-scene]').forEach((button, i) => button.setAttribute('aria-current', mode === 'guided' && i === index ? 'step' : 'false'));
-}
-function setPlaying(value) {
-  if (raf !== null) cancelAnimationFrame(raf);
-  raf = null; last = null; playing = value;
-  if (playing && t >= duration()) show(0);
-  $('play').textContent = playing ? '暂停' : '播放';
-  $('play').setAttribute('aria-pressed', String(playing));
-  if (playing) raf = requestAnimationFrame(loop);
-}
-function loop(ts) {
-  raf = null;
-  if (!playing) return;
-  if (last !== null) {
-    const next = t + Math.min((ts - last) / 1000, 0.1) * Number($('speed').value);
-    if (next >= duration()) {
-      if ($('repeat').checked) show(next % duration());
-      else { show(duration()); setPlaying(false); return; }
-    } else show(next);
-  }
-  last = ts; raf = requestAnimationFrame(loop);
-}
-function switchMode(value) {
-  setPlaying(false); mode = value;
-  document.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  $('chapters').hidden = mode !== 'guided';
-  $('mode-note').textContent = mode === 'guided' ? '按 7 个片段依次讲解，也可直接跳到某一步。' : '三组振动同时显示，可暂停调参、逐步推进或循环播放。';
-  show(mode === 'guided' ? 0 : Math.max(5, Math.min(t, 60)));
-}
-function setParams(values) {
-  for (const key of ['A', 'T', 'phi', 'c', 'speed']) {
-    if (values[key] === undefined) continue;
-    $(key).value = values[key];
-    if (key !== 'speed') C[key] = key === 'phi' ? values[key] * Math.PI / 180 : values[key];
-  }
-  syncValues(); show(t);
-}
-for (const key of ['A', 'T', 'phi', 'c', 'speed']) {
-  $(key).addEventListener('input', () => setParams({ [key]: Number($(key).value) }));
-}
-$('play').onclick = () => setPlaying(!playing);
-$('restart').onclick = () => { setPlaying(false); show(0); };
-$('back').onclick = () => { setPlaying(false); show(t - C.T / 4); };
-$('forward').onclick = () => { setPlaying(false); show(t + C.T / 4); };
-$('scrub').oninput = () => { setPlaying(false); show(Number($('scrub').value)); };
-$('reset').onclick = () => {
-  setPlaying(false); setParams(defaults);
-  visible.fill(true);
-  document.querySelectorAll('[data-visible]').forEach(input => input.checked = true);
-  $('show-phi').checked = $('show-c').checked = $('repeat').checked = true;
-  show(mode === 'guided' ? 0 : 5);
-};
-document.querySelectorAll('[data-mode]').forEach(button => button.onclick = () => switchMode(button.dataset.mode));
-sceneNames.forEach((name, i) => {
-  const button = document.createElement('button'); button.type = 'button'; button.textContent = (i + 1) + ' ' + name; button.dataset.scene = i;
-  button.onclick = () => { setPlaying(false); show(C.scenes[i].start + 0.6); };
-  $('scene-buttons').append(button);
-});
-document.querySelectorAll('[data-visible]').forEach(input => input.onchange = () => { visible[Number(input.dataset.visible)] = input.checked; show(t); });
-for (const id of ['show-phi', 'show-c']) $(id).onchange = () => show(t);
-const presets = {
-  same: { phi: 0, c: 0 }, lead: { phi: 90, c: 0 }, lag: { phi: -90, c: 0 },
-  opposite: { phi: 180, c: 0 }, offset: { phi: 0, c: 150 }, original: defaults
-};
-document.querySelectorAll('[data-preset]').forEach(button => button.onclick = () => {
-  if (mode !== 'explore') switchMode('explore');
-  visible.fill(true); document.querySelectorAll('[data-visible]').forEach(input => input.checked = true);
-  setParams(presets[button.dataset.preset]);
-});
-async function fullscreen() {
-  try {
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else if ($('demo').requestFullscreen) await $('demo').requestFullscreen();
-    else { $('demo').classList.toggle('presenting'); syncFullscreen(); }
-  } catch { $('demo').classList.toggle('presenting'); syncFullscreen(); }
-}
-function syncFullscreen() {
-  const active = !!document.fullscreenElement || $('demo').classList.contains('presenting');
-  $('fullscreen').textContent = active ? '退出全屏' : '全屏演示';
-}
-$('fullscreen').onclick = fullscreen;
-document.addEventListener('fullscreenchange', syncFullscreen);
-document.addEventListener('keydown', event => {
-  if (recording || event.ctrlKey || event.metaKey || event.altKey || /INPUT|SELECT|TEXTAREA/.test(event.target.tagName)) return;
-  if (event.code === 'Space') {
-    if (/BUTTON|A/.test(event.target.tagName)) return;
-    event.preventDefault(); setPlaying(!playing);
-  }
-  else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); setPlaying(false); show(t + (event.key === 'ArrowRight' ? 1 : -1) * C.T / 16); }
-  else if (event.key.toLowerCase() === 'r') $('restart').click();
-  else if (event.key.toLowerCase() === 'f') fullscreen();
-  else if (event.key === 'Escape') { $('demo').classList.remove('presenting'); syncFullscreen(); }
-});
-$('still').onclick = () => {
-  const a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = 'phi-c-' + t.toFixed(2) + 's.png'; a.click();
-};
-$('export').onclick = async () => {
-  const types = ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
-  const mime = window.MediaRecorder && cv.captureStream && types.find(type => MediaRecorder.isTypeSupported(type));
-  if (!mime) { $('status').textContent = '此浏览器不支持录制，请使用保存画面。'; return; }
-  setPlaying(false);
-  const savedTime = t, controls = [...document.querySelectorAll('#demo button, #demo input')];
-  recording = true; cancelRecording = false;
-  controls.forEach(control => control.disabled = true);
-  $('cancel-export').disabled = false; $('cancel-export').hidden = false;
-  let stream, rec, url;
-  try {
-    show(0); stream = cv.captureStream(C.fps);
-    rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6e6 });
-    const chunks = [];
-    rec.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
-    const stopped = new Promise((resolve, reject) => { rec.onstop = resolve; rec.onerror = event => reject(event.error || new Error('录制失败')); });
-    rec.start();
-    const start = performance.now(), length = mode === 'guided' ? TOTAL : 10;
-    await new Promise(resolve => {
-      function frame(now) {
-        const elapsed = (now - start) / 1000; show(Math.min(elapsed, length));
-        $('status').textContent = '录制中 ' + Math.min(100, Math.round(elapsed / length * 100)) + '%（1×速度）';
-        if (cancelRecording || elapsed >= length) resolve(); else requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-    });
-    if (rec.state !== 'inactive') rec.stop(); await stopped;
-    if (cancelRecording) { $('status').textContent = '已取消录制。'; return; }
-    const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
-    url = URL.createObjectURL(new Blob(chunks, { type: mime.split(';')[0] }));
-    const a = document.createElement('a'); a.href = url; a.download = 'phi-c-animation.' + ext; a.click();
-    $('status').textContent = '已导出视频。';
-  } catch (error) { $('status').textContent = '录制失败，请改用保存画面。'; }
-  finally {
-    if (rec && rec.state !== 'inactive') rec.stop();
-    if (stream) stream.getTracks().forEach(track => track.stop());
-    if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
-    recording = false; controls.forEach(control => control.disabled = false); $('cancel-export').hidden = true; show(savedTime);
-  }
-};
-$('cancel-export').onclick = () => { cancelRecording = true; };
-window.renderAt = tt => render(tt); window.TOTAL = TOTAL; window.FPS = C.fps;
-syncValues(); switchMode('explore');
-
-</script>
+    <script src="js/main.js?v=20261014b"></script>
 </body>
 </html>

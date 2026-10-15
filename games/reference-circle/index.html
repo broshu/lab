@@ -1,388 +1,71 @@
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="参考圆上的点匀速转动，投影成简谐运动的 x–t 曲线；拖动角频率 ω 和初相 φ，观察周期 T、频率 f 的变化。">
-<title>参考圆与角频率 · 物理实验室</title>
-<style>
-/* Layout: one stage (reference circle on the left, x–t trace on the right, joined by a dashed projection line), then controls, a four-cell readout, and class prompts. */
-:root {
-  --bg: #F2F5F7;
-  --surface: #FFFFFF;
-  --fg: #13222D;
-  --muted: #566874;
-  --line: #D3DCE2;
-  --accent: #0B6FA4;
-  --wash: #D5E9F4;
-  --mark: #C4450F;
-  --on-accent: #FFFFFF;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0C161E;
-    --surface: #111F29;
-    --fg: #E4ECF1;
-    --muted: #8FA3B1;
-    --line: #263744;
-    --accent: #4DB5EC;
-    --wash: #173A4D;
-    --mark: #FF8A55;
-    --on-accent: #06141D;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0C161E;
-  --surface: #111F29;
-  --fg: #E4ECF1;
-  --muted: #8FA3B1;
-  --line: #263744;
-  --accent: #4DB5EC;
-  --wash: #173A4D;
-  --mark: #FF8A55;
-  --on-accent: #06141D;
-  color-scheme: dark;
-}
-
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.6;
-  padding-block: 20px 40px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 22px; }
-h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.25; font-weight: 600; text-wrap: balance; }
-.back { display: inline-block; margin-bottom: 6px; color: var(--accent); text-decoration: none; font-size: 14px; }
-.back:hover { text-decoration: underline; }
-.lead { margin: 0; color: var(--muted); max-width: 44em; }
-
-.stage { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-canvas { display: block; width: 100%; }
-
-.controls { display: grid; gap: 14px; }
-.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.plabel { color: var(--muted); font-size: 13px; margin-right: 2px; }
-button {
-  font: inherit; min-height: 40px; padding: 0 14px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
-  border-radius: 8px; cursor: pointer;
-}
-button:hover { border-color: var(--accent); }
-button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.field { display: grid; gap: 4px; }
-.frow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-label { font-weight: 500; }
-output { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); }
-input[type="range"] { width: 100%; margin: 0; min-height: 28px; accent-color: var(--accent); }
-
-.readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 20px; }
-.cell { border-top: 1px solid var(--line); padding: 10px 0 6px; min-width: 0; }
-.k { font-size: 12px; color: var(--muted); }
-.v { font-family: var(--font-mono); font-size: 22px; font-weight: 500; line-height: 1.35; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.s { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-
-h2 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
-ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
-.note { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference Circle</title>
+    <link rel="stylesheet" href="css/theme.css?v=20261014b">
+    <link rel="stylesheet" href="css/style.css?v=20261014b">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <a class="back" href="../../library.html?section=games">← 互动实验</a>
-    <h1>参考圆与角频率</h1>
-    <p class="lead">圆周上的点以角速度 ω 匀速转动，它在竖直直径上的投影，就是简谐运动 x = A sin(ωt + φ)。</p>
-  </header>
+    <header class="top-bar">
+        <div>
+            <h1>Reference Circle</h1>
+        </div>
+        <a class="home-button" href="../../library.html?section=games" aria-label="Back to Interactive Labs" title="Interactive Labs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+    </header>
 
-  <div class="stage">
-    <canvas id="stage" role="img" aria-label="左侧参考圆上的点匀速转动，右侧同步描出 x–t 曲线"></canvas>
-  </div>
+    <main class="layout">
+        <section class="panel controls-panel">
+            <div class="section-title">
+                <h2>Controls</h2>
+                <button id="resetBtn" class="ghost-button" type="button">Reset</button>
+            </div>
 
-  <section class="controls" aria-label="演示控制">
-    <div class="row">
-      <button id="play" type="button">暂停</button>
-      <button id="restart" type="button">从头开始</button>
-    </div>
-    <div class="row" role="group" aria-label="按周期取 ω">
-      <span class="plabel">按周期取 ω</span>
-      <button type="button" data-t="4" aria-pressed="false">T = 4 s</button>
-      <button type="button" data-t="2" aria-pressed="false">T = 2 s</button>
-      <button type="button" data-t="1" aria-pressed="false">T = 1 s</button>
-    </div>
-    <div class="field">
-      <div class="frow"><label for="omega">角频率 ω</label><output id="omegaOut" for="omega">3.14 rad/s</output></div>
-      <input id="omega" type="range" min="0.8" max="6.5" step="0.01" value="3.14">
-    </div>
-    <div class="field">
-      <div class="frow"><label for="phi">初相 φ</label><output id="phiOut" for="phi">0.00π rad</output></div>
-      <input id="phi" type="range" min="0" max="2" step="0.01" value="0">
-    </div>
-  </section>
+            <label class="slider-row">
+                <span>Angular frequency ω</span>
+                <output id="omegaOut" for="omega">3.14 rad/s</output>
+                <input id="omega" type="range" min="0.8" max="6.5" step="0.01" value="3.14">
+            </label>
 
-  <section class="readout" aria-label="数值读数">
-    <div class="cell"><div class="k">周期 T = 2π / ω</div><div class="v" id="vT">2.00 s</div><div class="s" id="sT">2π ÷ 3.14 rad/s</div></div>
-    <div class="cell"><div class="k">频率 f = 1 / T</div><div class="v" id="vF">0.50 Hz</div><div class="s" id="sF">每秒转 0.50 圈</div></div>
-    <div class="cell"><div class="k">时间 t</div><div class="v" id="vt">3.30 s</div><div class="s" id="st">= 1.65 T</div></div>
-    <div class="cell"><div class="k">相位 ωt + φ</div><div class="v" id="vth">10.37 rad</div><div class="s" id="sth">ωt 已转 1.65 圈</div></div>
-  </section>
+            <label class="slider-row">
+                <span>Initial phase φ</span>
+                <output id="phiOut" for="phi">0.00π rad</output>
+                <input id="phi" type="range" min="0" max="2" step="0.01" value="0">
+            </label>
 
-  <section>
-    <h2>观察与思考</h2>
-    <ul>
-      <li>点转完一圈（2π rad）用多长时间？它对应曲线上的哪一段？</li>
-      <li>把 ω 加倍，T 和曲线的疏密怎样变化？</li>
-      <li>只改初相 φ，曲线的疏密变了吗？变化的是什么？</li>
-    </ul>
-    <p class="note">ω 是参考圆上那个虚拟质点的角速度，不是振子自己的运动速度。</p>
-  </section>
-</div>
+            <div class="button-row">
+                <button id="playBtn" class="primary-button" type="button">Pause</button>
+                <button id="restartBtn" class="ghost-button" type="button">Restart</button>
+            </div>
 
-<script>
-(function () {
-  'use strict';
-  var TWO_PI = Math.PI * 2, WIN = 8;
-  var omega = Math.PI, phi = 0, t = 3.3;
-  var reduce = false;
-  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  var playing = !reduce, dirty = true, last = 0;
+            <div class="formula-box">
+                <h3>Readout</h3>
+                <p>Period T = 2π/ω <strong id="vT">2.00 s</strong></p>
+                <p>Frequency f = 1/T <strong id="vF">0.50 Hz</strong></p>
+                <p>Time t <strong id="vt">3.30 s</strong></p>
+                <p>Phase ωt + φ <strong id="vth">10.37 rad</strong></p>
+            </div>
+        </section>
 
-  var cv = document.getElementById('stage'), ctx = cv.getContext('2d');
-  var W = 0, H = 0, C = {};
-  var SANS = '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif';
-  var MONO = 'ui-monospace,"SF Mono",Menlo,Consolas,monospace';
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <h2>x = A sin(ωt + φ)</h2>
+                <div class="legend">
+                    <span><i class="swatch blue"></i>Point on the circle</span>
+                    <span><i class="swatch orange"></i>Projection x</span>
+                </div>
+            </div>
+            <div class="figure">
+                <canvas id="stage" role="img" aria-label="A point turning on a reference circle, with its vertical projection traced as an x–t graph"></canvas>
+            </div>
+        </section>
+    </main>
 
-  function $(id) { return document.getElementById(id); }
-  var playBtn = $('play'), restartBtn = $('restart');
-  var omegaIn = $('omega'), phiIn = $('phi'), omegaOut = $('omegaOut'), phiOut = $('phiOut');
-  var vT = $('vT'), sT = $('sT'), vF = $('vF'), sF = $('sF'), vt = $('vt'), st = $('st'), vth = $('vth'), sth = $('sth');
-  var presets = Array.prototype.slice.call(document.querySelectorAll('button[data-t]'));
+    <footer>
+        <p>One turn of the point (2π rad) takes one period T. ω is the angular velocity of the point on the circle, not the speed of the oscillator.</p>
+    </footer>
 
-  function setText(el, s) { if (el._s !== s) { el.textContent = s; el._s = s; } }
-
-  function readColors() {
-    var s = getComputedStyle(document.documentElement);
-    ['surface', 'fg', 'muted', 'line', 'accent', 'wash', 'mark'].forEach(function (k) {
-      C[k] = s.getPropertyValue('--' + k).trim();
-    });
-    dirty = true;
-  }
-
-  function resize() {
-    var r = cv.getBoundingClientRect();
-    if (!r.width) return;
-    var wantH = Math.round(r.width / (r.width < 520 ? 1.8 : 2.4));
-    if (cv.style.height !== wantH + 'px') { cv.style.height = wantH + 'px'; r = cv.getBoundingClientRect(); }
-    var d = Math.min(window.devicePixelRatio || 1, 3);
-    W = r.width; H = r.height;
-    cv.width = Math.round(W * d);
-    cv.height = Math.round(H * d);
-    ctx.setTransform(d, 0, 0, d, 0, 0);
-    dirty = true;
-  }
-
-  function label(txt, x, y, color, align, font) {
-    ctx.font = font;
-    ctx.textAlign = align;
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = C.surface;
-    ctx.strokeText(txt, x, y);
-    ctx.fillStyle = color;
-    ctx.fillText(txt, x, y);
-  }
-
-  function line(x1, y1, x2, y2) {
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-  }
-
-  function draw() {
-    if (!W) return;
-    ctx.clearRect(0, 0, W, H);
-    var padL = 12, padR = 14, padT = 18, padB = 40;
-    var circleW = W < 520 ? W * 0.37 : W * 0.31;
-    var avail = (H - padT - padB) / 2;
-    var R = Math.max(28, Math.min((circleW - padL) / 2 - 4, avail - 4));
-    var cx = padL + R + 4, cy = padT + avail;
-    var x0 = cx + R + 16, pw = W - padR - x0, sx = pw / WIN;
-    var T = TWO_PI / omega;
-    var th = omega * t + phi;
-    var px = cx + R * Math.cos(th), py = cy - R * Math.sin(th), tx = x0 + t * sx;
-    var by = cy + R + 28;
-    var k, x;
-
-    /* time grid and amplitude guides */
-    ctx.setLineDash([]);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = C.line;
-    for (k = 1; k <= WIN; k++) { x = x0 + k * sx; line(x, cy - R - 4, x, cy + R + 4); }
-    ctx.setLineDash([3, 4]);
-    line(x0, cy - R, x0 + pw, cy - R);
-    line(x0, cy + R, x0 + pw, cy + R);
-    ctx.setLineDash([]);
-
-    /* time axis and displacement axis */
-    ctx.strokeStyle = C.muted;
-    ctx.lineWidth = 1.25;
-    line(x0, cy, x0 + pw, cy);
-    line(x0, cy - R - 8, x0, cy + R + 8);
-    ctx.fillStyle = C.muted;
-    ctx.beginPath();
-    ctx.moveTo(x0 + pw, cy); ctx.lineTo(x0 + pw - 6, cy - 3.5); ctx.lineTo(x0 + pw - 6, cy + 3.5);
-    ctx.closePath(); ctx.fill();
-
-    /* period guide and bracket */
-    var xT = x0 + T * sx, xe = Math.min(xT, x0 + pw);
-    ctx.strokeStyle = C.mark;
-    if (T <= WIN) {
-      ctx.globalAlpha = 0.5; ctx.lineWidth = 1.25; ctx.setLineDash([3, 3]);
-      line(xT, cy - R - 4, xT, by - 5);
-      ctx.setLineDash([]); ctx.globalAlpha = 1;
-    }
-    ctx.lineWidth = 1.5;
-    line(x0, by, xe, by);
-    line(x0, by - 4, x0, by + 4);
-    if (T <= WIN) line(xT, by - 4, xT, by + 4);
-
-    /* tick labels */
-    for (k = 0; k <= WIN; k++) label(String(k), x0 + k * sx, cy + R + 14, C.muted, 'center', '11px ' + MONO);
-    label('t / s', x0 + pw, cy - 10, C.muted, 'right', '11px ' + MONO);
-    label('x', x0 + 8, cy - R - 8, C.muted, 'left', 'italic 12px ' + SANS);
-    label('A', x0 - 5, cy - R, C.muted, 'right', '11px ' + MONO);
-    label('−A', x0 - 5, cy + R, C.muted, 'right', '11px ' + MONO);
-
-    /* T label */
-    var tTxt = 'T = ' + T.toFixed(2) + ' s';
-    ctx.font = '600 12px ' + MONO;
-    var tw = ctx.measureText(tTxt).width;
-    if (xe + 8 + tw <= W - 4) label(tTxt, xe + 8, by, C.mark, 'left', '600 12px ' + MONO);
-    else label(tTxt, (x0 + xe) / 2, by, C.mark, 'center', '600 12px ' + MONO);
-    label('转一圈 = 2π rad', cx, by, C.mark, 'center', '500 12px ' + SANS);
-
-    /* x–t curve: faint full curve, bold traced part */
-    function curve(tEnd, width, alpha) {
-      var n = Math.max(2, Math.ceil(tEnd * sx / 1.5)), i, s;
-      ctx.beginPath();
-      for (i = 0; i <= n; i++) {
-        s = tEnd * i / n;
-        var X = x0 + s * sx, Y = cy - R * Math.sin(omega * s + phi);
-        if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y);
-      }
-      ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.strokeStyle = C.accent;
-      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-      ctx.stroke(); ctx.globalAlpha = 1;
-    }
-    curve(WIN, 2, 0.28);
-    if (t > 0) curve(t, 2.75, 1);
-
-    /* reference circle: swept sector first, then outline and axes */
-    var s0 = (omega * t) % TWO_PI, r1 = R * 0.45;
-    if (s0 > 0.002) {
-      ctx.beginPath(); ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r1, -phi, -(phi + s0), true);
-      ctx.closePath(); ctx.fillStyle = C.wash; ctx.fill();
-    }
-    ctx.lineWidth = 1.5; ctx.strokeStyle = C.line;
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, TWO_PI); ctx.stroke();
-    ctx.lineWidth = 1; line(cx - R - 4, cy, cx + R + 4, cy);
-    ctx.strokeStyle = C.muted; ctx.lineWidth = 1.25; line(cx, cy - R - 8, cx, cy + R + 8);
-    label('x', cx + 8, cy - R - 8, C.muted, 'left', 'italic 12px ' + SANS);
-    if (s0 > 0.002) {
-      ctx.beginPath(); ctx.arc(cx, cy, r1, -phi, -(phi + s0), true);
-      ctx.lineWidth = 1.75; ctx.strokeStyle = C.accent; ctx.stroke();
-    }
-
-    /* start marker for the initial phase */
-    var sxm = cx + R * Math.cos(phi), sym = cy - R * Math.sin(phi);
-    ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.strokeStyle = C.muted;
-    line(cx, cy, sxm, sym); ctx.setLineDash([]);
-    ctx.beginPath(); ctx.arc(sxm, sym, 4, 0, TWO_PI);
-    ctx.fillStyle = C.surface; ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = C.accent; ctx.stroke();
-
-    /* radius, rotating point */
-    ctx.lineWidth = 2; ctx.strokeStyle = C.accent; line(cx, cy, px, py);
-    ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, TWO_PI); ctx.fillStyle = C.muted; ctx.fill();
-
-    /* projection line, projected points */
-    ctx.setLineDash([4, 4]); ctx.lineWidth = 1.25; ctx.strokeStyle = C.mark;
-    line(px, py, tx, py); ctx.setLineDash([]);
-    ctx.beginPath(); ctx.arc(cx, py, 4.5, 0, TWO_PI); ctx.fillStyle = C.mark; ctx.fill();
-    ctx.beginPath(); ctx.arc(tx, py, 5.5, 0, TWO_PI);
-    ctx.fillStyle = C.mark; ctx.fill();
-    ctx.lineWidth = 2; ctx.strokeStyle = C.surface; ctx.stroke();
-    ctx.beginPath(); ctx.arc(px, py, 6.5, 0, TWO_PI);
-    ctx.fillStyle = C.accent; ctx.fill();
-    ctx.lineWidth = 2; ctx.strokeStyle = C.surface; ctx.stroke();
-  }
-
-  function updateStatic() {
-    var T = TWO_PI / omega, f = 1 / T;
-    setText(omegaOut, omega.toFixed(2) + ' rad/s');
-    setText(phiOut, (phi / Math.PI).toFixed(2) + 'π rad');
-    setText(vT, T.toFixed(2) + ' s');
-    setText(sT, '2π ÷ ' + omega.toFixed(2) + ' rad/s');
-    setText(vF, f.toFixed(2) + ' Hz');
-    setText(sF, '每秒转 ' + f.toFixed(2) + ' 圈');
-    presets.forEach(function (b) {
-      var on = Math.abs(omega - TWO_PI / parseFloat(b.getAttribute('data-t'))) < 0.006;
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-    dirty = true;
-  }
-
-  function updateDynamic() {
-    var T = TWO_PI / omega;
-    setText(vt, t.toFixed(2) + ' s');
-    setText(st, '= ' + (t / T).toFixed(2) + ' T');
-    setText(vth, (omega * t + phi).toFixed(2) + ' rad');
-    setText(sth, 'ωt 已转 ' + (omega * t / TWO_PI).toFixed(2) + ' 圈');
-  }
-
-  omegaIn.addEventListener('input', function () { omega = parseFloat(omegaIn.value); updateStatic(); });
-  phiIn.addEventListener('input', function () { phi = parseFloat(phiIn.value) * Math.PI; updateStatic(); });
-  presets.forEach(function (b) {
-    b.addEventListener('click', function () {
-      omega = TWO_PI / parseFloat(b.getAttribute('data-t'));
-      omegaIn.value = String(omega);
-      updateStatic();
-    });
-  });
-  playBtn.addEventListener('click', function () {
-    playing = !playing;
-    playBtn.textContent = playing ? '暂停' : '播放';
-  });
-  restartBtn.addEventListener('click', function () { t = 0; dirty = true; });
-  playBtn.textContent = playing ? '暂停' : '播放';
-
-  function frame(now) {
-    var dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
-    last = now;
-    if (playing) { t += dt; if (t >= WIN) t -= WIN; dirty = true; }
-    if (dirty) { draw(); updateDynamic(); dirty = false; }
-    requestAnimationFrame(frame);
-  }
-
-  readColors();
-  resize();
-  updateStatic();
-  if (window.ResizeObserver) new ResizeObserver(resize).observe(cv);
-  else window.addEventListener('resize', resize);
-  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors); } catch (e) {}
-  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { dirty = true; });
-  requestAnimationFrame(frame);
-})();
-</script>
+    <script src="js/main.js?v=20261014b"></script>
 </body>
 </html>
