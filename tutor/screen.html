@@ -70,6 +70,7 @@
     .brand strong { font-size: calc(var(--u) * 1.9); font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
     .crumbs { color: var(--ink-2); font-size: calc(var(--u) * 1.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tool {
+      display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
       min-height: calc(var(--u) * 3.6); min-width: calc(var(--u) * 3.6);
       padding: 0 calc(var(--u) * 1.1);
       border: 1px solid var(--rule); border-radius: calc(var(--u) * .5);
@@ -254,6 +255,7 @@
       <button class="tool" type="button" id="smaller" aria-label="字小一点">A−</button>
       <button class="tool" type="button" id="bigger" aria-label="字大一点">A+</button>
       <button class="tool" type="button" id="full">全屏</button>
+      <a class="tool" id="teacher" href="https://p-ai-tutor.dgxwmk9dbm.workers.dev/admin" target="_blank" rel="noopener noreferrer" aria-label="教师后台，查看学生提问记录（新窗口）">教师后台</a>
     </header>
 
     <!-- 1. 目录 -->
