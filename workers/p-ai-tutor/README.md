@@ -4,7 +4,7 @@
 
 - `POST /api/chat`：把学生的提问和对话转给 DeepSeek，返回回答。
 - `GET /admin`：老师查看提问记录（密码登录），每次会话归为一条，展开查看完整问答。
-- `GET /admin/conversations`：按匿名会话分页，最近交流优先；旧记录自动归并。
+- `GET /admin/conversations`：按匿名会话分页，最近交流优先；旧记录自动归并。仅含自动开场白的会话不进入列表、总数和分页，学生提问数不含开场白；有效会话展开后仍保留完整上下文。
 - `GET /admin/conversations/:sessionId`：读取该会话全部问答，按时间顺序返回。
 - `GET /health`：检查配置是否齐全、当前用哪个模型。
 

@@ -97,3 +97,47 @@ test('both conversation routes require the existing teacher login, and empty/mis
     assert.deepEqual(legacy.records, []);
   } finally { close(); }
 });
+
+test('opening-only sessions are excluded before pagination, including retries in either mode', async () => {
+  const { db, add, close } = database();
+  const opening = '老师好，我选了这道题，我们开始吧。';
+  const explainOpening = '老师好，我选了这道题。答案和解析我已经有了，想问问没看懂的地方。';
+  try {
+    // More than a page of newest automatic-only sessions must not hide real ones.
+    for (let i = 0; i < 30; i++) add('automatic-' + i, 'session-automatic-' + i, '2026-10-15T12:00:00.000Z', opening);
+    add('retry-one', 'session-retried-001', '2026-10-15T12:01:00.000Z', explainOpening, 'failed');
+    add('retry-two', 'session-retried-001', '2026-10-15T12:01:01.000Z', explainOpening);
+    add('padded-opening', 'session-padded-001', '2026-10-15T12:02:00.000Z', '  ' + opening + '  ');
+    // A single actual question is meaningful, even when the AI fails to answer.
+    add('direct', 'session-direct-001', '2026-10-15T10:00:00.000Z', '为什么速度要取负值？', 'failed');
+    add('started', 'session-engaged-001', '2026-10-15T10:00:00.000Z', opening);
+    add('participated', 'session-engaged-001', '2026-10-15T10:00:01.000Z', '我不明白动量的方向。');
+    const call = await client(db);
+    const data = await (await call('/admin/conversations')).json();
+    assert.equal(data.pagination.total, 2);
+    assert.equal(data.pagination.totalPages, 1);
+    assert.equal(data.conversations.length, 2);
+    assert.equal(data.totalTurns, 3);
+    assert.equal(data.totalStudentTurns, 2);
+    assert.deepEqual(data.conversations.map(c => c.sessionId), ['session-engaged-001', 'session-direct-001']);
+    assert.deepEqual(data.conversations.map(c => c.studentTurnCount), [1, 1]);
+    const detail = await (await call('/admin/conversations/session-engaged-001')).json();
+    assert.equal(detail.records.length, 2); // Keep the complete context of a real conversation.
+    const legacy = await (await call('/admin/questions')).json();
+    assert.equal(legacy.pagination.total, 36); // Filtering does not erase stored records.
+  } finally { close(); }
+});
+
+test('a database containing only automatic openings has an empty conversation list and zero counts', async () => {
+  const { db, add, close } = database();
+  try {
+    add('automatic-only', 'session-automatic-only', '2026-10-15T10:00:00.000Z', '老师好，我选了这道题，我们开始吧。');
+    const call = await client(db);
+    const data = await (await call('/admin/conversations')).json();
+    assert.deepEqual(data.conversations, []);
+    assert.equal(data.pagination.total, 0);
+    assert.equal(data.pagination.totalPages, 1);
+    assert.equal(data.totalTurns, 0);
+    assert.equal(data.totalStudentTurns, 0);
+  } finally { close(); }
+});

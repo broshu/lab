@@ -80,7 +80,7 @@ export const ADMIN_PAGE = String.raw`<!doctype html>
   <main>
     <header>
       <h1>AI Tutor 提问记录</h1>
-      <p>每次对话归为一条，点击展开查看完整问答。</p>
+      <p>仅显示学生实际参与的对话，点击展开查看完整问答。</p>
       <p class="muted">仅保存匿名会话编号、题目位置、学生提问和 AI 回答；不保存姓名、IP 地址或浏览器指纹。原文保留 <span id="retention">—</span> 天。</p>
     </header>
     <section class="toolbar"><p id="status" aria-live="polite">正在读取…</p><div><button id="refresh" type="button">刷新</button><form action="/admin/logout" method="post" style="display:inline"><button type="submit">退出</button></form></div></section>
@@ -119,7 +119,7 @@ export const ADMIN_PAGE = String.raw`<!doctype html>
       summary.append(text('conversation-title', [conversation.bookTitle, conversation.chapterTitle, questionRef, conversation.questionType].filter(Boolean).join(' · ') || '匿名对话'));
       const updated = new Date(conversation.updatedAt);
       const date = Number.isNaN(updated.getTime()) ? conversation.updatedAt : updated.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false });
-      summary.append(text('meta', '最近交流：' + date + ' · ' + conversation.turnCount + ' 轮问答' + (conversation.failedCount ? ' · ' + conversation.failedCount + ' 次回答失败' : '') + ' · 点击展开'));
+      summary.append(text('meta', '最近交流：' + date + ' · ' + conversation.studentTurnCount + ' 次学生提问' + (conversation.failedCount ? ' · ' + conversation.failedCount + ' 次回答失败' : '') + ' · 点击展开'));
       const body = document.createElement('section'); body.className = 'conversation-body'; body.setAttribute('aria-label', '完整对话');
       card.append(summary, body);
       let loaded = false, loading = false;
@@ -153,7 +153,7 @@ export const ADMIN_PAGE = String.raw`<!doctype html>
         currentPage = data.pagination.page; totalPages = data.pagination.totalPages;
         page.textContent = '第 ' + currentPage + ' / ' + totalPages + ' 页';
         retention.textContent = data.retentionDays;
-        status.textContent = '共 ' + data.pagination.total + ' 次对话 · ' + data.totalTurns + ' 条提问。';
+        status.textContent = '共 ' + data.pagination.total + ' 次对话 · ' + data.totalStudentTurns + ' 条学生提问。';
       } catch (error) {
         records.replaceChildren(); status.textContent = error instanceof Error ? error.message : String(error);
       } finally {

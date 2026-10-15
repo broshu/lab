@@ -10,6 +10,10 @@ const MAX_HISTORY_MESSAGES = 12;
 const MAX_RESPONSE_BYTES = 96 * 1024;
 const PROVIDER_TIMEOUT_MS = 30000;
 const PAGE_SIZE = 25;
+const AUTO_OPENINGS = [
+  '老师好，我选了这道题，我们开始吧。',
+  '老师好，我选了这道题。答案和解析我已经有了，想问问没看懂的地方。',
+];
 const DEFAULT_RETENTION_DAYS = 30;
 const ADMIN_SESSION_SECONDS = 24 * 60 * 60;
 const ADMIN_COOKIE = 'p_ai_tutor_admin';
@@ -239,21 +243,27 @@ async function listQuestions(db, requestedPage, retentionDays) {
 /** 分页按完整会话计数，避免一段对话被拆到不同页。 */
 async function listConversations(db, requestedPage, retentionDays) {
   const page = Math.min(10000, Math.max(1, Math.trunc(requestedPage) || 1));
+  // A failed/retried automatic opening may create several rows. Count actual
+  // student messages instead of assuming every multi-row session was used.
+  const active = `WITH conversations AS (
+    SELECT session_id AS sessionId, MIN(created_at) AS startedAt, MAX(created_at) AS updatedAt,
+      MAX(book_title) AS bookTitle, MAX(chapter_title) AS chapterTitle,
+      MAX(question_no) AS questionNo, MAX(question_type) AS questionType,
+      COUNT(*) AS turnCount, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failedCount,
+      SUM(CASE WHEN TRIM(question) IN (?, ?) THEN 0 ELSE 1 END) AS studentTurnCount
+    FROM tutor_questions GROUP BY session_id
+  ), active AS (SELECT * FROM conversations WHERE studentTurnCount > 0)`;
   const [countResult, sessionsResult] = await db.batch([
-    db.prepare('SELECT COUNT(DISTINCT session_id) AS total, COUNT(*) AS totalTurns FROM tutor_questions'),
-    db.prepare(
-      `SELECT session_id AS sessionId, MIN(created_at) AS startedAt, MAX(created_at) AS updatedAt,
-        MAX(book_title) AS bookTitle, MAX(chapter_title) AS chapterTitle,
-        MAX(question_no) AS questionNo, MAX(question_type) AS questionType,
-        COUNT(*) AS turnCount, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failedCount
-       FROM tutor_questions GROUP BY session_id
-       ORDER BY MAX(created_at) DESC, session_id ASC LIMIT ? OFFSET ?`,
-    ).bind(PAGE_SIZE, (page - 1) * PAGE_SIZE),
+    db.prepare(`${active} SELECT COUNT(*) AS total, SUM(turnCount) AS totalTurns,
+      SUM(studentTurnCount) AS totalStudentTurns FROM active`).bind(...AUTO_OPENINGS),
+    db.prepare(`${active} SELECT * FROM active
+      ORDER BY updatedAt DESC, sessionId ASC LIMIT ? OFFSET ?`).bind(...AUTO_OPENINGS, PAGE_SIZE, (page - 1) * PAGE_SIZE),
   ]);
   const total = Number(countResult.results[0]?.total) || 0;
   return {
     conversations: sessionsResult.results,
     totalTurns: Number(countResult.results[0]?.totalTurns) || 0,
+    totalStudentTurns: Number(countResult.results[0]?.totalStudentTurns) || 0,
     pagination: { page, pageSize: PAGE_SIZE, total, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) },
     retentionDays,
   };
