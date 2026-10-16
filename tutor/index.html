@@ -490,7 +490,8 @@
 
   </main>
 
-  <script src="data.js?v=3e920c99"></script>
+  <script src="data.js?v=5378f3de"></script>
+  <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -625,15 +626,17 @@
           row.type = "button";
           row.className = "chapter-link";
           row.setAttribute("aria-pressed", String(ch.id === state.chapter));
-          row.disabled = !ch.ready;
+          row.disabled = !ch.ready && !(ch.sealed && window.EXAM_RELEASES.due(ch));
           const name = document.createElement("span");
           name.className = "chapter-name";
           name.textContent = ch.title.replace(/^第[一二三四五六七八九十百]+章\s*/, "");
           const status = document.createElement("span");
           status.className = "chapter-count";
-          status.textContent = ch.ready ? `${ch.questions.length} 题` : "待整理";
+          status.textContent = ch.sealed ? window.EXAM_RELEASES.label(ch) : ch.ready ? `${ch.questions.length} 题` : "待整理";
+          if (ch.sealed) row.title = window.EXAM_RELEASES.label(ch) + "（北京时间）";
           row.append(name, status);
           row.addEventListener("click", () => {
+            if (ch.sealed) { window.EXAM_RELEASES.retry(ch); return; }
             selectChapter(ch.id);
             el("chapters").querySelector('[aria-pressed="true"]').focus();
           });
@@ -890,6 +893,8 @@
     }
 
     function selectChapter(id) {
+      const chapter = currentBook()?.chapters.find(c => c.id === id);
+      if (!chapter?.ready || chapter.sealed) return;
       state.chapter = id;
       state.question = null;
       resetDirectory();
@@ -932,6 +937,7 @@
       setView(params.get("view") === "key" ? "key" : "solution");
     }
 
+    window.addEventListener("exam-release-updated", () => { renderChapters(); renderQuestions(); renderSolution(); });
     boot();
     // KaTeX 是 defer 加载的，脚本就位后再补渲染一次。
     window.addEventListener("load", () => {

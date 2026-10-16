@@ -209,6 +209,8 @@ def build_book(book):
         cid, title = [p.strip() for p in line.split("|", 1)]
         order.append((cid, title))
 
+    releases_path = root / "releases.json"
+    releases = {c["id"]: c for c in json.loads(releases_path.read_text(encoding="utf8"))} if releases_path.exists() else {}
     ready = {}
     for path in sorted((root / "topics").glob("*.md")):
         meta, questions = parse_topic(path)
@@ -219,7 +221,14 @@ def build_book(book):
     chapters = []
     for cid, title in order:
         group = (GROUP.match(title).group(1) if GROUP.match(title) else "")
-        if cid in ready:
+        if cid in releases:
+            if cid in ready:
+                raise SystemExit(f"{book['id']}：{cid} 的未开放试卷不能同时发布明文题目")
+            chapter = releases[cid]
+            if chapter.get("questions") or chapter.get("ready") or not chapter.get("sealed"):
+                raise SystemExit(f"{book['id']}：{cid} 的锁定元数据无效")
+            chapters.append(chapter)
+        elif cid in ready:
             meta, questions = ready[cid]
             chapters.append({
                 "id": cid,
@@ -235,6 +244,9 @@ def build_book(book):
         if cid not in dict(order):
             raise SystemExit(f"{book['id']}：{cid} 不在 chapters.txt 里，请先补上章节清单")
 
+    for cid in releases:
+        if cid not in dict(order):
+            raise SystemExit(f"{book['id']}：锁定试卷 {cid} 不在 chapters.txt 里")
     out = {"id": book["id"], "title": book["title"], "chapters": chapters}
     if book.get("mode"):
         out["mode"] = book["mode"]

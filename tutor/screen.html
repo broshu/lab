@@ -70,6 +70,7 @@
     .brand strong { font-size: calc(var(--u) * 1.9); font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
     .crumbs { color: var(--ink-2); font-size: calc(var(--u) * 1.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tool {
+      display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
       min-height: calc(var(--u) * 3.6); min-width: calc(var(--u) * 3.6);
       padding: 0 calc(var(--u) * 1.1);
       border: 1px solid var(--rule); border-radius: calc(var(--u) * .5);
@@ -254,6 +255,7 @@
       <button class="tool" type="button" id="smaller" aria-label="字小一点">A−</button>
       <button class="tool" type="button" id="bigger" aria-label="字大一点">A+</button>
       <button class="tool" type="button" id="full">全屏</button>
+      <a class="tool" id="teacher" href="https://p-ai-tutor.dgxwmk9dbm.workers.dev/admin" target="_blank" rel="noopener noreferrer" aria-label="教师后台，查看学生提问记录（新窗口）">教师后台</a>
     </header>
 
     <!-- 1. 目录 -->
@@ -317,7 +319,8 @@
     </div>
   </div>
 
-  <script src="data.js?v=3e920c99"></script>
+  <script src="data.js?v=5378f3de"></script>
+  <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -387,7 +390,7 @@
 
     // 只有带题干和问答脚本的题才放上大屏：AI 照着老师写好的脚本问，不容易出错。
     const ready = (q) => q.stem && q.guide;
-    const usable = (chapter) => chapter.ready && chapter.questions.some(ready);
+    const usable = (chapter) => !!chapter.sealed || (chapter.ready && chapter.questions.some(ready));
 
     // ------------------------------------------------------------ 1. 目录
 
@@ -431,7 +434,15 @@
         const n = ch.questions.filter(ready).length;
         row.innerHTML = `<span></span><span class="leader" aria-hidden="true"></span><span class="count">${n} 题</span>`;
         row.firstChild.textContent = ch.title;
-        row.addEventListener("click", () => openChapter(ch));
+        if (ch.sealed) {
+          row.classList.add("locked");
+          row.querySelector(".count").textContent = window.EXAM_RELEASES.label(ch);
+          row.disabled = !window.EXAM_RELEASES.due(ch);
+          row.title = window.EXAM_RELEASES.label(ch) + "（北京时间）";
+          row.addEventListener("click", () => window.EXAM_RELEASES.retry(ch));
+        } else {
+          row.addEventListener("click", () => openChapter(ch));
+        }
         box.append(row);
       }
     }
@@ -439,6 +450,7 @@
     // ------------------------------------------------------------ 2. 题号
 
     function openChapter(ch) {
+      if (ch.sealed || !ch.ready) return;
       state.chapter = ch;
       $("pick-title").textContent = ch.title;
       const grid = $("qgrid");
@@ -730,7 +742,8 @@
       $("stem").querySelectorAll("a").forEach((a) => a.replaceWith(...a.childNodes));
       // 题图挪到题干文字后、选项前：大屏上不用往下翻就能看到图
       const firstList = $("stem").querySelector("ul");
-      if (firstList) $("stem").querySelectorAll("figure").forEach((f) => firstList.before(f));
+      // 选修一复合题保留原书各小问的配图位置，避免两组实验的图片混在一起。
+      if (firstList && state.book.id !== "xx1") $("stem").querySelectorAll("figure").forEach((f) => firstList.before(f));
       typeset($("stem"));
       if (ex) typeset($("key"));
       $("problem").scrollTop = 0;
@@ -814,7 +827,9 @@
 
     // ------------------------------------------------------------ 开始
 
-    state.book = data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
+    window.addEventListener("exam-release-updated", () => { renderBooks(); renderToc(); });
+    const requestedBook = new URLSearchParams(location.search).get("b");
+    state.book = data.books.find((b) => b.id === requestedBook && b.chapters.some(usable)) || data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
     renderBooks();
     renderToc();
     renderTip();
