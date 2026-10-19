@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>物理实验室</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="site.css">
+  <link rel="icon" type="image/png" href="/icon.png">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="stylesheet" href="/site.css">
   <style>
     main {
       padding: 28px 0 42px;
@@ -97,7 +97,7 @@
 <body>
   <main>
     <div class="topbar">
-      <a class="back-link" id="back-link" href="index.html">返回</a>
+      <a class="back-link" id="back-link" href="/">返回</a>
       <span class="meta" id="item-count"></span>
     </div>
     <h1 id="page-title"></h1>
@@ -107,7 +107,7 @@
     </section>
   </main>
 
-  <script src="site.js"></script>
+  <script src="/site.js"></script>
   <script>
     const { el, countText, sectionUrl, itemRow } = window.Lab;
 
@@ -129,7 +129,9 @@
     window.Lab.loadSections().then((sections) => {
       const listRoot = document.querySelector("#item-list");
       const params = new URLSearchParams(window.location.search);
-      const section = sections.find((item) => item.id === params.get("section")) || sections[0];
+      // 栏目由网址决定：/ppt/ 是课件，/games/ 是互动实验（部署时把本页复制到这两个文件夹）。
+      const sectionId = window.location.pathname.split("/").filter(Boolean)[0] || params.get("section");
+      const section = sections.find((item) => item.id === sectionId) || sections[0];
 
       if (!section) {
         document.querySelector("#page-title").textContent = "加载失败";
@@ -145,7 +147,7 @@
       document.querySelector("#page-title").textContent = title;
       document.querySelector("#page-path").textContent = path.length > 0 ? [section.title, ...path].join(" / ") : "";
       document.querySelector("#item-count").textContent = countText(folder.children.length);
-      document.querySelector("#back-link").href = path.length > 0 ? sectionUrl(section.id, path.slice(0, -1)) : "index.html";
+      document.querySelector("#back-link").href = path.length > 0 ? sectionUrl(section.id, path.slice(0, -1)) : "/";
 
       listRoot.replaceChildren(...folder.children.map((item) => itemRow(item, section, path)));
       if (folder.children.length === 0) {

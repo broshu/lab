@@ -15,7 +15,6 @@
   "实验：验证动量守恒定律.pptx": "lab-verifying-conservation-of-momentum",
   "弹性碰撞与非弹性碰撞.pptx": "elastic-and-inelastic-collisions",
   "探究小车速度随时间变化的规律.pptx": "lab-cart-velocity-over-time",
-  "斜面七层——物理竞赛讲座素材.md": "seven-layers-of-the-incline-olympiad-lecture-notes",
   "物理竞赛 相互作用.pdf": "physics-olympiad-forces-and-interactions",
   "电池电动势和内阻的测量.pptx": "measuring-emf-and-internal-resistance",
   "电池电动势和内阻的测量实验.pptx": "lab-measuring-emf-and-internal-resistance",
@@ -28,5 +27,11 @@
   "高二物理四校联考 试卷讲评.html": "grade-11-four-school-joint-exam-review",
   "高二10月周练 试卷讲评.html": "grade-11-october-weekly-exam-review",
   "实验：探究弹簧弹力与形变量的关系.html": "lab-spring-force-vs-extension",
-  "实验：探究两个互成角度的力的合成规律.html": "lab-parallelogram-rule-of-force-composition"
+  "实验：探究两个互成角度的力的合成规律.html": "lab-parallelogram-rule-of-force-composition",
+  "2.2  简谐运动的描述.pptx": "describing-simple-harmonic-motion",
+  "摩擦力.pptx": "friction",
+  "牛顿第三定律.pptx": "newtons-third-law",
+  "简谐运动.pptx": "simple-harmonic-motion",
+  "简谐运动的回复力和能量.pptx": "restoring-force-and-energy-in-shm",
+  "重力与弹力.pptx": "gravity-and-elastic-force"
 }

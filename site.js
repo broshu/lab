@@ -1,9 +1,9 @@
-// 首页和列表页共用的函数。栏目内容来自部署时生成的 manifest.json（见 scripts/build-manifest.mjs）。
+// 首页和列表页共用的函数。栏目内容来自部署时生成的 manifest.json（见 scripts/build-site.mjs）。
 
 window.Lab = (() => {
   async function loadSections() {
     try {
-      const response = await fetch("manifest.json", { cache: "no-cache" });
+      const response = await fetch("/manifest.json", { cache: "no-cache" });
       if (!response.ok) {
         throw new Error(`manifest.json ${response.status}`);
       }
@@ -72,12 +72,12 @@ window.Lab = (() => {
     return link;
   }
 
+  // 栏目页的网址：/ppt/、/games/；文件夹里的子目录用 ?path= 表示。
   function sectionUrl(sectionId, pathParts = []) {
-    const query = new URLSearchParams({ section: sectionId });
-    if (pathParts.length > 0) {
-      query.set("path", pathParts.join("/"));
+    if (pathParts.length === 0) {
+      return `/${sectionId}/`;
     }
-    return `library.html?${query.toString()}`;
+    return `/${sectionId}/?${new URLSearchParams({ path: pathParts.join("/") }).toString()}`;
   }
 
   function itemRow(item, section, pathParts) {

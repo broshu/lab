@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>物理实验室</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="site.css">
+  <link rel="icon" type="image/png" href="/icon.png">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="stylesheet" href="/site.css">
   <style>
     main {
       padding: 36px 0;
@@ -112,7 +112,7 @@
     <div class="grid" id="cards"></div>
   </main>
 
-  <script src="site.js"></script>
+  <script src="/site.js"></script>
   <script>
     const { el, countText, sectionUrl, itemRow } = window.Lab;
 
@@ -152,8 +152,8 @@
     window.Lab.loadSections().then((sections) => {
       document.querySelector("#cards").replaceChildren(
         ...sections.map(renderCard),
-        renderLinkCard("作业问答系统", "tutor/screen.html", "问答"),
-        renderLinkCard("作业答案与详解", "tutor/", "解析")
+        renderLinkCard("作业问答系统", "/tutor/screen/", "问答"),
+        renderLinkCard("作业答案与详解", "/tutor/", "解析")
       );
     });
   </script>

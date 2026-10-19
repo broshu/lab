@@ -14,8 +14,8 @@ on:
       - "ppt/**"
       - "games/**"
       - "tutor/**"
-      - "scripts/build-manifest.mjs"
-      - ".github/workflows/update-manifest.yml"
+      - "scripts/build-site.mjs"
+      - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
 
 permissions:
@@ -58,9 +58,10 @@ jobs:
           cp tutor/index.html tutor/screen.html tutor/data.js _site/tutor/
           cp -R tutor/assets _site/tutor/
 
-      # 课件文件名可以照常用中文；这一步按 ppt/links.json 把网站上的链接改成英文，页面上仍显示中文名。
-      - name: Build manifest
-        run: node scripts/build-manifest.mjs _site
+      # 课件文件名可以照常用中文；这一步按 ppt/links.json 把网站上的链接改成英文，页面上仍显示中文名，
+      # 并把每个网页放成「文件夹/index.html」，网址里不带 .html，旧网址自动跳转。
+      - name: Build site
+        run: node scripts/build-site.mjs _site
 
       - name: Check links have no Chinese
         run: |
