@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>力的合成实验台</title>
+<style>
+/* Layout: drawing board with rubber band, ring and strings on the left; mode, controls, data table and vector diagram on the right. */
+:root{
+  --bg:#EDF1F0; --surface:#FFFFFF; --ink:#10252C; --muted:#546A72; --line:#CFDAD8;
+  --accent:#0E7C86; --accent-ink:#FFFFFF; --warn:#B3470F; --ok:#13795B;
+  --c1:#0E7C86; --c2:#C2610C; --c3:#7A4FB5; --band:#8A6A3B; --paper:#FBFBF6; --grid:#D8E2DF; --grid-major:#B7C8C4; --target:#D1343B;
+  --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif; --font-num:ui-monospace,'SF Mono',Consolas,'Courier New',monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1B20; --surface:#14262D; --ink:#E6EFEE; --muted:#93A9AF; --line:#284048;
+  --accent:#4FC3CC; --accent-ink:#082A2E; --warn:#F0A36B; --ok:#5ED3A8;
+  --c1:#4FC3CC; --c2:#F0A36B; --c3:#B79CE8; --band:#B8935A; --paper:#162A31; --grid:#25404A; --grid-major:#36586A; --target:#FF6B70; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D1B20; --surface:#14262D; --ink:#E6EFEE; --muted:#93A9AF; --line:#284048;
+  --accent:#4FC3CC; --accent-ink:#082A2E; --warn:#F0A36B; --ok:#5ED3A8;
+  --c1:#4FC3CC; --c2:#F0A36B; --c3:#B79CE8; --band:#B8935A; --paper:#162A31; --grid:#25404A; --grid-major:#36586A; --target:#FF6B70; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5;margin:0;
+  padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+h1{font-size:28px;line-height:1.2;margin:0;font-weight:700}
+h2{font-size:18px;margin:0 0 10px;font-weight:700}
+.top{max-width:1240px;margin:0 auto 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+.top p{margin:0;color:var(--muted);font-size:15px}
+.grid{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,640px) minmax(0,1fr);gap:16px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.board-card{padding:8px;position:sticky;top:12px}
+.board-card svg{display:block;width:100%;height:auto;border-radius:8px;touch-action:none;user-select:none}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.modes{display:flex;flex-wrap:wrap;gap:6px 20px;margin-bottom:12px}
+.modes label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:500}
+.ctl{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.ctl h3{margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr) 76px;gap:10px;align-items:center;margin:4px 0}
+.row span{color:var(--muted);font-size:14px}
+.row output{font-family:var(--font-num);text-align:right;font-size:15px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.status{padding:10px 12px;border-radius:10px;border:1px solid var(--line);margin:4px 0 12px;font-weight:500}
+.status.ok{border-color:var(--ok);color:var(--ok)}
+.status.no{color:var(--warn)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-weight:500;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;cursor:pointer;min-height:40px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.steps{margin:0 0 12px;padding-left:20px;color:var(--muted);font-size:14px}
+.steps li{margin:2px 0}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:13px;font-weight:500;color:var(--muted)}
+th:first-child,td:first-child{text-align:left}
+tbody tr{cursor:pointer}
+tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.del{padding:2px 8px;min-height:30px;font-size:14px;color:var(--muted)}
+.empty{color:var(--muted);padding:12px 0 4px;font-size:15px}
+.opts{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 8px;color:var(--muted);font-size:14px}
+.opts label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.diagram svg{width:100%;height:auto;display:block}
+.diagram text{fill:var(--ink);font-family:var(--font-num);font-size:13px}
+.result{margin-top:8px;font-size:15px;line-height:1.7}
+.result b{font-family:var(--font-num)}
+@media (max-width:900px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .board-card{position:static}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>力的合成实验台</h1>
+  <p>拖动弹簧测力计，把橡皮条的结点拉到 O 点，比较平行四边形与单个力</p>
+</div>
+
+<div class="grid">
+  <div class="card board-card">
+    <svg id="board" viewBox="0 0 640 520" role="img" aria-label="木板上的白纸，橡皮条一端固定在 G 点，另一端系着圆环，圆环上拴着两根细线连接弹簧测力计">
+      <defs>
+        <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1"/></pattern>
+        <pattern id="g5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="var(--grid-major)" stroke-width="1.2"/></pattern>
+      </defs>
+      <rect x="0" y="0" width="640" height="520" fill="var(--paper)"/>
+      <rect x="0" y="0" width="640" height="520" fill="url(#g1)"/>
+      <rect x="0" y="0" width="640" height="520" fill="url(#g5)"/>
+      <g id="dyn"></g>
+    </svg>
+  </div>
+
+  <div class="col">
+    <section class="card">
+      <h2>操作</h2>
+      <ol class="steps">
+        <li>选“两个测力计”，调整两根线的方向和拉力，让结点到达红色的 O 点，记录读数。</li>
+        <li>再选“一个测力计”，把结点同样拉到 O 点，记录这个力 F′。</li>
+        <li>换不同的夹角重复，比较平行四边形的对角线 F 与 F′。</li>
+      </ol>
+      <div class="modes">
+        <label><input type="radio" name="mode" value="two" checked> 两个测力计同时拉</label>
+        <label><input type="radio" name="mode" value="one"> 一个测力计拉</label>
+      </div>
+      <div id="ctls"></div>
+      <div id="status" class="status no">结点距 O 点：—</div>
+      <div class="btns">
+        <button id="recTwo" class="primary">记录两个测力计的读数</button>
+        <button id="recOne" class="primary">记录单个测力计的读数</button>
+      </div>
+      <div id="hintMsg" style="color:var(--muted);font-size:14px;margin-top:8px"></div>
+    </section>
+
+    <section class="card">
+      <h2>数据记录</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>组</th><th>F₁ (N)</th><th>F₂ (N)</th><th>夹角 (°)</th><th>F₁+F₂ (N)</th><th>平行四边形 F (N)</th><th>单个 F′ (N)</th><th>|F′−F| (N)</th><th><span style="position:absolute;left:-9999px">删除</span></th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="emptyMsg" class="empty">还没有数据。先用两个测力计把结点拉到 O 点，再点“记录”。</div>
+    </section>
+
+    <section class="card diagram">
+      <h2>作图比较</h2>
+      <div class="opts">
+        <label><input type="checkbox" id="showPar"> 画出平行四边形和对角线</label>
+        <span>标度：1 N = 34 px（点击表格中的一行可切换）</span>
+      </div>
+      <svg id="diag" viewBox="0 0 520 340" role="img" aria-label="用平行四边形法则作出的合力与单个测力计拉力的对比图"></svg>
+      <div id="result" class="result"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  var G={x:110,y:260}, O={x:330,y:260}, L0=100, KR=0.025;          // 橡皮条：1 px = 0.025 N，O 点处合力 3.0 N 向右
+  var FMAX=5, HMIN=80, HPX=30, TOL=3, SC=34;
+  var st={mode:'two',t1:40,f1:1.8,t2:-35,f2:1.5,t3:10,f3:2.5};
+  var rows=[], nextId=1, sel=null;
+  var $=function(id){return document.getElementById(id)};
+  var rad=Math.PI/180;
+  function fmt(v,d){return (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d)}
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+  var defs=[{k:'1',label:'测力计 1',color:'var(--c1)'},{k:'2',label:'测力计 2',color:'var(--c2)'},{k:'3',label:'测力计',color:'var(--c3)'}];
+  (function(){
+    var s='';
+    defs.forEach(function(d){
+      s+='<div class="ctl" id="ctl'+d.k+'"><h3><span class="dot" style="background:'+d.color+'"></span>'+d.label+'</h3>'+
+        '<div class="row"><span>方向 θ</span><input type="range" id="t'+d.k+'" min="-180" max="180" step="1" aria-label="'+d.label+'方向角"><output id="ot'+d.k+'"></output></div>'+
+        '<div class="row"><span>拉力 F</span><input type="range" id="f'+d.k+'" min="0" max="5" step="0.01" aria-label="'+d.label+'拉力"><output id="of'+d.k+'"></output></div></div>';
+    });
+    $('ctls').innerHTML=s;
+  })();
+
+  function vecSum(){
+    var f,sx,sy;
+    if(st.mode==='two'){ sx=st.f1*Math.cos(st.t1*rad)+st.f2*Math.cos(st.t2*rad); sy=st.f1*Math.sin(st.t1*rad)+st.f2*Math.sin(st.t2*rad); }
+    else { sx=st.f3*Math.cos(st.t3*rad); sy=st.f3*Math.sin(st.t3*rad); }
+    return {x:sx,y:sy};
+  }
+  function ringPos(){
+    var S=vecSum(), m=Math.sqrt(S.x*S.x+S.y*S.y), ux=1, uy=0;
+    if(m>1e-6){ ux=S.x/m; uy=-S.y/m; }
+    var len=L0+m/KR;
+    return {x:G.x+ux*len, y:G.y+uy*len};
+  }
+  function handle(R,t,f){
+    var d=HMIN+f*HPX;
+    return {x:R.x+Math.cos(t*rad)*d, y:R.y-Math.sin(t*rad)*d};
+  }
+
+  function render(){
+    var R=ringPos(), s='';
+    // 目标 O
+    s+='<circle cx="'+O.x+'" cy="'+O.y+'" r="'+TOL+'" fill="none" stroke="var(--target)" stroke-width="1.5"/>'+
+       '<line x1="'+(O.x-12)+'" x2="'+(O.x+12)+'" y1="'+O.y+'" y2="'+O.y+'" stroke="var(--target)" stroke-width="1.5"/>'+
+       '<line x1="'+O.x+'" x2="'+O.x+'" y1="'+(O.y-12)+'" y2="'+(O.y+12)+'" stroke="var(--target)" stroke-width="1.5"/>'+
+       '<text x="'+(O.x+10)+'" y="'+(O.y+24)+'" font-size="18" font-weight="700" fill="var(--target)" style="font-family:var(--font-num)">O</text>';
+    // 固定点 G 与橡皮条
+    s+='<line x1="'+G.x+'" y1="'+G.y+'" x2="'+R.x+'" y2="'+R.y+'" stroke="var(--band)" stroke-width="5" stroke-linecap="round"/>'+
+       '<circle cx="'+G.x+'" cy="'+G.y+'" r="8" fill="var(--ink)"/>'+
+       '<text x="'+(G.x-8)+'" y="'+(G.y+28)+'" font-size="18" font-weight="700" fill="var(--ink)" style="font-family:var(--font-num)">G</text>';
+    // 细线与测力计
+    var list=st.mode==='two'?[1,2]:[3];
+    list.forEach(function(i){
+      var t=st['t'+i], f=st['f'+i], h=handle(R,t,f), col=defs[i-1].color;
+      var cx=Math.cos(t*rad), cy=-Math.sin(t*rad);
+      s+='<line x1="'+R.x+'" y1="'+R.y+'" x2="'+h.x+'" y2="'+h.y+'" stroke="'+col+'" stroke-width="2.5"/>'+
+         '<circle class="h" data-h="'+i+'" cx="'+h.x+'" cy="'+h.y+'" r="13" fill="'+col+'" stroke="var(--surface)" stroke-width="3" style="cursor:grab"/>';
+      var lx=h.x+cx*34, ly=h.y+cy*34;
+      var name=(i===3?'F′':'F'+(i===1?'₁':'₂'));
+      var anchor=cx>0.3?'start':(cx<-0.3?'end':'middle');
+      s+='<text x="'+(lx+(cx>0.3?-8:(cx<-0.3?8:0)))+'" y="'+(ly+5)+'" text-anchor="'+anchor+'" font-size="17" font-weight="700" fill="'+col+'" style="font-family:var(--font-num)">'+name+' '+fmt(f,1)+' N</text>';
+    });
+    // 圆环
+    s+='<circle cx="'+R.x+'" cy="'+R.y+'" r="7" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/>';
+    $('dyn').innerHTML=s;
+    // 控件
+    [1,2,3].forEach(function(i){
+      $('ctl'+i).hidden=!( (st.mode==='two'&&i<3)||(st.mode==='one'&&i===3) );
+      $('t'+i).value=st['t'+i]; $('f'+i).value=st['f'+i];
+      $('ot'+i).textContent=fmt(st['t'+i],0)+'°'; $('of'+i).textContent=fmt(st['f'+i],2)+' N';
+    });
+    var dist=Math.sqrt(Math.pow(R.x-O.x,2)+Math.pow(R.y-O.y,2)), ok=dist<=TOL;
+    var cm=dist/20;
+    var stEl=$('status');
+    stEl.className='status '+(ok?'ok':'no');
+    stEl.textContent=ok?'结点已到达 O 点，可以记录':'结点距 O 点 '+fmt(cm,2)+' cm，继续调整';
+    $('recTwo').disabled=!(ok&&st.mode==='two');
+    $('recOne').disabled=!(ok&&st.mode==='one'&&rows.length>0);
+    var hm='';
+    if(st.mode==='one'&&rows.length===0) hm='先用两个测力计记录一组数据，再来测单个力。';
+    else if(st.mode==='two'&&!ok) hm='两根线要分别在水平方向的上下两侧，才能把结点拉到 O 点。';
+    $('hintMsg').textContent=hm;
+  }
+
+  /* 拖动测力计 */
+  var board=$('board'), drag=null;
+  function toSvg(e){
+    var r=board.getBoundingClientRect();
+    return {x:(e.clientX-r.left)*640/r.width, y:(e.clientY-r.top)*520/r.height};
+  }
+  board.addEventListener('pointerdown',function(e){
+    var h=e.target.closest&&e.target.closest('.h'); if(!h) return;
+    drag=h.getAttribute('data-h'); board.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  board.addEventListener('pointermove',function(e){
+    if(!drag) return;
+    var p=toSvg(e), R=ringPos(), vx=p.x-R.x, vy=p.y-R.y, d=Math.sqrt(vx*vx+vy*vy);
+    st['t'+drag]=Math.round(Math.atan2(-vy,vx)/rad);
+    st['f'+drag]=Math.round(clamp((d-HMIN)/HPX,0,FMAX)*100)/100;
+    render();
+  });
+  function endDrag(){drag=null}
+  board.addEventListener('pointerup',endDrag); board.addEventListener('pointercancel',endDrag);
+
+  [1,2,3].forEach(function(i){
+    $('t'+i).addEventListener('input',function(){st['t'+i]=parseFloat(this.value);render()});
+    $('f'+i).addEventListener('input',function(){st['f'+i]=parseFloat(this.value);render()});
+  });
+  document.querySelectorAll('input[name="mode"]').forEach(function(el){
+    el.addEventListener('change',function(){ if(el.checked){st.mode=el.value;render();} });
+  });
+
+  /* 记录与表格 */
+  function angDiff(a,b){ return Math.abs(((a-b+540)%360+360)%360-180); }
+  function calc(r){
+    var sx=r.f1*Math.cos(r.t1*rad)+r.f2*Math.cos(r.t2*rad), sy=r.f1*Math.sin(r.t1*rad)+r.f2*Math.sin(r.t2*rad);
+    return {sx:sx,sy:sy,F:Math.sqrt(sx*sx+sy*sy),sum:r.f1+r.f2,ang:angDiff(r.t1,r.t2)};
+  }
+  $('recTwo').addEventListener('click',function(){
+    var r={id:nextId++,t1:Math.round(st.t1),f1:Math.round(st.f1*10)/10,t2:Math.round(st.t2),f2:Math.round(st.f2*10)/10,fp:null,t3:null};
+    rows.push(r); sel=r.id; renderAll();
+  });
+  $('recOne').addEventListener('click',function(){
+    var r=rows[rows.length-1]; if(!r) return;
+    r.fp=Math.round(st.f3*10)/10; r.t3=Math.round(st.t3); sel=r.id; renderAll();
+  });
+  function renderTable(){
+    var s='';
+    rows.forEach(function(r,i){
+      var c=calc(r), has=r.fp!==null;
+      s+='<tr data-id="'+r.id+'" class="'+(r.id===sel?'sel':'')+'"><td>'+(i+1)+'</td>'+
+        '<td class="num">'+fmt(r.f1,1)+'</td><td class="num">'+fmt(r.f2,1)+'</td><td class="num">'+c.ang+'</td>'+
+        '<td class="num">'+fmt(c.sum,2)+'</td><td class="num">'+fmt(c.F,2)+'</td>'+
+        '<td class="num">'+(has?fmt(r.fp,1):'—')+'</td><td class="num">'+(has?fmt(Math.abs(r.fp-c.F),2):'—')+'</td>'+
+        '<td><button class="del" data-del="'+r.id+'" aria-label="删除这一组">删除</button></td></tr>';
+    });
+    $('tbody').innerHTML=s; $('emptyMsg').hidden=rows.length>0;
+  }
+  $('tbody').addEventListener('click',function(e){
+    var b=e.target.closest('[data-del]');
+    if(b){ var id=parseInt(b.getAttribute('data-del'),10); rows=rows.filter(function(r){return r.id!==id}); if(sel===id) sel=rows.length?rows[rows.length-1].id:null; renderAll(); return; }
+    var tr=e.target.closest('tr[data-id]'); if(tr){ sel=parseInt(tr.getAttribute('data-id'),10); renderAll(); }
+  });
+  $('showPar').addEventListener('change',renderDiagram);
+
+  /* 作图 */
+  function arrow(x1,y1,x2,y2,col,w,dash){
+    var dx=x2-x1, dy=y2-y1, L=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/L, uy=dy/L, hs=10;
+    var bx=x2-ux*hs, by=y2-uy*hs;
+    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+bx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+w+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>'+
+      '<polygon points="'+x2+','+y2+' '+(bx-uy*5)+','+(by+ux*5)+' '+(bx+uy*5)+','+(by-ux*5)+'" fill="'+col+'"/>';
+  }
+  function renderDiagram(){
+    var r=null; rows.forEach(function(x){ if(x.id===sel) r=x; });
+    var ox=120, oy=175, s='';
+    s+='<line x1="30" y1="318" x2="'+(30+SC)+'" y2="318" stroke="var(--muted)" stroke-width="3"/><text x="'+(30+SC+8)+'" y="323">1 N</text>';
+    var res=$('result');
+    if(!r){
+      s+='<text x="260" y="170" text-anchor="middle" style="fill:var(--muted);font-family:var(--font-body);font-size:15px">记录一组数据后在这里作图</text>';
+      $('diag').innerHTML=s; res.innerHTML=''; return;
+    }
+    var c=calc(r);
+    function P(fx,fy){return {x:ox+fx*SC,y:oy-fy*SC}}
+    var p1=P(r.f1*Math.cos(r.t1*rad),r.f1*Math.sin(r.t1*rad));
+    var p2=P(r.f2*Math.cos(r.t2*rad),r.f2*Math.sin(r.t2*rad));
+    var pf=P(c.sx,c.sy);
+    if($('showPar').checked){
+      s+='<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+pf.x+'" y2="'+pf.y+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>'+
+         '<line x1="'+p2.x+'" y1="'+p2.y+'" x2="'+pf.x+'" y2="'+pf.y+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>';
+    }
+    s+=arrow(ox,oy,p1.x,p1.y,'var(--c1)',3)+arrow(ox,oy,p2.x,p2.y,'var(--c2)',3);
+    s+='<text x="'+(p1.x+8)+'" y="'+(p1.y-6)+'" style="fill:var(--c1)">F₁ '+fmt(r.f1,1)+' N</text>'+
+       '<text x="'+(p2.x+8)+'" y="'+(p2.y+16)+'" style="fill:var(--c2)">F₂ '+fmt(r.f2,1)+' N</text>';
+    if(r.fp!==null){
+      var p3=P(r.fp*Math.cos(r.t3*rad),r.fp*Math.sin(r.t3*rad));
+      s+=arrow(ox,oy,p3.x,p3.y,'var(--c3)',3,'2 0');
+      s+='<text x="'+(p3.x+8)+'" y="'+(p3.y+(p3.y<oy?-6:16))+'" style="fill:var(--c3)">F′ '+fmt(r.fp,1)+' N</text>';
+    }
+    if($('showPar').checked){
+      s+=arrow(ox,oy,pf.x,pf.y,'var(--ink)',3,'9 5');
+      s+='<text x="'+(pf.x+8)+'" y="'+(pf.y+(pf.y<oy?18:-8))+'">F '+fmt(c.F,2)+' N</text>';
+    }
+    s+='<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="var(--ink)"/>';
+    $('diag').innerHTML=s;
+    var t='夹角 <b>'+c.ang+'°</b>；算术和 F₁+F₂ = <b>'+fmt(c.sum,2)+' N</b>。';
+    if($('showPar').checked) t+='平行四边形对角线 F = <b>'+fmt(c.F,2)+' N</b>。';
+    if(r.fp!==null){
+      var diff=Math.abs(r.fp-c.F);
+      t+=' 单个测力计 F′ = <b>'+fmt(r.fp,1)+' N</b>'+($('showPar').checked?'，与 F 相差 <b>'+fmt(diff,2)+' N</b>（约 '+fmt(diff/Math.max(c.F,1e-6)*100,1)+'%）。':'。');
+    } else t+=' 还没有记录单个测力计的读数。';
+    res.innerHTML=t;
+  }
+  function renderAll(){ renderTable(); renderDiagram(); render(); }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
