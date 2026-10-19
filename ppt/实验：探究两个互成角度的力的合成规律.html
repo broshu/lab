@@ -220,11 +220,53 @@ html.cv .result{line-height:1.6}
     else { sx=st.f3*Math.cos(st.t3*rad); sy=st.f3*Math.sin(st.t3*rad); }
     return {x:sx,y:sy};
   }
-  function ringPos(){
-    var S=vecSum(), m=Math.sqrt(S.x*S.x+S.y*S.y), ux=1, uy=0;
+  function ringFromS(S){
+    var m=Math.sqrt(S.x*S.x+S.y*S.y), ux=1, uy=0;
     if(m>1e-6){ ux=S.x/m; uy=-S.y/m; }
     var len=L0+m/KR;
     return {x:G.x+ux*len, y:G.y+uy*len};
+  }
+  function ringPos(){ return ringFromS(vecSum()); }
+  /* 拖动测力计 i 时让球严格落在鼠标处：球的位置 = 结点位置 + 线长×方向，而结点又随这个力移动，
+     所以用牛顿迭代反解出 (方向 θ, 拉力 F)，使球心与鼠标重合（拉力限制在 0~5 N 内） */
+  function sumOther(i){
+    if(st.mode!=='two') return {x:0,y:0};
+    var j=i===1?2:1;
+    return {x:st['f'+j]*Math.cos(st['t'+j]*rad), y:st['f'+j]*Math.sin(st['t'+j]*rad)};
+  }
+  function ballAt(o,t,f){
+    var R=ringFromS({x:o.x+f*Math.cos(t),y:o.y+f*Math.sin(t)}), d=HMIN+f*HPX;
+    return {x:R.x+Math.cos(t)*d, y:R.y-Math.sin(t)*d};
+  }
+  function newton(o,t,f,p){
+    var best=null;
+    for(var it=0;it<40;it++){
+      var H=ballAt(o,t,f), ex=H.x-p.x, ey=H.y-p.y, e=Math.sqrt(ex*ex+ey*ey);
+      if(!best||e<best.e) best={t:t,f:f,e:e};
+      if(e<0.02) break;
+      var dt=1e-4, df=1e-4, Ht=ballAt(o,t+dt,f), Hf=ballAt(o,t,f+df);
+      var a=(Ht.x-H.x)/dt, c=(Ht.y-H.y)/dt, b=(Hf.x-H.x)/df, d2=(Hf.y-H.y)/df, det=a*d2-b*c;
+      if(Math.abs(det)<1e-9) break;
+      var dT=-(d2*ex-b*ey)/det, dF=-(-c*ex+a*ey)/det, k=1, moved=false;
+      for(var tries=0;tries<8;tries++){
+        var nt=t+dT*k, nf=clamp(f+dF*k,0.005,FMAX), Hn=ballAt(o,nt,nf);
+        var en=Math.sqrt(Math.pow(Hn.x-p.x,2)+Math.pow(Hn.y-p.y,2));
+        if(en<e){ t=nt; f=nf; moved=true; break; }
+        k/=2;
+      }
+      if(!moved) break;
+    }
+    return best;
+  }
+  function dragTo(i,p){
+    var o=sumOther(i), t=st['t'+i]*rad, f=clamp(st['f'+i],0.005,FMAX), H0=ballAt(o,t,f);
+    var dist=Math.sqrt(Math.pow(p.x-H0.x,2)+Math.pow(p.y-H0.y,2)), n=Math.min(80,Math.max(1,Math.ceil(dist/6)));
+    for(var s=1;s<=n;s++){   // 沿鼠标移动的路径一小步一小步追，鼠标快速甩动也能跟上
+      var r=newton(o,t,f,{x:H0.x+(p.x-H0.x)*s/n, y:H0.y+(p.y-H0.y)*s/n});
+      t=r.t; f=r.f;
+    }
+    var deg=t/rad; deg=((deg+180)%360+360)%360-180;
+    st['t'+i]=deg; st['f'+i]=f;
   }
   function handle(R,t,f){
     var d=HMIN+f*HPX;
@@ -342,14 +384,12 @@ html.cv .result{line-height:1.6}
   board.addEventListener('pointerdown',function(e){
     if(!isLive()) return;
     var h=e.target.closest&&e.target.closest('.h');
-    if(h){ drag=h.getAttribute('data-h'); board.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+    if(h){ drag=parseInt(h.getAttribute('data-h'),10); board.setPointerCapture(e.pointerId); e.preventDefault(); dragTo(drag,toSvg(e)); render(); return; }
     if(!hasData(pages[cur])){ setO(toSvg(e)); render(); }
   });
   board.addEventListener('pointermove',function(e){
     if(!drag) return;
-    var p=toSvg(e), R=ringPos(), vx=p.x-R.x, vy=p.y-R.y, d=Math.sqrt(vx*vx+vy*vy);
-    st['t'+drag]=Math.round(Math.atan2(-vy,vx)/rad);
-    st['f'+drag]=Math.round(clamp((d-HMIN)/HPX,0,FMAX)*100)/100;
+    dragTo(drag,toSvg(e));
     render();
   });
   function endDrag(){drag=null}
