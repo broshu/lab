@@ -76,10 +76,36 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
   .mag-row{grid-template-columns:minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
+/* 一体机横屏演示：宽高比 ≥ 1.25 时按 1600×900 的 16:9 画布整屏显示并等比缩放，不出现滚动条 */
+html.cv,html.cv body{height:100%;overflow:hidden}
+html.cv body{padding:0;position:relative}
+html.cv #app{position:absolute;left:50%;top:50%;width:1600px;height:900px;padding:18px 28px 22px;display:flex;flex-direction:column;transform-origin:center center}
+html.cv .top{max-width:none;margin:0 0 12px;width:100%}
+html.cv .grid{max-width:none;margin:0;width:100%;flex:1;min-height:0;gap:16px}
+html.cv .col{display:contents}
+html.cv .board-card,html.cv .stage-card{position:static;min-height:0;display:flex}
+html.cv .board-card svg,html.cv .stage-card svg{flex:1;min-height:0;width:100%;height:100%}
+html.cv button{min-height:46px}
+html.cv #secData{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+html.cv #secData .tablewrap{flex:1;min-height:0;overflow:auto}
+html.cv table{min-width:0}
+html.cv .grid{align-items:stretch}
+html.cv th,html.cv td{padding:8px 5px}
+html.cv td input{width:78px}
+html.cv .del{padding:2px 6px}
+html.cv th{position:sticky;top:0;background:var(--surface)}
+html.cv .grid{grid-template-columns:520px minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+html.cv .stage-card{grid-column:1;grid-row:1/3}
+html.cv #secMag{grid-column:2;grid-row:1}
+html.cv #secHang{grid-column:2;grid-row:2;min-height:0;overflow:hidden}
+html.cv #secChart{grid-column:3;grid-row:1}
+html.cv #secData{grid-column:3;grid-row:2}
+html.cv .mag-row{grid-template-columns:300px minmax(0,1fr);height:100%;align-content:center}
 </style>
 </head>
 <body>
-
+<div id="app">
 <div class="top">
   <h1>弹簧伸长实验台</h1>
   <p>挂钩码，读刻度，记录数据，画出 F–x 图像</p>
@@ -102,7 +128,7 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
   </div>
 
   <div class="col">
-    <section class="card">
+    <section class="card" id="secMag">
       <h2>读数放大镜</h2>
       <div class="mag-row">
         <svg id="mag" viewBox="0 0 280 190" role="img" aria-label="刻度尺放大图：红线表示弹簧下端所在位置"></svg>
@@ -115,7 +141,7 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="secHang">
       <h2>挂钩码</h2>
       <div class="info">
         <div><small>钩码个数</small><b id="vN">0</b></div>
@@ -135,7 +161,7 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="secData">
       <h2>数据记录</h2>
       <p style="margin:0 0 8px;color:var(--muted);font-size:14px">先在不挂钩码时记录一组，读出弹簧原长 L₀。再逐个加钩码，每次等弹簧静止后记录，并在表格里填入你读出的长度 L。</p>
       <div class="tablewrap">
@@ -148,7 +174,7 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
       <div class="btns" style="margin-top:10px"><button id="clear">清空数据</button></div>
     </section>
 
-    <section class="card chart">
+    <section class="card chart" id="secChart">
       <h2>F–x 图像</h2>
       <svg id="chart" viewBox="0 0 520 340" role="img" aria-label="弹力 F 与伸长量 x 的散点图"></svg>
       <div id="kline" class="kline"></div>
@@ -156,6 +182,7 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
   </div>
 </div>
 
+</div>
 <script>
 (function(){
   var K=25, FL=4.0, PX=12, Y0=60, MAXN=10, UNIT=50, PHYS_G=9.8;
@@ -338,6 +365,14 @@ td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-hei
   });
 
   drawStage(); drawMag(); updateInfo(); renderTable();
+
+  var app=$('app');
+  function fit(){
+    var w=window.innerWidth,h=window.innerHeight,cv=(w/h>=1.25&&w>=900);
+    document.documentElement.classList.toggle('cv',cv);
+    app.style.transform=cv?'translate(-50%,-50%) scale('+Math.min(w/1600,h/900)+')':'';
+  }
+  window.addEventListener('resize',fit); fit();
 })();
 </script>
 </body>

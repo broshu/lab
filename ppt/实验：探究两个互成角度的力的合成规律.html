@@ -73,16 +73,44 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
   .board-card{position:static}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
+/* 一体机横屏演示：宽高比 ≥ 1.25 时按 1600×900 的 16:9 画布整屏显示并等比缩放，不出现滚动条 */
+html.cv,html.cv body{height:100%;overflow:hidden}
+html.cv body{padding:0;position:relative}
+html.cv #app{position:absolute;left:50%;top:50%;width:1600px;height:900px;padding:18px 28px 22px;display:flex;flex-direction:column;transform-origin:center center}
+html.cv .top{max-width:none;margin:0 0 12px;width:100%}
+html.cv .grid{max-width:none;margin:0;width:100%;flex:1;min-height:0;gap:16px}
+html.cv .col{display:contents}
+html.cv .board-card,html.cv .stage-card{position:static;min-height:0;display:flex}
+html.cv .board-card svg,html.cv .stage-card svg{flex:1;min-height:0;width:100%;height:100%}
+html.cv button{min-height:46px}
+html.cv #secData{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+html.cv #secData .tablewrap{flex:1;min-height:0;overflow:auto}
+html.cv table{min-width:0}
+html.cv .grid{align-items:stretch}
+html.cv th,html.cv td{padding:8px 5px}
+html.cv td input{width:78px}
+html.cv .del{padding:2px 6px}
+html.cv .grid{grid-template-columns:600px 400px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+html.cv #secBoard{grid-column:1;grid-row:1}
+html.cv #secAct{grid-column:1;grid-row:2;min-height:0;overflow:hidden}
+html.cv #secCtrl{grid-column:2;grid-row:1}
+html.cv #secDiag{grid-column:3;grid-row:1}
+html.cv #secData{grid-column:2/4;grid-row:2}
+html.cv .steps{font-size:14px;margin-bottom:8px}
+html.cv .status{margin:4px 0 8px;padding:8px 12px}
+html.cv .result{line-height:1.6}
 </style>
 </head>
 <body>
+<div id="app">
 <div class="top">
   <h1>力的合成实验台</h1>
   <p>拖动弹簧测力计，把橡皮条的结点拉到 O 点，比较平行四边形与单个力</p>
 </div>
 
 <div class="grid">
-  <div class="card board-card">
+  <div class="card board-card" id="secBoard">
     <svg id="board" viewBox="0 0 640 520" role="img" aria-label="木板上的白纸，橡皮条一端固定在 G 点，另一端系着圆环，圆环上拴着两根细线连接弹簧测力计">
       <defs>
         <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1"/></pattern>
@@ -96,18 +124,21 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
   </div>
 
   <div class="col">
-    <section class="card">
-      <h2>操作</h2>
-      <ol class="steps">
-        <li>选“两个测力计”，调整两根线的方向和拉力，让结点到达红色的 O 点，记录读数。</li>
-        <li>再选“一个测力计”，把结点同样拉到 O 点，记录这个力 F′。</li>
-        <li>换不同的夹角重复，比较平行四边形的对角线 F 与 F′。</li>
-      </ol>
+    <section class="card" id="secCtrl">
+      <h2>调节测力计</h2>
       <div class="modes">
         <label><input type="radio" name="mode" value="two" checked> 两个测力计同时拉</label>
         <label><input type="radio" name="mode" value="one"> 一个测力计拉</label>
       </div>
       <div id="ctls"></div>
+    </section>
+
+    <section class="card" id="secAct">
+      <ol class="steps">
+        <li>选“两个测力计”，调整两根线的方向和拉力，让结点到达红色的 O 点，记录读数。</li>
+        <li>再选“一个测力计”，把结点同样拉到 O 点，记录这个力 F′。</li>
+        <li>换不同的夹角重复，比较平行四边形的对角线 F 与 F′。</li>
+      </ol>
       <div id="status" class="status no">结点距 O 点：—</div>
       <div class="btns">
         <button id="recTwo" class="primary">记录两个测力计的读数</button>
@@ -116,7 +147,7 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
       <div id="hintMsg" style="color:var(--muted);font-size:14px;margin-top:8px"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="secData">
       <h2>数据记录</h2>
       <div class="tablewrap">
         <table>
@@ -127,11 +158,11 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
       <div id="emptyMsg" class="empty">还没有数据。先用两个测力计把结点拉到 O 点，再点“记录”。</div>
     </section>
 
-    <section class="card diagram">
+    <section class="card diagram" id="secDiag">
       <h2>作图比较</h2>
       <div class="opts">
         <label><input type="checkbox" id="showPar"> 画出平行四边形和对角线</label>
-        <span>标度：1 N = 34 px（点击表格中的一行可切换）</span>
+        <span>标度：1 N = 48 px（点击表格中的一行可切换）</span>
       </div>
       <svg id="diag" viewBox="0 0 520 340" role="img" aria-label="用平行四边形法则作出的合力与单个测力计拉力的对比图"></svg>
       <div id="result" class="result"></div>
@@ -139,10 +170,11 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
   </div>
 </div>
 
+</div>
 <script>
 (function(){
   var G={x:110,y:260}, O={x:330,y:260}, L0=100, KR=0.025;          // 橡皮条：1 px = 0.025 N，O 点处合力 3.0 N 向右
-  var FMAX=5, HMIN=80, HPX=30, TOL=3, SC=34;
+  var FMAX=5, HMIN=80, HPX=30, TOL=3, SC=48;
   var st={mode:'two',t1:40,f1:1.8,t2:-35,f2:1.5,t3:10,f3:2.5};
   var rows=[], nextId=1, sel=null;
   var $=function(id){return document.getElementById(id)};
@@ -293,7 +325,7 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
   }
   function renderDiagram(){
     var r=null; rows.forEach(function(x){ if(x.id===sel) r=x; });
-    var ox=120, oy=175, s='';
+    var ox=110, oy=175, s='';
     s+='<line x1="30" y1="318" x2="'+(30+SC)+'" y2="318" stroke="var(--muted)" stroke-width="3"/><text x="'+(30+SC+8)+'" y="323">1 N</text>';
     var res=$('result');
     if(!r){
@@ -315,11 +347,11 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
     if(r.fp!==null){
       var p3=P(r.fp*Math.cos(r.t3*rad),r.fp*Math.sin(r.t3*rad));
       s+=arrow(ox,oy,p3.x,p3.y,'var(--c3)',3,'2 0');
-      s+='<text x="'+(p3.x+8)+'" y="'+(p3.y+(p3.y<oy?-6:16))+'" style="fill:var(--c3)">F′ '+fmt(r.fp,1)+' N</text>';
+      s+='<text x="'+(p3.x+8)+'" y="'+(p3.y+22)+'" style="fill:var(--c3)">F′ '+fmt(r.fp,1)+' N</text>';
     }
     if($('showPar').checked){
       s+=arrow(ox,oy,pf.x,pf.y,'var(--ink)',3,'9 5');
-      s+='<text x="'+(pf.x+8)+'" y="'+(pf.y+(pf.y<oy?18:-8))+'">F '+fmt(c.F,2)+' N</text>';
+      s+='<text x="'+(pf.x+8)+'" y="'+(pf.y-10)+'">F '+fmt(c.F,2)+' N</text>';
     }
     s+='<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="var(--ink)"/>';
     $('diag').innerHTML=s;
@@ -334,6 +366,14 @@ tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
   function renderAll(){ renderTable(); renderDiagram(); render(); }
 
   renderAll();
+
+  var app=$('app');
+  function fit(){
+    var w=window.innerWidth,h=window.innerHeight,cv=(w/h>=1.25&&w>=900);
+    document.documentElement.classList.toggle('cv',cv);
+    app.style.transform=cv?'translate(-50%,-50%) scale('+Math.min(w/1600,h/900)+')':'';
+  }
+  window.addEventListener('resize',fit); fit();
 })();
 </script>
 </body>
