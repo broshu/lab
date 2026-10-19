@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>作业答案与详解</title>
+  <!-- 网站上这页的地址是 /answers/，base 让 data.js、assets 等相对路径仍从 /tutor/ 找起 -->
+  <base href="/tutor/">
   <link rel="icon" type="image/png" href="../icon.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
         integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
@@ -775,7 +777,7 @@
     function keyRow(ch, q) {
       const row = document.createElement("a");
       row.className = "key-row";
-      row.href = `?b=${encodeURIComponent(state.book)}&c=${encodeURIComponent(ch.id)}&q=${q.no}`;
+      row.href = `${location.pathname}?b=${encodeURIComponent(state.book)}&c=${encodeURIComponent(ch.id)}&q=${q.no}`;
       row.title = `看第 ${q.no} 题的详解`;
       row.addEventListener("click", (event) => {
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -881,7 +883,7 @@
       if (state.chapter) params.set("c", state.chapter);
       if (state.question) params.set("q", String(state.question));
       const qs = params.toString();
-      history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+      history.replaceState(null, "", qs ? `${location.pathname}?${qs}` : location.pathname);
     }
 
     function selectBook(id) {

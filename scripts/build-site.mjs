@@ -7,8 +7,8 @@ import { dirname, join } from "node:path";
 // 生成栏目目录 manifest.json。传入站点目录（工作流里是 _site）时，还会整理网站上的网址：
 // - 按 ppt/links.json 把 ppt/ 下的中文文件名改成英文链接名，网站上显示的仍是中文名；
 // - 每个网页都放成「文件夹/index.html」，网址里不出现 .html：
-//     /ppt/ 课件列表，/games/ 互动实验列表，/ppt/<英文名>/ 网页课件，/tutor/screen/ 作业问答；
-// - 旧网址（library.html、ppt/*.html、tutor/screen.html）留一个跳转页，自动转到新网址。
+//     /ppt/ 课件列表，/games/ 互动实验列表，/ppt/<英文名>/ 网页课件，/tutor/ 作业问答，/answers/ 作业答案；
+// - 旧网址（library.html、ppt/*.html、tutor/screen.html、tutor/screen/）留一个跳转页，自动转到新网址。
 // 仓库里的文件不用按这个结构摆放，照常放即可。
 const siteDir = process.argv[2] || null;
 
@@ -216,7 +216,7 @@ function writeRedirect(file, target, script = "") {
 `);
 }
 
-// 课件、互动实验的列表页（library.html）复制到 /ppt/ 和 /games/；作业问答放到 /tutor/screen/。
+// 课件、互动实验的列表页（library.html）复制到 /ppt/ 和 /games/；作业问答放到 /tutor/，作业答案放到 /answers/。
 function publishPages() {
   for (const section of manifest.sections) {
     copyFileSync(join(siteDir, "library.html"), join(siteDir, section.id, "index.html"));
@@ -227,8 +227,10 @@ function publishPages() {
     const rest = section !== "/" && params.get("path") ? "?" + new URLSearchParams({ path: params.get("path") }) : "";
     location.replace(section + rest + location.hash);`);
 
-  moveTo(join(siteDir, "tutor", "screen.html"), join(siteDir, "tutor", "screen", "index.html"));
-  writeRedirect(join(siteDir, "tutor", "screen.html"), "/tutor/screen/");
+  moveTo(join(siteDir, "tutor", "screen.html"), join(siteDir, "tutor", "index.html"));
+  moveTo(join(siteDir, "tutor", "answers.html"), join(siteDir, "answers", "index.html"));
+  writeRedirect(join(siteDir, "tutor", "screen.html"), "/tutor/");
+  writeRedirect(join(siteDir, "tutor", "screen", "index.html"), "/tutor/");
 }
 
 const files = trackedFiles();
@@ -247,7 +249,7 @@ const manifest = {
       type: "open",
       items: buildGames(files)
     }
-    // 「资料」栏目已停用，首页这个位置换成了作业问答系统（tutor/screen.html）。
+    // 「资料」栏目已停用，首页这个位置换成了作业问答系统（/tutor/）。
   ]
 };
 

@@ -17,8 +17,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "data.js"
-PAGE = ROOT / "index.html"
-SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页
+PAGE = ROOT / "answers.html"  # 作业答案与详解（网站上是 /answers/）
+SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页（网站上是 /tutor/）
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
 BOOKS = [
@@ -268,7 +268,7 @@ def main():
         encoding="utf8",
     )
 
-    # 给 data.js 打指纹，并写进 index.html 的 script 标签。
+    # 给 data.js 打指纹，并写进 answers.html、screen.html 的 script 标签。
     # 不这么做的话，浏览器会一直用缓存里的旧 data.js，新加的章节死活出不来。
     stamp = hashlib.md5(payload.encode("utf8")).hexdigest()[:8]
     for page_path in (PAGE, SCREEN):
@@ -285,7 +285,7 @@ def main():
     done = sum(1 for c in chapters if c["ready"])
     total = sum(len(c["questions"]) for c in chapters)
     print(f"已写入 {OUT.name}：{done}/{len(chapters)} 个章节，共 {total} 题")
-    print(f"index.html、screen.html 已更新为 data.js?v={stamp}（构建时间 {built}）")
+    print(f"answers.html、screen.html 已更新为 data.js?v={stamp}（构建时间 {built}）")
 
 
 if __name__ == "__main__":

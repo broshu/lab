@@ -152,8 +152,8 @@
     window.Lab.loadSections().then((sections) => {
       document.querySelector("#cards").replaceChildren(
         ...sections.map(renderCard),
-        renderLinkCard("作业问答系统", "/tutor/screen/", "问答"),
-        renderLinkCard("作业答案与详解", "/tutor/", "解析")
+        renderLinkCard("作业问答系统", "/tutor/", "问答"),
+        renderLinkCard("作业答案与详解", "/answers/", "解析")
       );
     });
   </script>

@@ -55,7 +55,7 @@ jobs:
           cp index.html library.html site.css site.js icon.png CNAME _site/
           cp -R ppt games _site/
           mkdir -p _site/tutor
-          cp tutor/index.html tutor/screen.html tutor/data.js _site/tutor/
+          cp tutor/answers.html tutor/screen.html tutor/data.js _site/tutor/
           cp -R tutor/assets _site/tutor/
 
       # 课件文件名可以照常用中文；这一步按 ppt/links.json 把网站上的链接改成英文，页面上仍显示中文名，
