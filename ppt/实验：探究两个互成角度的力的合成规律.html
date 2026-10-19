@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>力的合成实验台</title>
 <style>
-/* Layout: drawing board with rubber band, ring and strings on the left; mode, controls, data table and vector diagram on the right. */
+/* Layout: paper board with rubber band, ring and strings on the left (with page flipping); controls, vector diagram and data table on the right. */
 :root{
   --bg:#EDF1F0; --surface:#FFFFFF; --ink:#10252C; --muted:#546A72; --line:#CFDAD8;
   --accent:#0E7C86; --accent-ink:#FFFFFF; --warn:#B3470F; --ok:#13795B;
@@ -31,6 +31,10 @@ h2{font-size:18px;margin:0 0 10px;font-weight:700}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
 .board-card{padding:8px;position:sticky;top:12px}
 .board-card svg{display:block;width:100%;height:auto;border-radius:8px;touch-action:none;user-select:none}
+.pagebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:2px 2px 8px}
+.pagebar .grow{flex:1}
+.pagebar button{padding:6px 12px;min-height:38px}
+#pageNo{font-weight:600;min-width:7em;text-align:center}
 .col{display:flex;flex-direction:column;gap:16px;min-width:0}
 .num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
 .modes{display:flex;flex-wrap:wrap;gap:6px 20px;margin-bottom:12px}
@@ -60,37 +64,41 @@ th{font-size:13px;font-weight:500;color:var(--muted)}
 th:first-child,td:first-child{text-align:left}
 tbody tr{cursor:pointer}
 tbody tr.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
-.del{padding:2px 8px;min-height:30px;font-size:14px;color:var(--muted)}
 .empty{color:var(--muted);padding:12px 0 4px;font-size:15px}
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.dhead h2{margin:0}
+.dhead button{padding:4px 10px;min-height:34px;font-size:14px;color:var(--muted)}
 .opts{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 8px;color:var(--muted);font-size:14px}
 .opts label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .diagram svg{width:100%;height:auto;display:block}
 .diagram text{fill:var(--ink);font-family:var(--font-num);font-size:13px}
 .result{margin-top:8px;font-size:15px;line-height:1.7}
 .result b{font-family:var(--font-num)}
+#board.turn #dyn{animation:turn .35s ease}
+@keyframes turn{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+#secCtrl.locked{opacity:.5}
 @media (max-width:900px){
   .grid{grid-template-columns:minmax(0,1fr)}
   .board-card{position:static}
 }
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto} #board.turn #dyn{animation:none}}
 
 /* 一体机横屏演示：宽高比 ≥ 1.25 时按 1600×900 的 16:9 画布整屏显示并等比缩放，不出现滚动条 */
 html.cv,html.cv body{height:100%;overflow:hidden}
 html.cv body{padding:0;position:relative}
 html.cv #app{position:absolute;left:50%;top:50%;width:1600px;height:900px;padding:18px 28px 22px;display:flex;flex-direction:column;transform-origin:center center}
 html.cv .top{max-width:none;margin:0 0 12px;width:100%}
-html.cv .grid{max-width:none;margin:0;width:100%;flex:1;min-height:0;gap:16px}
+html.cv .grid{max-width:none;margin:0;width:100%;flex:1;min-height:0;gap:16px;align-items:stretch}
 html.cv .col{display:contents}
-html.cv .board-card,html.cv .stage-card{position:static;min-height:0;display:flex}
-html.cv .board-card svg,html.cv .stage-card svg{flex:1;min-height:0;width:100%;height:100%}
+html.cv .board-card{position:static;min-height:0;display:flex;flex-direction:column}
+html.cv .board-card svg{flex:1;min-height:0;width:100%;height:100%}
 html.cv button{min-height:46px}
+html.cv .pagebar button{min-height:40px}
 html.cv #secData{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 html.cv #secData .tablewrap{flex:1;min-height:0;overflow:auto}
 html.cv table{min-width:0}
-html.cv .grid{align-items:stretch}
 html.cv th,html.cv td{padding:8px 5px}
-html.cv td input{width:78px}
-html.cv .del{padding:2px 6px}
+html.cv th{position:sticky;top:0;background:var(--surface)}
 html.cv .grid{grid-template-columns:600px 400px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
 html.cv #secBoard{grid-column:1;grid-row:1}
 html.cv #secAct{grid-column:1;grid-row:2;min-height:0;overflow:hidden}
@@ -106,12 +114,20 @@ html.cv .result{line-height:1.6}
 <div id="app">
 <div class="top">
   <h1>力的合成实验台</h1>
-  <p>拖动弹簧测力计，把橡皮条的结点拉到 O 点，比较平行四边形与单个力</p>
+  <p>选 O 点，用两个测力计和一个测力计各拉一次，比较平行四边形与单个力</p>
 </div>
 
 <div class="grid">
   <div class="card board-card" id="secBoard">
-    <svg id="board" viewBox="0 0 640 520" role="img" aria-label="木板上的白纸，橡皮条一端固定在 G 点，另一端系着圆环，圆环上拴着两根细线连接弹簧测力计">
+    <div class="pagebar">
+      <button id="prevP" aria-label="上一页">◀ 上一页</button>
+      <span id="pageNo" class="num">第 1 / 1 页</span>
+      <button id="nextP" aria-label="下一页">下一页 ▶</button>
+      <button id="lastP" hidden>回到最新页</button>
+      <span class="grow"></span>
+      <button id="newP" class="primary">翻到新的一页</button>
+    </div>
+    <svg id="board" viewBox="0 0 640 520" role="img" aria-label="木板上的白纸，橡皮条一端固定在 G 点，另一端系着圆环，圆环上拴着细线连接弹簧测力计">
       <defs>
         <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1"/></pattern>
         <pattern id="g5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="var(--grid-major)" stroke-width="1.2"/></pattern>
@@ -135,11 +151,11 @@ html.cv .result{line-height:1.6}
 
     <section class="card" id="secAct">
       <ol class="steps">
-        <li>选“两个测力计”，调整两根线的方向和拉力，让结点到达红色的 O 点，记录读数。</li>
-        <li>再选“一个测力计”，把结点同样拉到 O 点，记录这个力 F′。</li>
-        <li>换不同的夹角重复，比较平行四边形的对角线 F 与 F′。</li>
+        <li>在白纸上点一下选定 O 点，不选的话，第一次记录时结点的位置就是 O 点。</li>
+        <li>两个测力计、一个测力计各把结点拉到 O 点并记录一次，先做哪个都行。</li>
+        <li>比较后点“翻到新的一页”，换一个夹角重做；可以随时翻回前面的页。</li>
       </ol>
-      <div id="status" class="status no">结点距 O 点：—</div>
+      <div id="status" class="status no">—</div>
       <div class="btns">
         <button id="recTwo" class="primary">记录两个测力计的读数</button>
         <button id="recOne" class="primary">记录单个测力计的读数</button>
@@ -148,39 +164,43 @@ html.cv .result{line-height:1.6}
     </section>
 
     <section class="card" id="secData">
-      <h2>数据记录</h2>
+      <div class="dhead"><h2>数据记录（每页一行）</h2><button id="clearAll">清空所有页</button></div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>组</th><th>F₁ (N)</th><th>F₂ (N)</th><th>夹角 (°)</th><th>F₁+F₂ (N)</th><th>平行四边形 F (N)</th><th>单个 F′ (N)</th><th>|F′−F| (N)</th><th><span style="position:absolute;left:-9999px">删除</span></th></tr></thead>
+          <thead><tr><th>页</th><th>F₁ (N)</th><th>F₂ (N)</th><th>夹角 (°)</th><th>F₁+F₂ (N)</th><th>平行四边形 F (N)</th><th>单个 F′ (N)</th><th>|F′−F| (N)</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
-      <div id="emptyMsg" class="empty">还没有数据。先用两个测力计把结点拉到 O 点，再点“记录”。</div>
+      <div id="emptyMsg" class="empty">还没有数据。点击一行可以翻到那一页。</div>
     </section>
 
     <section class="card diagram" id="secDiag">
       <h2>作图比较</h2>
       <div class="opts">
         <label><input type="checkbox" id="showPar"> 画出平行四边形和对角线</label>
-        <span>标度：1 N = 48 px（点击表格中的一行可切换）</span>
+        <span id="scaleTxt"></span>
       </div>
       <svg id="diag" viewBox="0 0 520 340" role="img" aria-label="用平行四边形法则作出的合力与单个测力计拉力的对比图"></svg>
       <div id="result" class="result"></div>
     </section>
   </div>
 </div>
-
 </div>
+
 <script>
 (function(){
-  var G={x:110,y:260}, O={x:330,y:260}, L0=100, KR=0.025;          // 橡皮条：1 px = 0.025 N，O 点处合力 3.0 N 向右
-  var FMAX=5, HMIN=80, HPX=30, TOL=3, SC=48;
-  var st={mode:'two',t1:40,f1:1.8,t2:-35,f2:1.5,t3:10,f3:2.5};
-  var rows=[], nextId=1, sel=null;
+  var G={x:110,y:260}, L0=100, KR=0.025;           // 橡皮条：1 px = 0.025 N；l0 = 100 px
+  var FMAX=5, HMIN=80, HPX=30, TOL=3, MARK=40, DMIN=120, DMAX=290;   // 结点离 G 的距离 120~290 px，单个测力计 ≤ 5 N 才拉得到
+  var DEF={t1:40,f1:1.8,t2:-35,f2:1.5,t3:10,f3:2.5};
+  var st={mode:'two',t1:DEF.t1,f1:DEF.f1,t2:DEF.t2,f2:DEF.f2,t3:DEF.t3,f3:DEF.f3};
+  var pages=[newPage()], cur=0;
   var $=function(id){return document.getElementById(id)};
   var rad=Math.PI/180;
+  function newPage(){return {O:null,two:null,one:null};}
   function fmt(v,d){return (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d)}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+  function isLive(){return cur===pages.length-1}
+  function hasData(P){return !!(P.two||P.one)}
 
   var defs=[{k:'1',label:'测力计 1',color:'var(--c1)'},{k:'2',label:'测力计 2',color:'var(--c2)'},{k:'3',label:'测力计',color:'var(--c3)'}];
   (function(){
@@ -193,8 +213,9 @@ html.cv .result{line-height:1.6}
     $('ctls').innerHTML=s;
   })();
 
+  /* 物理：结点位置由测力计的合力决定，橡皮条沿合力方向伸长 */
   function vecSum(){
-    var f,sx,sy;
+    var sx,sy;
     if(st.mode==='two'){ sx=st.f1*Math.cos(st.t1*rad)+st.f2*Math.cos(st.t2*rad); sy=st.f1*Math.sin(st.t1*rad)+st.f2*Math.sin(st.t2*rad); }
     else { sx=st.f3*Math.cos(st.t3*rad); sy=st.f3*Math.sin(st.t3*rad); }
     return {x:sx,y:sy};
@@ -209,61 +230,120 @@ html.cv .result{line-height:1.6}
     var d=HMIN+f*HPX;
     return {x:R.x+Math.cos(t*rad)*d, y:R.y-Math.sin(t*rad)*d};
   }
+  function arrow(x1,y1,x2,y2,col,w,dash){
+    var dx=x2-x1, dy=y2-y1, L=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/L, uy=dy/L, hs=10;
+    var bx=x2-ux*hs, by=y2-uy*hs;
+    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+bx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+w+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>'+
+      '<polygon points="'+x2+','+y2+' '+(bx-uy*5)+','+(by+ux*5)+' '+(bx+uy*5)+','+(by-ux*5)+'" fill="'+col+'"/>';
+  }
+
+  /* 白纸上的铅笔记号：已记录的力的图示（1 N = 40 px） */
+  function marks(P,labels){
+    if(!P.O) return '';
+    var o=P.O, s='';
+    function mk(t,f,col,name){
+      var x=o.x+Math.cos(t*rad)*f*MARK, y=o.y-Math.sin(t*rad)*f*MARK;
+      s+=arrow(o.x,o.y,x,y,col,2.5);
+      if(labels){
+        var cx=Math.cos(t*rad), anchor=cx>0.3?'start':(cx<-0.3?'end':'middle');
+        s+='<text x="'+(x+(cx>0.3?8:(cx<-0.3?-8:0)))+'" y="'+(y-(Math.sin(t*rad)>=0?8:-18))+'" text-anchor="'+anchor+'" font-size="16" font-weight="700" fill="'+col+'" style="font-family:var(--font-num)">'+name+' '+fmt(f,1)+' N</text>';
+      }
+    }
+    if(P.two){ mk(P.two.t1,P.two.f1,'var(--c1)','F₁'); mk(P.two.t2,P.two.f2,'var(--c2)','F₂'); }
+    if(P.one){ mk(P.one.t3,P.one.f3,'var(--c3)','F′'); }
+    return '<g opacity=".75">'+s+'</g>';
+  }
 
   function render(){
-    var R=ringPos(), s='';
-    // 目标 O
-    s+='<circle cx="'+O.x+'" cy="'+O.y+'" r="'+TOL+'" fill="none" stroke="var(--target)" stroke-width="1.5"/>'+
-       '<line x1="'+(O.x-12)+'" x2="'+(O.x+12)+'" y1="'+O.y+'" y2="'+O.y+'" stroke="var(--target)" stroke-width="1.5"/>'+
-       '<line x1="'+O.x+'" x2="'+O.x+'" y1="'+(O.y-12)+'" y2="'+(O.y+12)+'" stroke="var(--target)" stroke-width="1.5"/>'+
-       '<text x="'+(O.x+10)+'" y="'+(O.y+24)+'" font-size="18" font-weight="700" fill="var(--target)" style="font-family:var(--font-num)">O</text>';
-    // 固定点 G 与橡皮条
+    var P=pages[cur], live=isLive();
+    var R=live?ringPos():(P.O||{x:G.x+L0,y:G.y}), s='';
+    s+=marks(P,!live);
+    if(P.O){
+      var vx=P.O.x-G.x, vy=P.O.y-G.y, vl=Math.sqrt(vx*vx+vy*vy)||1;
+      s+='<line x1="'+P.O.x+'" y1="'+P.O.y+'" x2="'+(P.O.x+vx/vl*130)+'" y2="'+(P.O.y+vy/vl*130)+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>'+
+         '<circle cx="'+P.O.x+'" cy="'+P.O.y+'" r="'+TOL+'" fill="none" stroke="var(--target)" stroke-width="1.5"/>'+
+         '<line x1="'+(P.O.x-12)+'" x2="'+(P.O.x+12)+'" y1="'+P.O.y+'" y2="'+P.O.y+'" stroke="var(--target)" stroke-width="1.5"/>'+
+         '<line x1="'+P.O.x+'" x2="'+P.O.x+'" y1="'+(P.O.y-12)+'" y2="'+(P.O.y+12)+'" stroke="var(--target)" stroke-width="1.5"/>'+
+         '<text x="'+(P.O.x+10)+'" y="'+(P.O.y+24)+'" font-size="18" font-weight="700" fill="var(--target)" style="font-family:var(--font-num)">O</text>';
+    }
     s+='<line x1="'+G.x+'" y1="'+G.y+'" x2="'+R.x+'" y2="'+R.y+'" stroke="var(--band)" stroke-width="5" stroke-linecap="round"/>'+
        '<circle cx="'+G.x+'" cy="'+G.y+'" r="8" fill="var(--ink)"/>'+
        '<text x="'+(G.x-8)+'" y="'+(G.y+28)+'" font-size="18" font-weight="700" fill="var(--ink)" style="font-family:var(--font-num)">G</text>';
-    // 细线与测力计
-    var list=st.mode==='two'?[1,2]:[3];
-    list.forEach(function(i){
-      var t=st['t'+i], f=st['f'+i], h=handle(R,t,f), col=defs[i-1].color;
-      var cx=Math.cos(t*rad), cy=-Math.sin(t*rad);
-      s+='<line x1="'+R.x+'" y1="'+R.y+'" x2="'+h.x+'" y2="'+h.y+'" stroke="'+col+'" stroke-width="2.5"/>'+
-         '<circle class="h" data-h="'+i+'" cx="'+h.x+'" cy="'+h.y+'" r="13" fill="'+col+'" stroke="var(--surface)" stroke-width="3" style="cursor:grab"/>';
-      var lx=h.x+cx*34, ly=h.y+cy*34;
-      var name=(i===3?'F′':'F'+(i===1?'₁':'₂'));
-      var anchor=cx>0.3?'start':(cx<-0.3?'end':'middle');
-      s+='<text x="'+(lx+(cx>0.3?-8:(cx<-0.3?8:0)))+'" y="'+(ly+5)+'" text-anchor="'+anchor+'" font-size="17" font-weight="700" fill="'+col+'" style="font-family:var(--font-num)">'+name+' '+fmt(f,1)+' N</text>';
-    });
-    // 圆环
+    if(live){
+      (st.mode==='two'?[1,2]:[3]).forEach(function(i){
+        var t=st['t'+i], f=st['f'+i], h=handle(R,t,f), col=defs[i-1].color;
+        var cx=Math.cos(t*rad), cy=-Math.sin(t*rad);
+        s+='<line x1="'+R.x+'" y1="'+R.y+'" x2="'+h.x+'" y2="'+h.y+'" stroke="'+col+'" stroke-width="2.5"/>'+
+           '<circle class="h" data-h="'+i+'" cx="'+h.x+'" cy="'+h.y+'" r="14" fill="'+col+'" stroke="var(--surface)" stroke-width="3" style="cursor:grab"/>';
+        var lx=h.x+cx*34, ly=h.y+cy*34, name=(i===3?'F′':'F'+(i===1?'₁':'₂'));
+        var anchor=cx>0.3?'start':(cx<-0.3?'end':'middle'), tx=lx+(cx>0.3?-8:(cx<-0.3?8:0));
+        if(h.x>520){ anchor='end'; tx=h.x+6; ly=h.y-26; }
+        s+='<text x="'+tx+'" y="'+(ly+5)+'" text-anchor="'+anchor+'" font-size="17" font-weight="700" fill="'+col+'" style="font-family:var(--font-num)">'+name+' '+fmt(f,1)+' N</text>';
+      });
+    }
     s+='<circle cx="'+R.x+'" cy="'+R.y+'" r="7" fill="var(--paper)" stroke="var(--ink)" stroke-width="3"/>';
+    if(!live) s+='<text x="22" y="40" font-size="20" font-weight="700" fill="var(--muted)" style="font-family:var(--font-body)">第 '+(cur+1)+' 页（回看，不能修改）</text>';
     $('dyn').innerHTML=s;
+
     // 控件
     [1,2,3].forEach(function(i){
       $('ctl'+i).hidden=!( (st.mode==='two'&&i<3)||(st.mode==='one'&&i===3) );
       $('t'+i).value=st['t'+i]; $('f'+i).value=st['f'+i];
       $('ot'+i).textContent=fmt(st['t'+i],0)+'°'; $('of'+i).textContent=fmt(st['f'+i],2)+' N';
     });
-    var dist=Math.sqrt(Math.pow(R.x-O.x,2)+Math.pow(R.y-O.y,2)), ok=dist<=TOL;
-    var cm=dist/20;
-    var stEl=$('status');
-    stEl.className='status '+(ok?'ok':'no');
-    stEl.textContent=ok?'结点已到达 O 点，可以记录':'结点距 O 点 '+fmt(cm,2)+' cm，继续调整';
+    document.querySelectorAll('#secCtrl input').forEach(function(e){e.disabled=!live});
+    $('secCtrl').classList.toggle('locked',!live);
+
+    // 状态
+    var dist=P.O?Math.sqrt(Math.pow(R.x-P.O.x,2)+Math.pow(R.y-P.O.y,2)):null;
+    var gd=Math.sqrt(Math.pow(R.x-G.x,2)+Math.pow(R.y-G.y,2));
+    var ok=live&&(P.O?dist<=TOL:(gd>=DMIN&&gd<=DMAX));
+    var stEl=$('status'), msg;
+    if(!live) msg='正在回看第 '+(cur+1)+' 页，数据不能修改。点“回到最新页”继续实验。';
+    else if(P.O) msg=ok?'结点已到达 O 点，可以记录':'结点距 O 点 '+fmt(dist/20,2)+' cm，继续调整';
+    else if(gd<DMIN) msg='结点离 G 点太近，请加大拉力';
+    else if(gd>DMAX) msg='结点离 G 点太远，请减小拉力（单个测力计最大 5 N）';
+    else msg='结点位置合适，点“记录”后这里就是 O 点';
+    stEl.className='status '+(ok?'ok':'no'); stEl.textContent=msg;
     $('recTwo').disabled=!(ok&&st.mode==='two');
-    $('recOne').disabled=!(ok&&st.mode==='one'&&rows.length>0);
+    $('recOne').disabled=!(ok&&st.mode==='one');
+    $('recTwo').textContent=(live&&P.two?'重新记录':'记录')+'两个测力计的读数';
+    $('recOne').textContent=(live&&P.one?'重新记录':'记录')+'单个测力计的读数';
     var hm='';
-    if(st.mode==='one'&&rows.length===0) hm='先用两个测力计记录一组数据，再来测单个力。';
-    else if(st.mode==='two'&&!ok) hm='两根线要分别在水平方向的上下两侧，才能把结点拉到 O 点。';
+    if(live){
+      if(P.two&&P.one) hm='这一页的两次测量都完成了。可以点“翻到新的一页”换一个夹角重做。';
+      else if(!hasData(P)) hm='点击白纸可以选定 O 点；不选的话，第一次记录时结点所在的位置就是 O 点。';
+      else if(st.mode==='two'&&!ok&&!P.two) hm='两根线要分别在橡皮条延长线（虚线）的两侧，才能把结点拉到 O 点。';
+      else if(!ok) hm='把结点拉回 O 点后再记录。';
+    }
     $('hintMsg').textContent=hm;
+
+    // 翻页条
+    $('pageNo').textContent='第 '+(cur+1)+' / '+pages.length+' 页';
+    $('prevP').disabled=cur===0; $('nextP').disabled=live;
+    $('lastP').hidden=live;
+    $('newP').disabled=!(live&&hasData(P));
   }
 
-  /* 拖动测力计 */
+  /* 拖动测力计 / 点击白纸选 O 点 */
   var board=$('board'), drag=null;
   function toSvg(e){
     var r=board.getBoundingClientRect();
     return {x:(e.clientX-r.left)*640/r.width, y:(e.clientY-r.top)*520/r.height};
   }
+  function setO(p){
+    var vx=p.x-G.x, vy=p.y-G.y, d=Math.sqrt(vx*vx+vy*vy)||1, ux=vx/d, uy=vy/d;
+    d=clamp(d,DMIN,DMAX);
+    var o={x:G.x+ux*d,y:G.y+uy*d};
+    while((o.x<36||o.x>604||o.y<36||o.y>484)&&d>DMIN){ d-=5; o={x:G.x+ux*d,y:G.y+uy*d}; }
+    if(o.x<36||o.x>604||o.y<36||o.y>484) return;   // 这个方向放不下 O 点，忽略
+    pages[cur].O=o;
+  }
   board.addEventListener('pointerdown',function(e){
-    var h=e.target.closest&&e.target.closest('.h'); if(!h) return;
-    drag=h.getAttribute('data-h'); board.setPointerCapture(e.pointerId); e.preventDefault();
+    if(!isLive()) return;
+    var h=e.target.closest&&e.target.closest('.h');
+    if(h){ drag=h.getAttribute('data-h'); board.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+    if(!hasData(pages[cur])){ setO(toSvg(e)); render(); }
   });
   board.addEventListener('pointermove',function(e){
     if(!drag) return;
@@ -283,85 +363,99 @@ html.cv .result{line-height:1.6}
     el.addEventListener('change',function(){ if(el.checked){st.mode=el.value;render();} });
   });
 
-  /* 记录与表格 */
-  function angDiff(a,b){ return Math.abs(((a-b+540)%360+360)%360-180); }
-  function calc(r){
-    var sx=r.f1*Math.cos(r.t1*rad)+r.f2*Math.cos(r.t2*rad), sy=r.f1*Math.sin(r.t1*rad)+r.f2*Math.sin(r.t2*rad);
-    return {sx:sx,sy:sy,F:Math.sqrt(sx*sx+sy*sy),sum:r.f1+r.f2,ang:angDiff(r.t1,r.t2)};
+  /* 记录（两种测量顺序不限） */
+  function record(kind){
+    var P=pages[cur]; if(!isLive()) return;
+    if(!P.O){ var R=ringPos(); P.O={x:R.x,y:R.y}; }
+    if(kind==='two') P.two={t1:Math.round(st.t1),f1:Math.round(st.f1*10)/10,t2:Math.round(st.t2),f2:Math.round(st.f2*10)/10};
+    else P.one={t3:Math.round(st.t3),f3:Math.round(st.f3*10)/10};
+    renderAll();
   }
-  $('recTwo').addEventListener('click',function(){
-    var r={id:nextId++,t1:Math.round(st.t1),f1:Math.round(st.f1*10)/10,t2:Math.round(st.t2),f2:Math.round(st.f2*10)/10,fp:null,t3:null};
-    rows.push(r); sel=r.id; renderAll();
+  $('recTwo').addEventListener('click',function(){record('two')});
+  $('recOne').addEventListener('click',function(){record('one')});
+
+  /* 翻页 */
+  function turn(){ board.classList.remove('turn'); void board.getBoundingClientRect(); board.classList.add('turn'); }
+  function go(i){ cur=clamp(i,0,pages.length-1); turn(); renderAll(); }
+  $('prevP').addEventListener('click',function(){go(cur-1)});
+  $('nextP').addEventListener('click',function(){go(cur+1)});
+  $('lastP').addEventListener('click',function(){go(pages.length-1)});
+  $('newP').addEventListener('click',function(){
+    if(!(isLive()&&hasData(pages[cur]))) return;
+    pages.push(newPage()); cur=pages.length-1;
+    st.t1=DEF.t1;st.f1=DEF.f1;st.t2=DEF.t2;st.f2=DEF.f2;st.t3=DEF.t3;st.f3=DEF.f3;
+    turn(); renderAll();
   });
-  $('recOne').addEventListener('click',function(){
-    var r=rows[rows.length-1]; if(!r) return;
-    r.fp=Math.round(st.f3*10)/10; r.t3=Math.round(st.t3); sel=r.id; renderAll();
+  $('clearAll').addEventListener('click',function(){
+    pages=[newPage()]; cur=0;
+    st.t1=DEF.t1;st.f1=DEF.f1;st.t2=DEF.t2;st.f2=DEF.f2;st.t3=DEF.t3;st.f3=DEF.f3;
+    turn(); renderAll();
   });
+
+  /* 表格：每页一行 */
+  function angDiff(a,b){ return Math.abs(((a-b+540)%360+360)%360-180); }
+  function calc(w){
+    var sx=w.f1*Math.cos(w.t1*rad)+w.f2*Math.cos(w.t2*rad), sy=w.f1*Math.sin(w.t1*rad)+w.f2*Math.sin(w.t2*rad);
+    return {sx:sx,sy:sy,F:Math.sqrt(sx*sx+sy*sy),sum:w.f1+w.f2,ang:angDiff(w.t1,w.t2)};
+  }
   function renderTable(){
-    var s='';
-    rows.forEach(function(r,i){
-      var c=calc(r), has=r.fp!==null;
-      s+='<tr data-id="'+r.id+'" class="'+(r.id===sel?'sel':'')+'"><td>'+(i+1)+'</td>'+
-        '<td class="num">'+fmt(r.f1,1)+'</td><td class="num">'+fmt(r.f2,1)+'</td><td class="num">'+c.ang+'</td>'+
-        '<td class="num">'+fmt(c.sum,2)+'</td><td class="num">'+fmt(c.F,2)+'</td>'+
-        '<td class="num">'+(has?fmt(r.fp,1):'—')+'</td><td class="num">'+(has?fmt(Math.abs(r.fp-c.F),2):'—')+'</td>'+
-        '<td><button class="del" data-del="'+r.id+'" aria-label="删除这一组">删除</button></td></tr>';
+    var s='', n=0;
+    pages.forEach(function(P,i){
+      if(!hasData(P)) return; n++;
+      var c=P.two?calc(P.two):null, o=P.one, dash='<td class="num">—</td>';
+      s+='<tr data-i="'+i+'" class="'+(i===cur?'sel':'')+'"><td>第 '+(i+1)+' 页</td>'+
+        (c?'<td class="num">'+fmt(P.two.f1,1)+'</td><td class="num">'+fmt(P.two.f2,1)+'</td><td class="num">'+c.ang+'</td><td class="num">'+fmt(c.sum,2)+'</td><td class="num">'+fmt(c.F,2)+'</td>':dash+dash+dash+dash+dash)+
+        (o?'<td class="num">'+fmt(o.f3,1)+'</td>':dash)+
+        (c&&o?'<td class="num">'+fmt(Math.abs(o.f3-c.F),2)+'</td>':dash)+'</tr>';
     });
-    $('tbody').innerHTML=s; $('emptyMsg').hidden=rows.length>0;
+    $('tbody').innerHTML=s; $('emptyMsg').hidden=n>0;
   }
   $('tbody').addEventListener('click',function(e){
-    var b=e.target.closest('[data-del]');
-    if(b){ var id=parseInt(b.getAttribute('data-del'),10); rows=rows.filter(function(r){return r.id!==id}); if(sel===id) sel=rows.length?rows[rows.length-1].id:null; renderAll(); return; }
-    var tr=e.target.closest('tr[data-id]'); if(tr){ sel=parseInt(tr.getAttribute('data-id'),10); renderAll(); }
+    var tr=e.target.closest('tr[data-i]'); if(tr) go(parseInt(tr.getAttribute('data-i'),10));
   });
   $('showPar').addEventListener('change',renderDiagram);
 
-  /* 作图 */
-  function arrow(x1,y1,x2,y2,col,w,dash){
-    var dx=x2-x1, dy=y2-y1, L=Math.sqrt(dx*dx+dy*dy)||1, ux=dx/L, uy=dy/L, hs=10;
-    var bx=x2-ux*hs, by=y2-uy*hs;
-    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+bx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+w+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>'+
-      '<polygon points="'+x2+','+y2+' '+(bx-uy*5)+','+(by+ux*5)+' '+(bx+uy*5)+','+(by-ux*5)+'" fill="'+col+'"/>';
-  }
+  /* 作图（当前页）：标度随图自动调整 */
   function renderDiagram(){
-    var r=null; rows.forEach(function(x){ if(x.id===sel) r=x; });
-    var ox=110, oy=175, s='';
+    var P=pages[cur], s='', res=$('result'), ox=110, oy=175;
+    if(!hasData(P)){
+      $('scaleTxt').textContent='';
+      $('diag').innerHTML='<text x="260" y="170" text-anchor="middle" style="fill:var(--muted);font-family:var(--font-body);font-size:15px">这一页还没有记录，记录后在这里作图</text>';
+      res.innerHTML=''; return;
+    }
+    var v=[], c=null, v1,v2,v3;
+    if(P.two){ c=calc(P.two);
+      v1={x:P.two.f1*Math.cos(P.two.t1*rad),y:P.two.f1*Math.sin(P.two.t1*rad)};
+      v2={x:P.two.f2*Math.cos(P.two.t2*rad),y:P.two.f2*Math.sin(P.two.t2*rad)};
+      v.push(v1,v2,{x:c.sx,y:c.sy}); }
+    if(P.one){ v3={x:P.one.f3*Math.cos(P.one.t3*rad),y:P.one.f3*Math.sin(P.one.t3*rad)}; v.push(v3); }
+    var my=0,mxp=0,mxn=0; v.forEach(function(a){ my=Math.max(my,Math.abs(a.y)); mxp=Math.max(mxp,a.x); mxn=Math.min(mxn,a.x); });
+    var SC=48; if(my>0) SC=Math.min(SC,150/my); if(mxp>0) SC=Math.min(SC,330/mxp); if(mxn<0) SC=Math.min(SC,95/(-mxn));
+    SC=Math.max(10,Math.floor(SC));
+    $('scaleTxt').textContent='标度：1 N = '+SC+' px';
+    function Pt(a){return {x:ox+a.x*SC,y:oy-a.y*SC}}
     s+='<line x1="30" y1="318" x2="'+(30+SC)+'" y2="318" stroke="var(--muted)" stroke-width="3"/><text x="'+(30+SC+8)+'" y="323">1 N</text>';
-    var res=$('result');
-    if(!r){
-      s+='<text x="260" y="170" text-anchor="middle" style="fill:var(--muted);font-family:var(--font-body);font-size:15px">记录一组数据后在这里作图</text>';
-      $('diag').innerHTML=s; res.innerHTML=''; return;
+    var par=$('showPar').checked, t='';
+    if(P.two){
+      var p1=Pt(v1), p2=Pt(v2), pf=Pt({x:c.sx,y:c.sy});
+      if(par) s+='<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+pf.x+'" y2="'+pf.y+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>'+
+                 '<line x1="'+p2.x+'" y1="'+p2.y+'" x2="'+pf.x+'" y2="'+pf.y+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>';
+      s+=arrow(ox,oy,p1.x,p1.y,'var(--c1)',3)+arrow(ox,oy,p2.x,p2.y,'var(--c2)',3);
+      s+='<text x="'+(p1.x+8)+'" y="'+(p1.y-6)+'" style="fill:var(--c1)">F₁ '+fmt(P.two.f1,1)+' N</text>'+
+         '<text x="'+(p2.x+8)+'" y="'+(p2.y+16)+'" style="fill:var(--c2)">F₂ '+fmt(P.two.f2,1)+' N</text>';
+      if(par){ s+=arrow(ox,oy,pf.x,pf.y,'var(--ink)',3,'9 5')+'<text x="'+(pf.x+8)+'" y="'+(pf.y-10)+'">F '+fmt(c.F,2)+' N</text>'; }
+      t+='夹角 <b>'+c.ang+'°</b>；算术和 F₁+F₂ = <b>'+fmt(c.sum,2)+' N</b>。';
+      if(par) t+='平行四边形对角线 F = <b>'+fmt(c.F,2)+' N</b>。';
     }
-    var c=calc(r);
-    function P(fx,fy){return {x:ox+fx*SC,y:oy-fy*SC}}
-    var p1=P(r.f1*Math.cos(r.t1*rad),r.f1*Math.sin(r.t1*rad));
-    var p2=P(r.f2*Math.cos(r.t2*rad),r.f2*Math.sin(r.t2*rad));
-    var pf=P(c.sx,c.sy);
-    if($('showPar').checked){
-      s+='<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+pf.x+'" y2="'+pf.y+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>'+
-         '<line x1="'+p2.x+'" y1="'+p2.y+'" x2="'+pf.x+'" y2="'+pf.y+'" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="6 5"/>';
-    }
-    s+=arrow(ox,oy,p1.x,p1.y,'var(--c1)',3)+arrow(ox,oy,p2.x,p2.y,'var(--c2)',3);
-    s+='<text x="'+(p1.x+8)+'" y="'+(p1.y-6)+'" style="fill:var(--c1)">F₁ '+fmt(r.f1,1)+' N</text>'+
-       '<text x="'+(p2.x+8)+'" y="'+(p2.y+16)+'" style="fill:var(--c2)">F₂ '+fmt(r.f2,1)+' N</text>';
-    if(r.fp!==null){
-      var p3=P(r.fp*Math.cos(r.t3*rad),r.fp*Math.sin(r.t3*rad));
-      s+=arrow(ox,oy,p3.x,p3.y,'var(--c3)',3,'2 0');
-      s+='<text x="'+(p3.x+8)+'" y="'+(p3.y+22)+'" style="fill:var(--c3)">F′ '+fmt(r.fp,1)+' N</text>';
-    }
-    if($('showPar').checked){
-      s+=arrow(ox,oy,pf.x,pf.y,'var(--ink)',3,'9 5');
-      s+='<text x="'+(pf.x+8)+'" y="'+(pf.y-10)+'">F '+fmt(c.F,2)+' N</text>';
-    }
-    s+='<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="var(--ink)"/>';
-    $('diag').innerHTML=s;
-    var t='夹角 <b>'+c.ang+'°</b>；算术和 F₁+F₂ = <b>'+fmt(c.sum,2)+' N</b>。';
-    if($('showPar').checked) t+='平行四边形对角线 F = <b>'+fmt(c.F,2)+' N</b>。';
-    if(r.fp!==null){
-      var diff=Math.abs(r.fp-c.F);
-      t+=' 单个测力计 F′ = <b>'+fmt(r.fp,1)+' N</b>'+($('showPar').checked?'，与 F 相差 <b>'+fmt(diff,2)+' N</b>（约 '+fmt(diff/Math.max(c.F,1e-6)*100,1)+'%）。':'。');
+    if(P.one){
+      var p3=Pt(v3);
+      s+=arrow(ox,oy,p3.x,p3.y,'var(--c3)',3);
+      s+='<text x="'+(p3.x+8)+'" y="'+(p3.y+22)+'" style="fill:var(--c3)">F′ '+fmt(P.one.f3,1)+' N</text>';
+      if(P.two) t+=' 单个测力计 F′ = <b>'+fmt(P.one.f3,1)+' N</b>'+(par?'，与 F 相差 <b>'+fmt(Math.abs(P.one.f3-c.F),2)+' N</b>（约 '+fmt(Math.abs(P.one.f3-c.F)/Math.max(c.F,1e-6)*100,1)+'%）。':'。');
+      else t+='单个测力计 F′ = <b>'+fmt(P.one.f3,1)+' N</b>。还没有记录两个测力计的读数。';
     } else t+=' 还没有记录单个测力计的读数。';
-    res.innerHTML=t;
+    s+='<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="var(--ink)"/>';
+    $('diag').innerHTML=s; res.innerHTML=t;
   }
   function renderAll(){ renderTable(); renderDiagram(); render(); }
 

@@ -60,7 +60,7 @@ th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:right;white
 th{font-size:13px;font-weight:500;color:var(--muted)}
 th:first-child,td:first-child{text-align:left}
 td input{width:96px;font:inherit;font-family:var(--font-num);text-align:right;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
-td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-height:0}
+td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-height:0;white-space:normal;min-width:130px}
 .del{padding:2px 8px;min-height:30px;font-size:14px;color:var(--muted)}
 .empty{color:var(--muted);padding:14px 0 4px;font-size:15px}
 .kline{margin-top:10px;font-size:16px}
@@ -134,7 +134,7 @@ html.cv .mag-row{grid-template-columns:300px minmax(0,1fr);height:100%;align-con
         <svg id="mag" viewBox="0 0 280 190" role="img" aria-label="刻度尺放大图：红线表示弹簧下端所在位置"></svg>
         <div class="readout">
           <div id="status" class="status still">已静止，可以读数</div>
-          <div style="color:var(--muted);font-size:14px">刻度尺最小分度是 1 mm。读数要估读到 0.1 mm，单位 cm。</div>
+          <div style="color:var(--muted);font-size:14px">刻度尺最小分度是 1 mm（0.1 cm），要再估读一位，所以单位用 cm 时写成两位小数，如 19.54。</div>
           <label class="opts" style="margin:0"><input type="checkbox" id="showTrue"> 显示实际读数（老师演示用）</label>
           <div id="trueVal" class="num" style="font-size:22px;font-weight:600" hidden></div>
         </div>
@@ -299,7 +299,13 @@ html.cv .mag-row{grid-template-columns:300px minmax(0,1fr);height:100%;align-con
       tr.querySelector('[data-f]').textContent=fmt(rowF(r),2);
       var v=parseFloat(r.L), xc=tr.querySelector('[data-x]'), hint=$('hint'+r.id);
       if(!isNaN(v)&&l0!==null&&r.n>0) xc.textContent=fmt(v-l0,2); else xc.textContent=(r.n===0?'0':'—');
-      hint.textContent=(!isNaN(v)&&Math.abs(v-r.Lt)>0.15)?'读数偏差较大，再读一次':'';
+      var txt='';
+      if(r.L!==''){
+        var bad=!/^\d+\.\d{2}$/.test(r.L), dm=/\.(\d*)$/.exec(r.L), dec=dm?dm[1].length:0;
+        if(bad&&(r.touched||dec>2)) txt=dec>2?'只估读一位，保留两位小数':'要估读：写成两位小数，如 19.54';
+        else if(!bad&&Math.abs(v-r.Lt)>0.06) txt='读数偏差较大，再读一次';
+      }
+      hint.textContent=txt;
     });
   }
   function nice(max){
@@ -357,6 +363,12 @@ html.cv .mag-row{grid-template-columns:300px minmax(0,1fr);height:100%;align-con
     var id=parseInt(t.id.slice(2),10);
     rows.forEach(function(r){ if(r.id===id) r.L=t.value.replace(/[^0-9.]/g,''); });
     refreshDerived(); renderChart();
+  });
+  $('tbody').addEventListener('change',function(e){
+    var t=e.target; if(!t.classList.contains('lin')) return;
+    var id=parseInt(t.id.slice(2),10);
+    rows.forEach(function(r){ if(r.id===id) r.touched=true; });
+    refreshDerived();
   });
   $('tbody').addEventListener('click',function(e){
     var b=e.target.closest('[data-del]'); if(!b) return;
