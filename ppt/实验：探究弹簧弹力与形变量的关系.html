@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弹簧伸长实验台</title>
+<style>
+/* Layout: bench-top stage (spring + ruler) on the left; magnifier, controls, data table and F–x chart stacked on the right. */
+:root{
+  --bg:#EDF1F0; --surface:#FFFFFF; --stage:#F7FAF9; --ink:#10252C; --muted:#546A72; --line:#CFDAD8;
+  --accent:#0E7C86; --accent-ink:#FFFFFF; --weight:#E3A04F; --weight-ink:#2A1A06; --pointer:#D1343B;
+  --ruler:#F1DFA6; --ruler-ink:#2B2512; --spring:#3C5560; --warn:#B3470F;
+  --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif; --font-num:ui-monospace,'SF Mono',Consolas,'Courier New',monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1B20; --surface:#14262D; --stage:#102128; --ink:#E6EFEE; --muted:#93A9AF; --line:#284048;
+  --accent:#4FC3CC; --accent-ink:#082A2E; --weight:#E3A04F; --weight-ink:#2A1A06; --pointer:#FF6B70;
+  --ruler:#CDBE86; --ruler-ink:#2B2512; --spring:#A9C2CB; --warn:#F0A36B; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D1B20; --surface:#14262D; --stage:#102128; --ink:#E6EFEE; --muted:#93A9AF; --line:#284048;
+  --accent:#4FC3CC; --accent-ink:#082A2E; --weight:#E3A04F; --weight-ink:#2A1A06; --pointer:#FF6B70;
+  --ruler:#CDBE86; --ruler-ink:#2B2512; --spring:#A9C2CB; --warn:#F0A36B; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5;margin:0;
+  padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+h1{font-size:28px;line-height:1.2;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:18px;margin:0 0 10px;font-weight:700}
+.top{max-width:1180px;margin:0 auto 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+.top p{margin:0;color:var(--muted);font-size:15px}
+.grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:16px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.stage-card{padding:8px;position:sticky;top:12px}
+.stage-card svg{display:block;width:100%;height:auto;background:var(--stage);border-radius:8px}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.mag-row{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:16px;align-items:center}
+.mag-row svg{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--line)}
+.readout{display:flex;flex-direction:column;gap:6px;min-width:0}
+.status{font-weight:700;font-size:15px}
+.status.moving{color:var(--warn)}
+.status.still{color:var(--accent)}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.info div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.info small{display:block;color:var(--muted);font-size:13px}
+.info b{font-family:var(--font-num);font-size:20px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{width:44px;height:26px;border-radius:4px;border:1px dashed var(--line);display:grid;place-items:center;font-size:12px;color:var(--muted);font-family:var(--font-num)}
+.chip.on{background:var(--weight);border:1px solid var(--weight);color:var(--weight-ink);font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-weight:500;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;cursor:pointer;min-height:40px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;color:var(--muted);font-size:14px;align-items:center}
+.opts label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:15px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:13px;font-weight:500;color:var(--muted)}
+th:first-child,td:first-child{text-align:left}
+td input{width:96px;font:inherit;font-family:var(--font-num);text-align:right;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+td small{display:block;font-size:12px;color:var(--warn);text-align:right;min-height:0}
+.del{padding:2px 8px;min-height:30px;font-size:14px;color:var(--muted)}
+.empty{color:var(--muted);padding:14px 0 4px;font-size:15px}
+.kline{margin-top:10px;font-size:16px}
+.kline b{font-family:var(--font-num);color:var(--accent);font-size:20px}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--font-num);font-size:13px}
+.chart .axis{stroke:var(--muted);stroke-width:1.5;fill:none}
+.chart .gridl{stroke:var(--line);stroke-width:1}
+.chart .lab{font-family:var(--font-body);font-size:14px;fill:var(--ink)}
+@media (max-width:860px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .stage-card{position:static;max-width:420px;margin-inline:auto;width:100%}
+  .mag-row{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>弹簧伸长实验台</h1>
+  <p>挂钩码，读刻度，记录数据，画出 F–x 图像</p>
+</div>
+
+<div class="grid">
+  <div class="card stage-card">
+    <svg id="stage" viewBox="0 0 520 800" role="img" aria-label="铁架台上悬挂着弹簧，左侧是竖直刻度尺，弹簧下端挂着钩码">
+      <rect x="440" y="20" width="14" height="760" rx="3" fill="var(--spring)" opacity=".55"/>
+      <rect x="380" y="772" width="140" height="14" rx="4" fill="var(--spring)" opacity=".55"/>
+      <rect x="250" y="44" width="204" height="16" rx="3" fill="var(--spring)" opacity=".75"/>
+      <rect x="40" y="60" width="56" height="540" fill="var(--ruler)" stroke="var(--ruler-ink)" stroke-width="1"/>
+      <g id="rulerTicks" stroke="var(--ruler-ink)" fill="var(--ruler-ink)"></g>
+      <text x="48" y="52" font-size="14" fill="var(--muted)" style="font-family:var(--font-body)">cm</text>
+      <line id="ptr" x1="96" x2="258" y1="100" y2="100" stroke="var(--pointer)" stroke-width="2" stroke-dasharray="6 4"/>
+      <polyline id="coil" fill="none" stroke="var(--spring)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <g id="hook"></g>
+      <g id="wts"></g>
+    </svg>
+  </div>
+
+  <div class="col">
+    <section class="card">
+      <h2>读数放大镜</h2>
+      <div class="mag-row">
+        <svg id="mag" viewBox="0 0 280 190" role="img" aria-label="刻度尺放大图：红线表示弹簧下端所在位置"></svg>
+        <div class="readout">
+          <div id="status" class="status still">已静止，可以读数</div>
+          <div style="color:var(--muted);font-size:14px">刻度尺最小分度是 1 mm。读数要估读到 0.1 mm，单位 cm。</div>
+          <label class="opts" style="margin:0"><input type="checkbox" id="showTrue"> 显示实际读数（老师演示用）</label>
+          <div id="trueVal" class="num" style="font-size:22px;font-weight:600" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>挂钩码</h2>
+      <div class="info">
+        <div><small>钩码个数</small><b id="vN">0</b></div>
+        <div><small>总质量 m (g)</small><b id="vM">0</b></div>
+        <div><small>弹力 F = mg (N)</small><b id="vF">0.00</b></div>
+      </div>
+      <div class="chips" id="chips" aria-hidden="true"></div>
+      <div class="btns">
+        <button id="add" class="primary">挂一个钩码（50 g）</button>
+        <button id="rem">取下一个</button>
+        <button id="rec">记录这组数据</button>
+      </div>
+      <div class="opts">
+        <span>g 取值：</span>
+        <label><input type="radio" name="g" value="9.8" checked> 9.8 N/kg</label>
+        <label><input type="radio" name="g" value="10"> 10 N/kg</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>数据记录</h2>
+      <p style="margin:0 0 8px;color:var(--muted);font-size:14px">先在不挂钩码时记录一组，读出弹簧原长 L₀。再逐个加钩码，每次等弹簧静止后记录，并在表格里填入你读出的长度 L。</p>
+      <div class="tablewrap">
+        <table id="tbl">
+          <thead><tr><th>组</th><th>质量 m (g)</th><th>弹力 F (N)</th><th>弹簧长度 L (cm)</th><th>伸长量 x (cm)</th><th><span style="position:absolute;left:-9999px">删除</span></th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="emptyMsg" class="empty">还没有数据。点击“记录这组数据”开始。</div>
+      <div class="btns" style="margin-top:10px"><button id="clear">清空数据</button></div>
+    </section>
+
+    <section class="card chart">
+      <h2>F–x 图像</h2>
+      <svg id="chart" viewBox="0 0 520 340" role="img" aria-label="弹力 F 与伸长量 x 的散点图"></svg>
+      <div id="kline" class="kline"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  var K=25, FL=4.0, PX=12, Y0=60, MAXN=10, UNIT=50, PHYS_G=9.8;
+  var L0=Math.round((9.5+Math.random()*2.5)*20)/20;
+  var n=0, pos=L0, vel=0, gSel=9.8, rows=[], nextId=1, running=false, last=0, settled=true;
+  var $=function(id){return document.getElementById(id)};
+  var NS='http://www.w3.org/2000/svg';
+
+  function lenAt(k){var F=k*UNIT/1000*PHYS_G, x=F/K*100; if(F>FL) x+=8*Math.pow(F-FL,2); return L0+x;}
+  function fmt(v,d){return (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d)}
+
+  /* static ruler on the stage */
+  (function(){
+    var g=$('rulerTicks'), s='';
+    for(var c=0;c<=45;c++){
+      var y=Y0+c*PX;
+      s+='<line x1="96" x2="'+(c%5===0?72:84)+'" y1="'+y+'" y2="'+y+'" stroke-width="'+(c%5===0?1.6:1)+'"/>';
+      if(c%5===0&&c>0) s+='<text x="46" y="'+(y+5)+'" font-size="14" stroke="none" style="font-family:var(--font-num)">'+c+'</text>';
+    }
+    g.innerHTML=s;
+    var ch='';
+    for(var i=0;i<MAXN;i++) ch+='<div class="chip" id="chip'+i+'">50 g</div>';
+    $('chips').innerHTML=ch;
+  })();
+
+  function drawStage(){
+    var ye=Y0+pos*PX, cx=260, amp=26, top=Y0+16, bot=ye-12, pts=[cx+','+Y0, cx+','+top], N=12;
+    for(var i=1;i<=2*N;i++){
+      pts.push((cx+(i%2?-amp:amp))+','+(top+(bot-top)*(i-0.5)/(2*N)));
+    }
+    pts.push(cx+','+bot, cx+','+ye);
+    $('coil').setAttribute('points',pts.join(' '));
+    $('ptr').setAttribute('y1',ye); $('ptr').setAttribute('y2',ye);
+    var h='<circle cx="'+cx+'" cy="'+(ye+8)+'" r="7" fill="none" stroke="var(--spring)" stroke-width="3"/>'+
+          '<circle cx="'+cx+'" cy="'+ye+'" r="4" fill="var(--pointer)"/>';
+    $('hook').innerHTML=h;
+    var w='';
+    if(n>0){
+      w+='<line x1="'+cx+'" x2="'+cx+'" y1="'+(ye+15)+'" y2="'+(ye+26)+'" stroke="var(--spring)" stroke-width="3"/>';
+      for(var j=0;j<n;j++){
+        var y=ye+26+j*23;
+        w+='<rect x="'+(cx-40)+'" y="'+y+'" width="80" height="21" rx="3" fill="var(--weight)"/>'+
+           '<text x="'+cx+'" y="'+(y+15)+'" text-anchor="middle" font-size="13" fill="var(--weight-ink)" style="font-family:var(--font-num);font-weight:600">50 g</text>';
+      }
+    }
+    $('wts').innerHTML=w;
+  }
+
+  function drawMag(){
+    var S=80, cy=95, s='<rect x="10" y="0" width="120" height="190" fill="var(--ruler)"/>';
+    var lo=Math.ceil((pos-1.25)*10), hi=Math.floor((pos+1.25)*10);
+    for(var i=lo;i<=hi;i++){
+      var v=i/10, y=cy+(v-pos)*S, isCm=(i%10===0), is5=(i%5===0);
+      var len=isCm?46:(is5?30:17);
+      s+='<line x1="130" x2="'+(130-len)+'" y1="'+y+'" y2="'+y+'" stroke="var(--ruler-ink)" stroke-width="'+(isCm?2:1.2)+'"/>';
+      if(isCm) s+='<text x="22" y="'+(y+7)+'" font-size="20" font-weight="600" fill="var(--ruler-ink)" style="font-family:var(--font-num)">'+(i/10)+'</text>';
+    }
+    s+='<line x1="130" x2="270" y1="'+cy+'" y2="'+cy+'" stroke="var(--pointer)" stroke-width="3"/>'+
+       '<circle cx="225" cy="'+cy+'" r="7" fill="var(--pointer)"/>';
+    $('mag').innerHTML=s;
+  }
+
+  function updateInfo(){
+    var m=n*UNIT;
+    $('vN').textContent=n; $('vM').textContent=m; $('vF').textContent=fmt(m/1000*gSel,2);
+    for(var i=0;i<MAXN;i++) $('chip'+i).className='chip'+(i<n?' on':'');
+    $('add').disabled=(n>=MAXN); $('rem').disabled=(n<=0);
+    $('rec').disabled=!settled;
+    var st=$('status');
+    st.textContent=settled?'已静止，可以读数':'弹簧还在摆动，请稍等…';
+    st.className='status '+(settled?'still':'moving');
+    var t=$('trueVal'); t.hidden=!$('showTrue').checked;
+    t.textContent='L = '+fmt(pos,2)+' cm';
+  }
+
+  function frame(ts){
+    var dt=Math.min(0.033,(ts-last)/1000||0.016); last=ts;
+    var target=lenAt(n), w=15, z=0.16;
+    var acc=-w*w*(pos-target)-2*z*w*vel;
+    vel+=acc*dt; pos+=vel*dt;
+    if(Math.abs(pos-target)<0.004&&Math.abs(vel)<0.05){pos=target;vel=0;settled=true;running=false;}
+    drawStage(); drawMag(); updateInfo();
+    if(running) requestAnimationFrame(frame);
+  }
+  function kick(){
+    settled=false; updateInfo();
+    if(!running){running=true;last=performance.now();requestAnimationFrame(frame);}
+  }
+
+  /* data table */
+  function getL0(){
+    for(var i=0;i<rows.length;i++){ if(rows[i].n===0){var v=parseFloat(rows[i].L); if(!isNaN(v)) return v;} }
+    return null;
+  }
+  function rowF(r){return r.n*UNIT/1000*gSel}
+  function renderTable(){
+    var body=$('tbody'), s='';
+    rows.forEach(function(r,idx){
+      s+='<tr data-id="'+r.id+'"><td>'+(r.n===0?'原长 L₀':(idx+1))+'</td>'+
+         '<td class="num">'+(r.n*UNIT)+'</td>'+
+         '<td class="num" data-f>'+fmt(rowF(r),2)+'</td>'+
+         '<td><input class="lin" inputmode="decimal" autocomplete="off" id="in'+r.id+'" value="'+r.L+'" aria-label="第'+(idx+1)+'组弹簧长度，单位厘米"><small id="hint'+r.id+'"></small></td>'+
+         '<td class="num" data-x>—</td>'+
+         '<td><button class="del" data-del="'+r.id+'" aria-label="删除这一组">删除</button></td></tr>';
+    });
+    body.innerHTML=s;
+    $('emptyMsg').hidden=rows.length>0;
+    refreshDerived(); renderChart();
+  }
+  function refreshDerived(){
+    var l0=getL0();
+    rows.forEach(function(r){
+      var tr=document.querySelector('tr[data-id="'+r.id+'"]'); if(!tr) return;
+      tr.querySelector('[data-f]').textContent=fmt(rowF(r),2);
+      var v=parseFloat(r.L), xc=tr.querySelector('[data-x]'), hint=$('hint'+r.id);
+      if(!isNaN(v)&&l0!==null&&r.n>0) xc.textContent=fmt(v-l0,2); else xc.textContent=(r.n===0?'0':'—');
+      hint.textContent=(!isNaN(v)&&Math.abs(v-r.Lt)>0.15)?'读数偏差较大，再读一次':'';
+    });
+  }
+  function nice(max){
+    if(!(max>0)) return 1;
+    var e=Math.pow(10,Math.floor(Math.log10(max)));
+    var ms=[1,2,2.5,5,10]; for(var i=0;i<ms.length;i++){ if(ms[i]*e>=max) return ms[i]*e; }
+    return 10*e;
+  }
+  function renderChart(){
+    var W=520,H=340,ml=60,mr=20,mt=16,mb=52, pw=W-ml-mr, ph=H-mt-mb;
+    var l0=getL0(), pts=[];
+    rows.forEach(function(r){var v=parseFloat(r.L); if(r.n>0&&!isNaN(v)&&l0!==null) pts.push({x:v-l0,F:rowF(r)});});
+    var s='';
+    var xmax=nice(Math.max(1,pts.reduce(function(a,p){return Math.max(a,p.x)},0))*1.05);
+    var fmax=nice(Math.max(0.5,pts.reduce(function(a,p){return Math.max(a,p.F)},0))*1.05);
+    function X(v){return ml+v/xmax*pw} function Y(v){return mt+ph-v/fmax*ph}
+    for(var i=0;i<=5;i++){
+      var xv=xmax*i/5, fv=fmax*i/5;
+      s+='<line class="gridl" x1="'+X(xv)+'" x2="'+X(xv)+'" y1="'+mt+'" y2="'+(mt+ph)+'"/>'+
+         '<line class="gridl" x1="'+ml+'" x2="'+(ml+pw)+'" y1="'+Y(fv)+'" y2="'+Y(fv)+'"/>'+
+         '<text x="'+X(xv)+'" y="'+(mt+ph+18)+'" text-anchor="middle">'+(+xv.toFixed(2))+'</text>'+
+         '<text x="'+(ml-8)+'" y="'+(Y(fv)+4)+'" text-anchor="end">'+(+fv.toFixed(2))+'</text>';
+    }
+    s+='<path class="axis" d="M'+ml+' '+mt+' V'+(mt+ph)+' H'+(ml+pw)+'"/>'+
+       '<text class="lab" x="'+(ml+pw/2)+'" y="'+(H-8)+'" text-anchor="middle">伸长量 x (cm)</text>'+
+       '<text class="lab" transform="translate(16 '+(mt+ph/2)+') rotate(-90)" text-anchor="middle">弹力 F (N)</text>';
+    var kl=$('kline');
+    if(pts.length>=2){
+      var sfx=0,sxx=0; pts.forEach(function(p){var xm=p.x/100; sfx+=p.F*xm; sxx+=xm*xm;});
+      var k=sxx>0?sfx/sxx:0, xe=xmax; if(k*xmax/100>fmax) xe=fmax*100/k;
+      if(k>0) s+='<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(xe)+'" y2="'+Y(k*xe/100)+'" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 5"/>';
+      kl.innerHTML='过原点拟合直线的斜率 k ≈ <b>'+fmt(k,1)+'</b> N/m';
+    } else { kl.textContent=''; }
+    pts.forEach(function(p){ s+='<circle cx="'+X(p.x)+'" cy="'+Y(p.F)+'" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"/>'; });
+    if(pts.length<2) s+='<text class="lab" x="'+(ml+pw/2)+'" y="'+(mt+ph/2)+'" text-anchor="middle" style="fill:var(--muted)">记录原长和至少 2 组数据后显示图像</text>';
+    $('chart').innerHTML=s;
+  }
+
+  /* events */
+  $('add').addEventListener('click',function(){ if(n<MAXN){n++;kick();} });
+  $('rem').addEventListener('click',function(){ if(n>0){n--;kick();} });
+  $('rec').addEventListener('click',function(){
+    if(!settled) return;
+    rows.push({id:nextId++,n:n,Lt:pos,L:''});
+    renderTable();
+    var r=rows[rows.length-1], inp=$('in'+r.id); if(inp) inp.focus();
+  });
+  $('clear').addEventListener('click',function(){ rows=[]; renderTable(); });
+  $('showTrue').addEventListener('change',updateInfo);
+  document.querySelectorAll('input[name="g"]').forEach(function(el){
+    el.addEventListener('change',function(){ if(el.checked){gSel=parseFloat(el.value); updateInfo(); refreshDerived(); renderChart();} });
+  });
+  $('tbody').addEventListener('input',function(e){
+    var t=e.target; if(!t.classList.contains('lin')) return;
+    var id=parseInt(t.id.slice(2),10);
+    rows.forEach(function(r){ if(r.id===id) r.L=t.value.replace(/[^0-9.]/g,''); });
+    refreshDerived(); renderChart();
+  });
+  $('tbody').addEventListener('click',function(e){
+    var b=e.target.closest('[data-del]'); if(!b) return;
+    var id=parseInt(b.getAttribute('data-del'),10);
+    rows=rows.filter(function(r){return r.id!==id}); renderTable();
+  });
+
+  drawStage(); drawMag(); updateInfo(); renderTable();
+})();
+</script>
+</body>
+</html>
