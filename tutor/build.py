@@ -25,6 +25,7 @@ SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页（网站上是 /tut
 BOOKS = [
     {"id": "bx1", "slug": "b1", "title": "必修一作业本", "dir": "content/bx1"},
     {"id": "xx1", "slug": "x1", "title": "选修一作业本", "dir": "content/xx1"},
+    {"id": "xx2", "slug": "x2", "title": "选修二作业本", "dir": "content/xx2"},
     # mode=explain：学生手上已有答案，大屏 AI 不隐藏答案，改为解释学生提出的问题
     {"id": "exams", "slug": "exam", "title": "考试讲评", "dir": "content/exams", "mode": "explain"},
 ]
