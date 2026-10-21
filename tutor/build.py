@@ -21,7 +21,7 @@ PAGE = ROOT / "answers.html"  # 作业答案与详解（网站上是 /answers/�
 SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页（网站上是 /tutor/）
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
-# slug 是答案页网址里的书名：/answers/b1/ 详解，/answers/b1/key/ 答案速查。
+# slug 是网址里的书名：/answers/b1/ 对答案，/answers/b1/solution/ 看解析，/tutor/#b1/k05/3 大屏问答。
 BOOKS = [
     {"id": "bx1", "slug": "b1", "title": "必修一作业本", "dir": "content/bx1"},
     {"id": "xx1", "slug": "x1", "title": "选修一作业本", "dir": "content/xx1"},

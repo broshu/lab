@@ -31,7 +31,8 @@
     }
 
     main {
-      width: min(880px, calc(100% - 32px));
+      /* 一体机横屏 16:9，页面放宽 */
+      width: min(1280px, calc(100% - 48px));
       margin: 0 auto;
       padding: 28px 0 72px;
     }
@@ -275,9 +276,21 @@
 
     /* ---------- 模式切换 ---------- */
 
+    /* 模式按钮吸在顶部，往下滑也一直点得到 */
+    .modebar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: 0 0 14px;
+      padding: 8px 0;
+      background: var(--bg);
+      border-bottom: 1px solid transparent;
+    }
+    .modebar.stuck { border-bottom-color: var(--line); }
+    #answer, #keysheet { scroll-margin-top: 72px; }
+
     .modes {
       display: inline-flex;
-      margin-bottom: 14px;
       padding: 3px;
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -295,6 +308,7 @@
       cursor: pointer;
     }
 
+    .mode { display: inline-flex; align-items: center; padding: 8px 22px; font-size: 16px; line-height: 1.5; text-decoration: none; }
     .mode:hover { color: var(--ink); }
     .mode[aria-pressed="true"] { background: var(--ink); color: #fff; }
 
@@ -444,9 +458,12 @@
       <a class="home" href="../">← Physics Lab</a>
     </div>
 
-    <div class="modes" role="group" aria-label="页面模式">
-      <button type="button" class="mode" id="mode-solution" aria-pressed="true">看解析</button>
-      <button type="button" class="mode" id="mode-key" aria-pressed="false">对答案</button>
+    <div class="modebar" id="modebar">
+      <div class="modes" role="group" aria-label="页面模式">
+        <button type="button" class="mode" id="mode-key" aria-pressed="true">对答案</button>
+        <button type="button" class="mode" id="mode-solution" aria-pressed="false">看解析</button>
+        <a class="mode" id="mode-tutor" href="/tutor/" title="到大屏问答，问当前这节（选了题就问这道题）">问答</a>
+      </div>
     </div>
 
     <section class="picker" id="picker">
@@ -492,7 +509,7 @@
 
   </main>
 
-  <script src="data.js?v=081ac6d9"></script>
+  <script src="data.js?v=4c7a201a"></script>
   <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
@@ -503,7 +520,7 @@
     const data = window.HOMEWORK_DATA || { books: [] };
     const el = (id) => document.getElementById(id);
 
-    const state = { view: "solution", book: null, chapter: null, question: null };
+    const state = { view: "key", book: null, chapter: null, question: null };
 
 
     function typeset(node) {
@@ -875,20 +892,31 @@
     el("mode-solution").addEventListener("click", () => setView("solution"));
     el("mode-key").addEventListener("click", () => setView("key"));
 
-    // 网址：/answers/b1/ 详解，/answers/b1/key/ 答案速查；章节、题号放在 # 后面，如 /answers/b1/#k05/3。
+    // 网址：/answers/b1/ 对答案（默认），/answers/b1/solution/ 看解析；章节、题号放在 # 后面，如 /answers/b1/solution/#k05/3。
     // 每本书的文件夹由 scripts/build-site.mjs 生成；本地直接打开 answers.html 时只改 # 部分。
     const onSite = location.pathname.startsWith("/answers");
 
     function pageUrl({ view = state.view, chapter = state.chapter, question = state.question } = {}) {
       const book = currentBook();
       let path = location.pathname;
-      if (onSite) path = book ? `/answers/${book.slug}/${view === "key" ? "key/" : ""}` : "/answers/";
+      if (onSite) path = book ? `/answers/${book.slug}/${view === "solution" ? "solution/" : ""}` : "/answers/";
       const hash = chapter ? `#${chapter}${question ? "/" + question : ""}` : "";
       return path + hash;
     }
 
+    // 「问答」跳到大屏问答：/tutor/#b1/k05/3（选了题就是这道题，否则是这一节）
+    function tutorUrl() {
+      const book = currentBook();
+      if (!book) return "/tutor/";
+      const parts = [book.slug];
+      if (state.chapter) parts.push(state.chapter);
+      if (state.chapter && state.question && state.view === "solution") parts.push(state.question);
+      return "/tutor/#" + parts.join("/");
+    }
+
     function syncUrl() {
       history.replaceState(null, "", pageUrl());
+      el("mode-tutor").href = tutorUrl();
     }
 
     function selectBook(id) {
@@ -942,11 +970,13 @@
 
       resetDirectory();
       renderBooks(); renderChapters(); renderQuestions();
-      setView(parts[1] === "key" ? "key" : "solution");
+      setView(parts[1] === "solution" ? "solution" : "key");
     }
 
     window.addEventListener("exam-release-updated", () => { renderChapters(); renderQuestions(); renderSolution(); });
     boot();
+    // 按钮条贴到顶部时加一条分隔线
+    new IntersectionObserver(([e]) => el("modebar").classList.toggle("stuck", e.intersectionRatio < 1), { threshold: [1], rootMargin: "-1px 0px 0px 0px" }).observe(el("modebar"));
     // KaTeX 是 defer 加载的，脚本就位后再补渲染一次。
     window.addEventListener("load", () => {
       typeset(el("answer"));
