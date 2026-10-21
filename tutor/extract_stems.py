@@ -2,7 +2,7 @@
 """从作业本 docx 里提取题干，写进 topics/*.md（每题「**答案：**」上方的「**题目**」块）。
 
 用法：
-    python3 tutor/extract_stems.py 作业本.docx content/bx3/topics/ks22-xxx.md [--write] [--teacher]
+    python3 tutor/extract_stems.py 作业本.docx content/bx1/topics/k08-xxx.md [--write] [--teacher]
 
 --teacher：来源是教师用书（课时作业在文末，题后紧跟解析），只取文末课时作业的题干。
 

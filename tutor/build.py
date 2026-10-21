@@ -21,12 +21,12 @@ PAGE = ROOT / "answers.html"  # 作业答案与详解（网站上是 /answers/�
 SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页（网站上是 /tutor/）
 
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
+# slug 是答案页网址里的书名：/answers/b1/ 详解，/answers/b1/key/ 答案速查。
 BOOKS = [
-    {"id": "bx1", "title": "必修一作业本", "dir": "content/bx1"},
-    {"id": "bx3", "title": "必修三作业本", "dir": "content/bx3"},
-    {"id": "xx1", "title": "选修一作业本", "dir": "content/xx1"},
+    {"id": "bx1", "slug": "b1", "title": "必修一作业本", "dir": "content/bx1"},
+    {"id": "xx1", "slug": "x1", "title": "选修一作业本", "dir": "content/xx1"},
     # mode=explain：学生手上已有答案，大屏 AI 不隐藏答案，改为解释学生提出的问题
-    {"id": "exams", "title": "考试讲评", "dir": "content/exams", "mode": "explain"},
+    {"id": "exams", "slug": "exam", "title": "考试讲评", "dir": "content/exams", "mode": "explain"},
 ]
 
 # ---------------------------------------------------------------- markdown
@@ -247,7 +247,7 @@ def build_book(book):
     for cid in releases:
         if cid not in dict(order):
             raise SystemExit(f"{book['id']}：锁定试卷 {cid} 不在 chapters.txt 里")
-    out = {"id": book["id"], "title": book["title"], "chapters": chapters}
+    out = {"id": book["id"], "slug": book["slug"], "title": book["title"], "chapters": chapters}
     if book.get("mode"):
         out["mode"] = book["mode"]
     return out

@@ -492,7 +492,7 @@
 
   </main>
 
-  <script src="data.js?v=d1e48676"></script>
+  <script src="data.js?v=081ac6d9"></script>
   <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
@@ -552,8 +552,7 @@
 
     const groupNames = {
       xx1: { "第一章": "动量守恒定律", "第二章": "机械振动", "第三章": "机械波", "第四章": "光" },
-      bx1: { "第一章": "运动的描述", "第二章": "匀变速直线运动的研究", "第三章": "相互作用——力", "第四章": "运动和力的关系" },
-      bx3: { "第九章": "静电场及其应用", "第十章": "静电场中的能量", "第十一章": "电路及其应用", "第十二章": "电能 能量守恒定律", "第十三章": "电磁感应与电磁波初步" }
+      bx1: { "第一章": "运动的描述", "第二章": "匀变速直线运动的研究", "第三章": "相互作用——力", "第四章": "运动和力的关系" }
     };
     let openGroups = new Set();
 
@@ -777,7 +776,7 @@
     function keyRow(ch, q) {
       const row = document.createElement("a");
       row.className = "key-row";
-      row.href = `${location.pathname}?b=${encodeURIComponent(state.book)}&c=${encodeURIComponent(ch.id)}&q=${q.no}`;
+      row.href = pageUrl({ view: "solution", chapter: ch.id, question: q.no });
       row.title = `看第 ${q.no} 题的详解`;
       row.addEventListener("click", (event) => {
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -876,14 +875,20 @@
     el("mode-solution").addEventListener("click", () => setView("solution"));
     el("mode-key").addEventListener("click", () => setView("key"));
 
+    // 网址：/answers/b1/ 详解，/answers/b1/key/ 答案速查；章节、题号放在 # 后面，如 /answers/b1/#k05/3。
+    // 每本书的文件夹由 scripts/build-site.mjs 生成；本地直接打开 answers.html 时只改 # 部分。
+    const onSite = location.pathname.startsWith("/answers");
+
+    function pageUrl({ view = state.view, chapter = state.chapter, question = state.question } = {}) {
+      const book = currentBook();
+      let path = location.pathname;
+      if (onSite) path = book ? `/answers/${book.slug}/${view === "key" ? "key/" : ""}` : "/answers/";
+      const hash = chapter ? `#${chapter}${question ? "/" + question : ""}` : "";
+      return path + hash;
+    }
+
     function syncUrl() {
-      const params = new URLSearchParams();
-      if (state.view === "key") params.set("view", "key");
-      if (state.book) params.set("b", state.book);
-      if (state.chapter) params.set("c", state.chapter);
-      if (state.question) params.set("q", String(state.question));
-      const qs = params.toString();
-      history.replaceState(null, "", qs ? `${location.pathname}?${qs}` : location.pathname);
+      history.replaceState(null, "", pageUrl());
     }
 
     function selectBook(id) {
@@ -924,19 +929,20 @@
       const ready = data.books.reduce((n, b) => n + b.chapters.filter((c) => c.ready).length, 0);
       el("built").textContent = `题库更新于 ${data.built || "未知"} · 已整理 ${ready} 个章节`;
 
-      const params = new URLSearchParams(location.search);
-      const book = data.books.find((b) => b.id === params.get("b")) || data.books[0] || null;
+      const parts = onSite ? location.pathname.split("/").filter(Boolean).slice(1) : [];
+      const [chapterId, questionNo] = decodeURIComponent(location.hash.slice(1)).split("/");
+      const book = data.books.find((b) => b.slug === parts[0]) || data.books[0] || null;
       state.book = book ? book.id : null;
 
-      const ch = book && book.chapters.find((c) => c.id === params.get("c") && c.ready);
+      const ch = book && book.chapters.find((c) => c.id === chapterId && c.ready);
       state.chapter = ch ? ch.id : null;
 
-      const no = Number(params.get("q"));
+      const no = Number(questionNo);
       state.question = ch && ch.questions.some((item) => item.no === no) ? no : null;
 
       resetDirectory();
       renderBooks(); renderChapters(); renderQuestions();
-      setView(params.get("view") === "key" ? "key" : "solution");
+      setView(parts[1] === "key" ? "key" : "solution");
     }
 
     window.addEventListener("exam-release-updated", () => { renderChapters(); renderQuestions(); renderSolution(); });
