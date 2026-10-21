@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>力的合成与分解 · 互动演示</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-block">
+      <p class="eyebrow">Force · Composition &amp; Decomposition</p>
+      <h1>力的合成与分解</h1>
+    </div>
+    <nav class="mode-tabs" role="group" aria-label="演示">
+      <button class="mode-button active" type="button" data-mode="compose">合成<small>平行四边形定则</small></button>
+      <button class="mode-button" type="button" data-mode="multi">多力合成<small>逐次合成</small></button>
+      <button class="mode-button" type="button" data-mode="effect">按效果分解<small>四个情境</small></button>
+      <button class="mode-button" type="button" data-mode="unique">分解的唯一性<small>画圆找交点</small></button>
+      <button class="mode-button" type="button" data-mode="ortho">正交分解<small>先分解后合成</small></button>
+    </nav>
+    <a class="back-link" href="/games/">返回</a>
+  </header>
+
+  <main class="app">
+    <section class="panel controls-panel" id="panel" aria-label="操作与读数"></section>
+    <section class="stage-panel">
+      <div class="stage-header">
+        <div>
+          <h2 id="stageTitle"></h2>
+          <p id="stageHint"></p>
+        </div>
+        <div class="stage-tools">
+          <label class="check-row"><input id="snap" type="checkbox" checked><span>吸附（0.5 N、5°）</span></label>
+          <button class="secondary-button small" id="resetButton" type="button">重置</button>
+        </div>
+      </div>
+      <div class="canvas-wrap"><canvas id="stage" aria-label="力的示意图，可以拖动箭头端点"></canvas></div>
+    </section>
+  </main>
+
+  <script src="js/physics.js"></script>
+  <script src="js/formulas.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
