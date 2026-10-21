@@ -229,6 +229,15 @@ function publishPages() {
 
   moveTo(join(siteDir, "tutor", "screen.html"), join(siteDir, "tutor", "index.html"));
   moveTo(join(siteDir, "tutor", "answers.html"), join(siteDir, "answers", "index.html"));
+  // 每本作业一个短网址：/answers/b1/ 对答案、/answers/b1/solution/ 看解析（同一个页面，页面按网址选书和视图）。
+  const answersPage = join(siteDir, "answers", "index.html");
+  const slugs = [...readFileSync(join(siteDir, "tutor", "data.js"), "utf8").matchAll(/"slug":"([a-z0-9-]+)"/g)].map((m) => m[1]);
+  for (const slug of slugs) {
+    for (const dir of [join(siteDir, "answers", slug), join(siteDir, "answers", slug, "solution")]) {
+      mkdirSync(dir, { recursive: true });
+      copyFileSync(answersPage, join(dir, "index.html"));
+    }
+  }
   writeRedirect(join(siteDir, "tutor", "screen.html"), "/tutor/");
   writeRedirect(join(siteDir, "tutor", "screen", "index.html"), "/tutor/");
 }

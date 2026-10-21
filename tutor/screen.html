@@ -321,7 +321,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=d1e48676"></script>
+  <script src="data.js?v=4c7a201a"></script>
   <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
@@ -830,12 +830,22 @@
     // ------------------------------------------------------------ 开始
 
     window.addEventListener("exam-release-updated", () => { renderBooks(); renderToc(); });
+    // 从答案页「问答」跳过来：/tutor/#b1/k05/3 → 直接进这一节（有题号就直接进这道题）
+    const [wantBook, wantChapter, wantNo] = decodeURIComponent(location.hash.slice(1)).split("/");
     const requestedBook = new URLSearchParams(location.search).get("b");
-    state.book = data.books.find((b) => b.id === requestedBook && b.chapters.some(usable)) || data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
+    state.book = data.books.find((b) => (b.slug === wantBook || b.id === requestedBook) && b.chapters.some(usable)) || data.books.find((b) => b.chapters.some(usable)) || data.books[0] || null;
     renderBooks();
     renderToc();
     renderTip();
     show("toc");
+    const wantCh = state.book && state.book.slug === wantBook && state.book.chapters.find((c) => c.id === wantChapter && usable(c) && !c.sealed);
+    if (wantCh) {
+      openChapter(wantCh);
+      const q = wantCh.questions.find((item) => item.no === Number(wantNo) && ready(item));
+      if (q) openQuestion(q);
+    }
+    // 网址恢复成 /tutor/，刷新或下一位同学就从目录开始
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
     poke();
     window.addEventListener("load", () => typeset(document.body));
   })();
