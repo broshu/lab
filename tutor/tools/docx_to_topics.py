@@ -32,6 +32,13 @@ def fixmath(l):
     l = l.replace("$$", "")
     l = re.sub(r"\$([^$]*?)[　 ]+\$", r"$\1$　", l)
     l = re.sub(r"\$[　 ]*\$", "", l)
+    # “•”紧跟全角空格把一个公式拆成两段：$E=B\cdot$　2$a$ → $E=B\cdot 2a$
+    l = l.replace("$\\cdot$　", "\\cdot ")
+    l = re.sub(r"\\cdot\$　([^$\n]*)\$", r"\\cdot \1", l)
+    # 原书的平均值写法 E̅、v̅ 转出来成了“E-”“v-”（后面紧跟 } 或 =）
+    def bar(m):
+        return "$" + re.sub(r"(\\Delta\s?[A-Za-z]|[A-Za-z])-(?=[}=])", lambda k: "\\overline{" + k.group(1) + "}", m.group(1)) + "$"
+    l = re.sub(r"\$([^$\n]+)\$", bar, l)
     return l
 
 def fixans(a):
@@ -57,7 +64,13 @@ def lines_of(docx):
                 part = part.strip()
                 if not part: continue
                 m = re.fullmatch(r"@@IMG(\d+)@@", part)
-                out.append(("img", "word/" + target[images[int(m.group(1))]]) if m else ("text", part))
+                if m:
+                    out.append(("img", "word/" + target[images[int(m.group(1))]]))
+                    continue
+                # 个别段落把“解析：”“答案：”接在选项后面，拆成两段
+                for piece in re.split(r"(?<=\S)(?=(?:解析|答案)[：:])", part):
+                    if piece.strip():
+                        out.append(("text", piece.strip()))
     return z, out
 
 QN = re.compile(r"^(\d+)\s*[.．]\s*")
