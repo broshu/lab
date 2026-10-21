@@ -4,7 +4,270 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>力的合成与分解 · 互动演示</title>
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+* { box-sizing: border-box; }
+
+:root {
+  --ink: #17212f;
+  --muted: #5d6879;
+  --paper: #ffffff;
+  --line: #d8dee8;
+  --navy: #264761;
+  --f1: #e07b1f;
+  --f2: #2f6fd6;
+  --f3: #8a4fb8;
+  --res: #17212f;
+  --green: #14936f;
+  --red: #c94040;
+}
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--ink);
+  background: #edf1f6;
+  font-family: Inter, "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+}
+
+button, input, select { font: inherit; }
+h1, h2, h3, p { margin-top: 0; }
+
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px min(3vw, 40px);
+  color: #f5f8fb;
+  background:
+    linear-gradient(135deg, rgba(14, 35, 55, 0.94), rgba(32, 66, 89, 0.94)),
+    repeating-linear-gradient(90deg, transparent 0 68px, rgba(255, 255, 255, 0.08) 68px 70px);
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  color: #a7d4ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1 { margin: 0; font-size: clamp(22px, 2.2vw, 32px); line-height: 1.1; white-space: nowrap; }
+
+.mode-tabs {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  max-width: 980px;
+  margin-left: auto;
+}
+
+.mode-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  color: #eaf2f8;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+.mode-button small { color: #b7cbdb; font-size: 12px; font-weight: 500; }
+.mode-button.active { color: var(--ink); background: #ffffff; border-color: #ffffff; }
+.mode-button.active small { color: var(--muted); }
+
+.back-link {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+.back-link:hover { background: rgba(255, 255, 255, 0.12); }
+
+.app {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px min(2.5vw, 32px) 16px;
+}
+
+.panel, .stage-panel {
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 14px 36px rgba(37, 54, 76, 0.1);
+}
+
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.stage-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+.stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.stage-header h2 { margin: 0 0 2px; font-size: 19px; }
+.stage-header p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.stage-tools { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+
+.canvas-wrap { position: relative; flex: 1 1 auto; min-height: 0; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: default; }
+
+.block { display: flex; flex-direction: column; gap: 8px; }
+.block h3 { margin: 0; font-size: 15px; color: var(--muted); letter-spacing: 0.04em; }
+
+.seg {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eef3f8;
+}
+.seg.three { grid-template-columns: repeat(3, 1fr); }
+.seg button {
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 650;
+  font-size: 15px;
+  cursor: pointer;
+}
+.seg button.active { background: #fff; box-shadow: 0 1px 4px rgba(23, 33, 47, 0.18); }
+
+.primary-button, .secondary-button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.primary-button { border: 1px solid var(--navy); color: #fff; background: var(--navy); }
+.secondary-button { border: 1px solid var(--line); color: var(--ink); background: #fff; }
+.secondary-button.small { min-height: 34px; padding: 5px 12px; font-size: 14px; }
+.button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
+.check-row input { width: 18px; height: 18px; }
+
+.slider-row { display: grid; grid-template-columns: 74px 1fr 76px; align-items: center; gap: 8px; font-size: 15px; }
+.slider-row strong { text-align: right; font-variant-numeric: tabular-nums; }
+.slider-row input { width: 100%; }
+
+.readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.readout span { color: var(--muted); font-size: 13px; }
+.readout strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+.readout.wide { grid-column: span 2; }
+.readout.f1 strong { color: var(--f1); }
+.readout.f2 strong { color: var(--f2); }
+.readout.f3 strong { color: var(--f3); }
+
+.formula {
+  padding: 10px 12px;
+  border-left: 4px solid var(--navy);
+  border-radius: 4px;
+  background: #f3f6fa;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+.formula svg { vertical-align: middle; max-width: 100%; }
+
+.note { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fff5ea; color: #6b3f12; font-size: 15px; line-height: 1.55; }
+.note.ok { background: #e8f6f1; color: #0d5c46; }
+.note.bad { background: #fdecec; color: #8a2424; }
+.hint { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+
+.rangebar { position: relative; height: 34px; margin: 4px 4px 18px; }
+.rangebar .track { position: absolute; left: 0; right: 0; top: 14px; height: 6px; border-radius: 3px; background: #e3e8ef; }
+.rangebar .span { position: absolute; top: 12px; height: 10px; border-radius: 5px; background: #bcd3ee; }
+.rangebar .dot { position: absolute; top: 8px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--res); border: 3px solid #fff; box-shadow: 0 0 0 1px var(--res); }
+.rangebar .lab { position: absolute; top: 28px; transform: translateX(-50%); font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+
+table.comp { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+table.comp th, table.comp td { padding: 5px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+table.comp th:first-child, table.comp td:first-child { text-align: left; }
+table.comp tr.sum td { font-weight: 800; border-top: 2px solid var(--ink); }
+
+i.v { font-family: "Times New Roman", "STIX Two Text", Times, serif; font-size: 1.12em; }
+sub { font-size: 0.72em; }
+
+@media (max-width: 900px) {
+  body { height: auto; overflow: auto; }
+  .topbar { flex-wrap: wrap; }
+  .mode-tabs { grid-template-columns: repeat(3, 1fr); max-width: none; }
+  .app { grid-template-columns: 1fr; }
+  .canvas-wrap { height: 70vh; }
+}
+
+.rangebar .lab:last-child { transform: translateX(-100%); }
+
+/* 一体机等大屏（横屏 16:9）：整体放大文字 */
+@media (min-width: 1500px) and (min-height: 800px) {
+  .app { grid-template-columns: minmax(360px, 460px) minmax(0, 1fr); }
+  h1 { font-size: 34px; }
+  .eyebrow { font-size: 12px; }
+  .mode-button { font-size: 20px; padding: 10px 6px; }
+  .mode-button small { font-size: 14px; }
+  .back-link { font-size: 18px; }
+  .stage-header h2 { font-size: 24px; }
+  .stage-header p { font-size: 17px; }
+  .check-row { font-size: 17px; }
+  .secondary-button.small { font-size: 17px; min-height: 40px; }
+  .block h3 { font-size: 17px; }
+  .seg button { font-size: 18px; padding: 10px 6px; }
+  .primary-button, .secondary-button { font-size: 18px; min-height: 48px; }
+  .slider-row { grid-template-columns: 100px 1fr 90px; font-size: 18px; }
+  .readout span { font-size: 15px; }
+  .readout strong { font-size: 26px; }
+  .formula { font-size: 21px; }
+  .note { font-size: 17px; }
+  .hint { font-size: 16px; }
+  .rangebar .lab { font-size: 15px; }
+  table.comp { font-size: 18px; }
+}
+
+</style>
 </head>
 <body>
   <header class="topbar">
@@ -19,7 +282,7 @@
       <button class="mode-button" type="button" data-mode="unique">分解的唯一性<small>画圆找交点</small></button>
       <button class="mode-button" type="button" data-mode="ortho">正交分解<small>先分解后合成</small></button>
     </nav>
-    <a class="back-link" href="/games/">返回</a>
+    
   </header>
 
   <main class="app">
@@ -39,8 +302,925 @@
     </section>
   </main>
 
-  <script src="js/physics.js"></script>
-  <script src="js/formulas.js"></script>
-  <script src="js/main.js"></script>
+  <script>
+// 力的合成与分解：纯计算，不依赖 DOM。力用 {x, y}（单位 N）表示，角度一律用度，x 轴正方向为 0°，逆时针为正。
+(function (root) {
+  'use strict';
+
+  const RAD = Math.PI / 180;
+  const EPS = 1e-9;
+
+  function polar(mag, deg) {
+    return { x: mag * Math.cos(deg * RAD), y: mag * Math.sin(deg * RAD) };
+  }
+  function add(a, b) { return { x: a.x + b.x, y: a.y + b.y }; }
+  function sub(a, b) { return { x: a.x - b.x, y: a.y - b.y }; }
+  function scale(a, k) { return { x: a.x * k, y: a.y * k }; }
+  function mag(a) { return Math.hypot(a.x, a.y); }
+  function angle(a) { return Math.atan2(a.y, a.x) / RAD; }
+  function dot(a, b) { return a.x * b.x + a.y * b.y; }
+
+  // 把角度化到 (-180, 180]。
+  function wrap(deg) {
+    let d = ((deg % 360) + 360) % 360;
+    if (d > 180) d -= 360;
+    return d;
+  }
+
+  // 两个力之间的夹角，0°～180°。
+  function between(a, b) {
+    const ma = mag(a), mb = mag(b);
+    if (ma < EPS || mb < EPS) return 0;
+    const c = Math.max(-1, Math.min(1, dot(a, b) / (ma * mb)));
+    return Math.acos(c) / RAD;
+  }
+
+  function resultant(forces) {
+    return forces.reduce((s, f) => add(s, f), { x: 0, y: 0 });
+  }
+
+  // 余弦定理：F = √(F₁² + F₂² + 2F₁F₂cosθ)
+  function resultantMagnitude(f1, f2, thetaDeg) {
+    return Math.sqrt(Math.max(0, f1 * f1 + f2 * f2 + 2 * f1 * f2 * Math.cos(thetaDeg * RAD)));
+  }
+
+  function range2(f1, f2) {
+    return { min: Math.abs(f1 - f2), max: f1 + f2 };
+  }
+
+  // 三个力合力的范围：最大为三力之和；若最大的力不超过另两力之和，最小为 0，否则为最大力减另两力之和。
+  function range3(a, b, c) {
+    const s = [a, b, c].sort((p, q) => q - p);
+    return { min: Math.max(0, s[0] - s[1] - s[2]), max: a + b + c };
+  }
+
+  // 沿两个已知方向分解 F：F = k₁·u₁ + k₂·u₂。k 为带符号的分量（负值表示与所给方向相反）。两方向共线时返回 null。
+  function decompose(F, dir1, dir2) {
+    const u1 = polar(1, dir1), u2 = polar(1, dir2);
+    const det = u1.x * u2.y - u1.y * u2.x;
+    if (Math.abs(det) < 1e-6) return null;
+    const k1 = (F.x * u2.y - F.y * u2.x) / det;
+    const k2 = (u1.x * F.y - u1.y * F.x) / det;
+    return { k1, k2, f1: scale(u1, k1), f2: scale(u2, k2) };
+  }
+
+  // 已知 F 的大小、F₁ 的方向（与 F 夹角 α，0 < α < 90°）和 F₂ 的大小，求 F₁ 的大小（只取 F₁ > 0 的解）。
+  // 余弦定理：F₂² = F² + F₁² − 2FF₁cosα  ⇒  F₁ = F cosα ± √(F₂² − F²sin²α)
+  function uniqueness(F, alphaDeg, F2) {
+    const s = F * Math.sin(alphaDeg * RAD);
+    const c = F * Math.cos(alphaDeg * RAD);
+    const tol = 1e-6 * Math.max(1, F);
+    let roots = [];
+    let kase;
+    if (F2 < s - tol) {
+      kase = 'none';
+    } else if (Math.abs(F2 - s) <= tol) {
+      kase = 'tangent';
+      roots = [c];
+    } else {
+      const d = Math.sqrt(F2 * F2 - s * s);
+      roots = [c - d, c + d].filter((r) => r > tol);
+      kase = roots.length === 2 ? 'two' : 'one';
+    }
+    return { kase, roots, Fsin: s, count: roots.length };
+  }
+
+  // 正交分解：坐标轴转过 axisDeg 后，每个力在 x′、y′ 轴上的分量。
+  function components(forces, axisDeg) {
+    const ux = polar(1, axisDeg), uy = polar(1, axisDeg + 90);
+    const list = forces.map((f) => ({ x: dot(f, ux), y: dot(f, uy) }));
+    const Fx = list.reduce((s, c) => s + c.x, 0);
+    const Fy = list.reduce((s, c) => s + c.y, 0);
+    return { list, Fx, Fy, F: Math.hypot(Fx, Fy), phi: Math.atan2(Fy, Fx) / RAD };
+  }
+
+  // 按效果分解的四个典型情境，返回两个分力的大小。
+  const scenarios = {
+    // 斜向上拉物体：F 与水平成 θ
+    pull(F, theta) { return { a: F * Math.cos(theta * RAD), b: F * Math.sin(theta * RAD) }; },
+    // 斜面上的物体：倾角 α
+    incline(G, alpha) { return { a: G * Math.sin(alpha * RAD), b: G * Math.cos(alpha * RAD) }; },
+    // 光滑斜面上被竖直挡板挡住的球：压紧挡板 mg·tanα，压紧斜面 mg/cosα
+    ball(G, alpha) { return { a: G * Math.tan(alpha * RAD), b: G / Math.cos(alpha * RAD) }; },
+    // 两绳悬挂：OA 与竖直成 θ，OB 水平；拉 OA 的分力 G/cosθ，拉 OB 的分力 G·tanθ
+    hang(G, theta) { return { a: G / Math.cos(theta * RAD), b: G * Math.tan(theta * RAD) }; }
+  };
+
+  const api = { RAD, polar, add, sub, scale, mag, angle, dot, wrap, between, resultant, resultantMagnitude, range2, range3, decompose, uniqueness, components, scenarios };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.FC = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+  <script>
+// 由 MathJax 预先排版好的公式（SVG，颜色随文字）。无网络依赖。
+window.FORMULAS = {"cosine":"<svg style=\"vertical-align: -1.179ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"29.024ex\" height=\"4.208ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1338.9 12828.6 1860\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(1026.8,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2082.6,0)\"><g transform=\"translate(1020,0)\"><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,353.6) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-297.3) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1463.1,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(2463.3,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,353.6) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-297.3) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(3926.4,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(4926.6,0)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(5426.6,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(6506.1,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(7752.4,0)\"><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(9090.4,0)\"><path d=\"\"></path></g><g transform=\"translate(9257,0)\"><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g></g><g transform=\"translate(0,128.9)\"><path d=\"M1001 1150Q1017 1150 1020 1132Q1020 1127 741 244L460 -643Q453 -650 436 -650H424Q423 -647 423 -645T421 -640T419 -631T415 -617T408 -594T399 -560T385 -512T367 -448T343 -364T312 -259L203 119L138 41L111 67L212 188L264 248L472 -474L983 1140Q988 1150 1001 1150Z\"></path></g><rect width=\"9726\" height=\"60\" x=\"1020\" y=\"1218.8\"></rect></g></g></g></g></svg>","range2":"<svg style=\"vertical-align: -0.564ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24.288ex\" height=\"2.26ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -749.5 10735.2 999\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g transform=\"translate(0 -0.5)\"><path d=\"M139 -249H137Q125 -249 119 -235V251L120 737Q130 750 139 750Q152 750 159 735V-235Q151 -249 141 -249H139Z\"></path></g><g transform=\"translate(278,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1579.8,0)\"><path d=\"M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z\"></path></g><g transform=\"translate(2580,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(3659.6,0) translate(0 -0.5)\"><path d=\"M139 -249H137Q125 -249 119 -235V251L120 737Q130 750 139 750Q152 750 159 735V-235Q151 -249 141 -249H139Z\"></path></g><g transform=\"translate(4215.3,0)\"><path d=\"M674 636Q682 636 688 630T694 615T687 601Q686 600 417 472L151 346L399 228Q687 92 691 87Q694 81 694 76Q694 58 676 56H670L382 192Q92 329 90 331Q83 336 83 348Q84 359 96 365Q104 369 382 500T665 634Q669 636 674 636ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z\"></path></g><g transform=\"translate(5271.1,0)\"><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(6297.9,0)\"><path d=\"M674 636Q682 636 688 630T694 615T687 601Q686 600 417 472L151 346L399 228Q687 92 691 87Q694 81 694 76Q694 58 676 56H670L382 192Q92 329 90 331Q83 336 83 348Q84 359 96 365Q104 369 382 500T665 634Q669 636 674 636ZM84 -118Q84 -108 99 -98H678Q694 -104 694 -118Q694 -130 679 -138H98Q84 -131 84 -118Z\"></path></g><g transform=\"translate(7353.7,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(8655.4,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(9655.7,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g></g></g></g></svg>","perp":"<svg style=\"vertical-align: -1.179ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"25.18ex\" height=\"4.208ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1338.9 11129.4 1860\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g><g transform=\"translate(746.8,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(1802.6,0)\"><g><path d=\"M352 287Q304 211 232 211Q154 211 104 270T44 396Q42 412 42 436V444Q42 537 111 606Q171 666 243 666Q245 666 249 666T257 665H261Q273 665 286 663T323 651T370 619T413 560Q456 472 456 334Q456 194 396 97Q361 41 312 10T208 -22Q147 -22 108 7T68 93T121 149Q143 149 158 135T173 96Q173 78 164 65T148 49T135 44L131 43Q131 41 138 37T164 27T206 22H212Q272 22 313 86Q352 142 352 280V287ZM244 248Q292 248 321 297T351 430Q351 508 343 542Q341 552 337 562T323 588T293 615T246 625Q208 625 181 598Q160 576 154 546T147 441Q147 358 152 329T172 282Q197 248 244 248Z\"></path><path d=\"M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z\" transform=\"translate(500,0)\"></path></g><g transform=\"translate(1033,413) scale(0.707)\"><path d=\"M55 251Q55 328 112 386T249 444T386 388T444 249Q444 171 388 113T250 55Q170 55 113 112T55 251ZM245 403Q188 403 142 361T96 250Q96 183 141 140T250 96Q284 96 313 109T354 135T375 160Q403 197 403 250Q403 313 360 358T245 403Z\"></path></g></g><g transform=\"translate(3516.9,0)\"><path d=\"M78 370Q78 394 95 412T138 430Q162 430 180 414T199 371Q199 346 182 328T139 310T96 327T78 370ZM78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z\"></path></g><g transform=\"translate(4072.7,0)\"><path d=\"\"></path></g><g transform=\"translate(4322.7,0)\"><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(5349.4,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(6405.2,0)\"><g transform=\"translate(1020,0)\"><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,353.6) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-297.3) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1463.1,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(2463.3,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,353.6) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-297.3) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g></g><g transform=\"translate(0,128.9)\"><path d=\"M1001 1150Q1017 1150 1020 1132Q1020 1127 741 244L460 -643Q453 -650 436 -650H424Q423 -647 423 -645T421 -640T419 -631T415 -617T408 -594T399 -560T385 -512T367 -448T343 -364T312 -259L203 119L138 41L111 67L212 188L264 248L472 -474L983 1140Q988 1150 1001 1150Z\"></path></g><rect width=\"3704.2\" height=\"60\" x=\"1020\" y=\"1218.8\"></rect></g></g></g></g></svg>","equal":"<svg style=\"vertical-align: -1.552ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24.547ex\" height=\"4.676ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1381 10849.7 2067\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1357.3,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2413.1,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(3770.4,0)\"><path d=\"M78 370Q78 394 95 412T138 430Q162 430 180 414T199 371Q199 346 182 328T139 310T96 327T78 370ZM78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z\"></path></g><g transform=\"translate(4326.2,0)\"><path d=\"\"></path></g><g transform=\"translate(4576.2,0)\"><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(5603,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(6658.8,0)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(7158.8,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(8405,0)\"><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(9743,0)\"><path d=\"\"></path></g><g transform=\"translate(9909.7,0)\"><g><g transform=\"translate(235.5,676)\"><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g><g transform=\"translate(220,-686)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><rect width=\"700\" height=\"60\" x=\"120\" y=\"220\"></rect></g></g></g></g></g></svg>","range3":"<svg style=\"vertical-align: -0.375ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"20.496ex\" height=\"1.913ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -680 9059 845.6\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q351 442 364 440T387 434T406 426T421 417T432 406T441 395T448 384T452 374T455 366L457 361L460 365Q463 369 466 373T475 384T488 397T503 410T523 422T546 432T572 439T603 442Q729 442 740 329Q741 322 741 190V104Q741 66 743 59T754 49Q775 46 803 46H819V0H811L788 1Q764 2 737 2T699 3Q596 3 587 0H579V46H595Q656 46 656 62Q657 64 657 200Q656 335 655 343Q649 371 635 385T611 402T585 404Q540 404 506 370Q479 343 472 315T464 232V168V108Q464 78 465 68T468 55T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\"></path><path d=\"M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z\" transform=\"translate(833,0)\"></path><path d=\"M201 0Q189 3 102 3Q26 3 17 0H11V46H25Q48 47 67 52T96 61T121 78T139 96T160 122T180 150L226 210L168 288Q159 301 149 315T133 336T122 351T113 363T107 370T100 376T94 379T88 381T80 383Q74 383 44 385H16V431H23Q59 429 126 429Q219 429 229 431H237V385Q201 381 201 369Q201 367 211 353T239 315T268 274L272 270L297 304Q329 345 329 358Q329 364 327 369T322 376T317 380T310 384L307 385H302V431H309Q324 428 408 428Q487 428 493 431H499V385H492Q443 385 411 368Q394 360 377 341T312 257L296 236L358 151Q424 61 429 57T446 50Q464 46 499 46H516V0H510H502Q494 1 482 1T457 2T432 2T414 3Q403 3 377 3T327 1L304 0H295V46H298Q309 46 320 51T331 63Q331 65 291 120L250 175Q249 174 219 133T185 88Q181 83 181 74Q181 63 188 55T206 46Q208 46 208 23V0H201Z\" transform=\"translate(1333,0)\"></path></g></g></g><g transform=\"translate(2319.7,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(3375.5,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(4677.3,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(5677.5,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(6979.3,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(7979.5,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z\"></path></g></g></g></g></g></svg>","pull":"<svg style=\"vertical-align: -0.439ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"27.013ex\" height=\"2.034ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -705 11939.6 899\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1357.3,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2413.1,0)\"><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(3328.8,0)\"><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(4666.8,0)\"><path d=\"\"></path></g><g transform=\"translate(4833.4,0)\"><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g><g transform=\"translate(5302.4,0)\"><path d=\"M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z\"></path></g><g transform=\"translate(5580.4,0)\"><g></g></g><g transform=\"translate(6747.1,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(8104.4,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(9160.2,0)\"><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(10075.9,0)\"><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\"></path><path d=\"M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z\" transform=\"translate(394,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(672,0)\"></path></g><g transform=\"translate(11303.9,0)\"><path d=\"\"></path></g><g transform=\"translate(11470.6,0)\"><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g></g></g></g></svg>","incline":"<svg style=\"vertical-align: -0.464ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"31.175ex\" height=\"2.059ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -705 13779.6 910\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q492 659 471 656T418 643T357 615T294 567T236 496T189 394T158 260Q156 242 156 221Q156 173 170 136T206 79T256 45T308 28T353 24Q407 24 452 47T514 106Q517 114 529 161T541 214Q541 222 528 224T468 227H431Q425 233 425 235T427 254Q431 267 437 273H454Q494 271 594 271Q634 271 659 271T695 272T707 272Q721 272 721 263Q721 261 719 249Q714 230 709 228Q706 227 694 227Q674 227 653 224Q646 221 643 215T629 164Q620 131 614 108Q589 6 586 3Q584 1 581 1Q571 1 553 21T530 52Q530 53 528 52T522 47Q448 -22 322 -22Q201 -22 126 55T50 252Z\"></path></g><g transform=\"translate(819,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1500.3,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2556.1,0)\"><path d=\"M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g><g transform=\"translate(3434.1,0)\"><path d=\"M311 43Q296 30 267 15T206 0Q143 0 105 45T66 160Q66 265 143 353T314 442Q361 442 401 394L404 398Q406 401 409 404T418 412T431 419T447 422Q461 422 470 413T480 394Q480 379 423 152T363 -80Q345 -134 286 -169T151 -205Q10 -205 10 -137Q10 -111 28 -91T74 -71Q89 -71 102 -80T116 -111Q116 -121 114 -130T107 -144T99 -154T92 -162L90 -164H91Q101 -167 151 -167Q189 -167 211 -155Q234 -144 254 -122T282 -75Q288 -56 298 -13Q311 35 311 43ZM384 328L380 339Q377 350 375 354T369 368T359 382T346 393T328 402T306 405Q262 405 221 352Q191 313 171 233T151 117Q151 38 213 38Q269 38 323 108L331 118L384 328Z\"></path></g><g transform=\"translate(4077.8,0)\"><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\"></path><path d=\"M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z\" transform=\"translate(394,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(672,0)\"></path></g><g transform=\"translate(5305.8,0)\"><path d=\"\"></path></g><g transform=\"translate(5472.4,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g><g transform=\"translate(6112.4,0)\"><path d=\"M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z\"></path></g><g transform=\"translate(6390.4,0)\"><g></g></g><g transform=\"translate(7557.1,0)\"><g><path d=\"M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q492 659 471 656T418 643T357 615T294 567T236 496T189 394T158 260Q156 242 156 221Q156 173 170 136T206 79T256 45T308 28T353 24Q407 24 452 47T514 106Q517 114 529 161T541 214Q541 222 528 224T468 227H431Q425 233 425 235T427 254Q431 267 437 273H454Q494 271 594 271Q634 271 659 271T695 272T707 272Q721 272 721 263Q721 261 719 249Q714 230 709 228Q706 227 694 227Q674 227 653 224Q646 221 643 215T629 164Q620 131 614 108Q589 6 586 3Q584 1 581 1Q571 1 553 21T530 52Q530 53 528 52T522 47Q448 -22 322 -22Q201 -22 126 55T50 252Z\"></path></g><g transform=\"translate(819,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(9057.4,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(10113.2,0)\"><path d=\"M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g><g transform=\"translate(10991.2,0)\"><path d=\"M311 43Q296 30 267 15T206 0Q143 0 105 45T66 160Q66 265 143 353T314 442Q361 442 401 394L404 398Q406 401 409 404T418 412T431 419T447 422Q461 422 470 413T480 394Q480 379 423 152T363 -80Q345 -134 286 -169T151 -205Q10 -205 10 -137Q10 -111 28 -91T74 -71Q89 -71 102 -80T116 -111Q116 -121 114 -130T107 -144T99 -154T92 -162L90 -164H91Q101 -167 151 -167Q189 -167 211 -155Q234 -144 254 -122T282 -75Q288 -56 298 -13Q311 35 311 43ZM384 328L380 339Q377 350 375 354T369 368T359 382T346 393T328 402T306 405Q262 405 221 352Q191 313 171 233T151 117Q151 38 213 38Q269 38 323 108L331 118L384 328Z\"></path></g><g transform=\"translate(11634.9,0)\"><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(12972.9,0)\"><path d=\"\"></path></g><g transform=\"translate(13139.6,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g></g></g></g></svg>","ball":"<svg style=\"vertical-align: -1.577ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"28.572ex\" height=\"4.106ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1118 12628.9 1815\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1357.3,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2413.1,0)\"><path d=\"M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g><g transform=\"translate(3291.1,0)\"><path d=\"M311 43Q296 30 267 15T206 0Q143 0 105 45T66 160Q66 265 143 353T314 442Q361 442 401 394L404 398Q406 401 409 404T418 412T431 419T447 422Q461 422 470 413T480 394Q480 379 423 152T363 -80Q345 -134 286 -169T151 -205Q10 -205 10 -137Q10 -111 28 -91T74 -71Q89 -71 102 -80T116 -111Q116 -121 114 -130T107 -144T99 -154T92 -162L90 -164H91Q101 -167 151 -167Q189 -167 211 -155Q234 -144 254 -122T282 -75Q288 -56 298 -13Q311 35 311 43ZM384 328L380 339Q377 350 375 354T369 368T359 382T346 393T328 402T306 405Q262 405 221 352Q191 313 171 233T151 117Q151 38 213 38Q269 38 323 108L331 118L384 328Z\"></path></g><g transform=\"translate(3934.8,0)\"><path d=\"M27 422Q80 426 109 478T141 600V615H181V431H316V385H181V241Q182 116 182 100T189 68Q203 29 238 29Q282 29 292 100Q293 108 293 146V181H333V146V134Q333 57 291 17Q264 -10 221 -10Q187 -10 162 2T124 33T105 68T98 100Q97 107 97 248V385H18V422H27Z\"></path><path d=\"M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z\" transform=\"translate(389,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(889,0)\"></path></g><g transform=\"translate(5379.8,0)\"><path d=\"\"></path></g><g transform=\"translate(5546.4,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g><g transform=\"translate(6186.4,0)\"><path d=\"M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z\"></path></g><g transform=\"translate(6464.4,0)\"><g></g></g><g transform=\"translate(7631.1,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(8988.4,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(10044.2,0)\"><g><g transform=\"translate(614.8,676)\"><g><path d=\"M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g><g transform=\"translate(878,0)\"><path d=\"M311 43Q296 30 267 15T206 0Q143 0 105 45T66 160Q66 265 143 353T314 442Q361 442 401 394L404 398Q406 401 409 404T418 412T431 419T447 422Q461 422 470 413T480 394Q480 379 423 152T363 -80Q345 -134 286 -169T151 -205Q10 -205 10 -137Q10 -111 28 -91T74 -71Q89 -71 102 -80T116 -111Q116 -121 114 -130T107 -144T99 -154T92 -162L90 -164H91Q101 -167 151 -167Q189 -167 211 -155Q234 -144 254 -122T282 -75Q288 -56 298 -13Q311 35 311 43ZM384 328L380 339Q377 350 375 354T369 368T359 382T346 393T328 402T306 405Q262 405 221 352Q191 313 171 233T151 117Q151 38 213 38Q269 38 323 108L331 118L384 328Z\"></path></g></g><g transform=\"translate(220,-686)\"><g><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(1338,0)\"><path d=\"\"></path></g><g transform=\"translate(1504.7,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g></g><rect width=\"2344.7\" height=\"60\" x=\"120\" y=\"220\"></rect></g></g></g></g></g></svg>","hang":"<svg style=\"vertical-align: -1.577ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"29.767ex\" height=\"4.701ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1381 13156.8 2078\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-152.7) scale(0.707)\"><g><path d=\"M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z\"></path></g><g transform=\"translate(763,0)\"><path d=\"M208 74Q208 50 254 46Q272 46 272 35Q272 34 270 22Q267 8 264 4T251 0Q249 0 239 0T205 1T141 2Q70 2 50 0H42Q35 7 35 11Q37 38 48 46H62Q132 49 164 96Q170 102 345 401T523 704Q530 716 547 716H555H572Q578 707 578 706L606 383Q634 60 636 57Q641 46 701 46Q726 46 726 36Q726 34 723 22Q720 7 718 4T704 0Q701 0 690 0T651 1T578 2Q484 2 455 0H443Q437 6 437 9T439 27Q443 40 445 43L449 46H469Q523 49 533 63L521 213H283L249 155Q208 86 208 74ZM516 260Q516 271 504 416T490 562L463 519Q447 492 400 412L310 260L413 259Q516 259 516 260Z\"></path></g></g></g><g transform=\"translate(2073.6,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(3129.4,0)\"><g><g transform=\"translate(813.8,676)\"><path d=\"M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q492 659 471 656T418 643T357 615T294 567T236 496T189 394T158 260Q156 242 156 221Q156 173 170 136T206 79T256 45T308 28T353 24Q407 24 452 47T514 106Q517 114 529 161T541 214Q541 222 528 224T468 227H431Q425 233 425 235T427 254Q431 267 437 273H454Q494 271 594 271Q634 271 659 271T695 272T707 272Q721 272 721 263Q721 261 719 249Q714 230 709 228Q706 227 694 227Q674 227 653 224Q646 221 643 215T629 164Q620 131 614 108Q589 6 586 3Q584 1 581 1Q571 1 553 21T530 52Q530 53 528 52T522 47Q448 -22 322 -22Q201 -22 126 55T50 252Z\"></path></g><g transform=\"translate(220,-686)\"><g><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(1338,0)\"><path d=\"\"></path></g><g transform=\"translate(1504.7,0)\"><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g></g><rect width=\"2173.7\" height=\"60\" x=\"120\" y=\"220\"></rect></g></g><g transform=\"translate(5543.1,0)\"><path d=\"M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z\"></path></g><g transform=\"translate(5821.1,0)\"><g></g></g><g transform=\"translate(6987.7,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z\"></path></g><g transform=\"translate(763,0)\"><path d=\"M231 637Q204 637 199 638T194 649Q194 676 205 682Q206 683 335 683Q594 683 608 681Q671 671 713 636T756 544Q756 480 698 429T565 360L555 357Q619 348 660 311T702 219Q702 146 630 78T453 1Q446 0 242 0Q42 0 39 2Q35 5 35 10Q35 17 37 24Q42 43 47 45Q51 46 62 46H68Q95 46 128 49Q142 52 147 61Q150 65 219 339T288 628Q288 635 231 637ZM649 544Q649 574 634 600T585 634Q578 636 493 637Q473 637 451 637T416 636H403Q388 635 384 626Q382 622 352 506Q352 503 351 500L320 374H401Q482 374 494 376Q554 386 601 434T649 544ZM595 229Q595 273 572 302T512 336Q506 337 429 337Q311 337 310 336Q310 334 293 263T258 122L240 52Q240 48 252 48T333 46Q422 46 429 47Q491 54 543 105T595 229Z\"></path></g></g></g><g transform=\"translate(9067.7,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(10123.5,0)\"><path d=\"M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q492 659 471 656T418 643T357 615T294 567T236 496T189 394T158 260Q156 242 156 221Q156 173 170 136T206 79T256 45T308 28T353 24Q407 24 452 47T514 106Q517 114 529 161T541 214Q541 222 528 224T468 227H431Q425 233 425 235T427 254Q431 267 437 273H454Q494 271 594 271Q634 271 659 271T695 272T707 272Q721 272 721 263Q721 261 719 249Q714 230 709 228Q706 227 694 227Q674 227 653 224Q646 221 643 215T629 164Q620 131 614 108Q589 6 586 3Q584 1 581 1Q571 1 553 21T530 52Q530 53 528 52T522 47Q448 -22 322 -22Q201 -22 126 55T50 252Z\"></path></g><g transform=\"translate(11076.2,0)\"><path d=\"M27 422Q80 426 109 478T141 600V615H181V431H316V385H181V241Q182 116 182 100T189 68Q203 29 238 29Q282 29 292 100Q293 108 293 146V181H333V146V134Q333 57 291 17Q264 -10 221 -10Q187 -10 162 2T124 33T105 68T98 100Q97 107 97 248V385H18V422H27Z\"></path><path d=\"M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z\" transform=\"translate(389,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(889,0)\"></path></g><g transform=\"translate(12521.2,0)\"><path d=\"\"></path></g><g transform=\"translate(12687.8,0)\"><path d=\"M35 200Q35 302 74 415T180 610T319 704Q320 704 327 704T339 705Q393 701 423 656Q462 596 462 495Q462 380 417 261T302 66T168 -10H161Q125 -10 99 10T60 63T41 130T35 200ZM383 566Q383 668 330 668Q294 668 260 623T204 521T170 421T157 371Q206 370 254 370L351 371Q352 372 359 404T375 484T383 566ZM113 132Q113 26 166 26Q181 26 198 36T239 74T287 161T335 307L340 324H145Q145 321 136 286T120 208T113 132Z\"></path></g></g></g></g></svg>","uniq":"<svg style=\"vertical-align: -1.131ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"31.805ex\" height=\"4.208ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1360.1 14057.9 1860\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g></g><g transform=\"translate(1357.3,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2413.1,0)\"><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(3328.8,0)\"><path d=\"M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z\"></path><path d=\"M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z\" transform=\"translate(444,0)\"></path><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\" transform=\"translate(944,0)\"></path></g><g transform=\"translate(4666.8,0)\"><path d=\"\"></path></g><g transform=\"translate(4833.4,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g><g transform=\"translate(5695.7,0)\"><path d=\"M56 320T56 333T70 353H369V502Q369 651 371 655Q376 666 388 666Q402 666 405 654T409 596V500V353H707Q722 345 722 333Q722 320 707 313H409V40H707Q722 32 722 20T707 0H70Q56 7 56 20T70 40H369V313H70Q56 320 56 333Z\"></path></g><g transform=\"translate(6695.9,0)\"><g transform=\"translate(1020,0)\"><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,353.6) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-297.3) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(1463.1,0)\"><path d=\"M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z\"></path></g><g transform=\"translate(2463.3,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,289) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(3870.8,0)\"><g><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\"></path><path d=\"M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z\" transform=\"translate(394,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(672,0)\"></path></g><g transform=\"translate(1261,396.1) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g></g><g transform=\"translate(5535.4,0)\"><path d=\"\"></path></g><g transform=\"translate(5702,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g></g><g transform=\"translate(0,150.1)\"><path d=\"M1001 1150Q1017 1150 1020 1132Q1020 1127 741 244L460 -643Q453 -650 436 -650H424Q423 -647 423 -645T421 -640T419 -631T415 -617T408 -594T399 -560T385 -512T367 -448T343 -364T312 -259L203 119L138 41L111 67L212 188L264 248L472 -474L983 1140Q988 1150 1001 1150Z\"></path></g><rect width=\"6342\" height=\"60\" x=\"1020\" y=\"1240.1\"></rect></g></g></g></g></svg>","fsin":"<svg style=\"vertical-align: -0.025ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"6.675ex\" height=\"1.563ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -680 2950.3 691\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(915.7,0)\"><path d=\"M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z\"></path><path d=\"M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z\" transform=\"translate(394,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(672,0)\"></path></g><g transform=\"translate(2143.7,0)\"><path d=\"\"></path></g><g transform=\"translate(2310.3,0)\"><path d=\"M34 156Q34 270 120 356T309 442Q379 442 421 402T478 304Q484 275 485 237V208Q534 282 560 374Q564 388 566 390T582 393Q603 393 603 385Q603 376 594 346T558 261T497 161L486 147L487 123Q489 67 495 47T514 26Q528 28 540 37T557 60Q559 67 562 68T577 70Q597 70 597 62Q597 56 591 43Q579 19 556 5T512 -10H505Q438 -10 414 62L411 69L400 61Q390 53 370 41T325 18T267 -2T203 -11Q124 -11 79 39T34 156ZM208 26Q257 26 306 47T379 90L403 112Q401 255 396 290Q382 405 304 405Q235 405 183 332Q156 292 139 224T121 120Q121 71 146 49T208 26Z\"></path></g></g></g></g></svg>","orthoSum":"<svg style=\"vertical-align: -0.667ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"45.101ex\" height=\"2.206ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -680 19934.7 975\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z\"></path></g></g><g transform=\"translate(1408.2,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2464,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g><g transform=\"translate(500,0)\"><path d=\"M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z\"></path></g></g></g><g transform=\"translate(4170.3,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(5170.5,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(500,0)\"><path d=\"M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z\"></path></g></g></g><g transform=\"translate(6876.7,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(7876.9,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z\"></path></g><g transform=\"translate(500,0)\"><path d=\"M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z\"></path></g></g></g><g transform=\"translate(9361,0)\"><path d=\"M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z\"></path></g><g transform=\"translate(9639,0)\"><g></g></g><g transform=\"translate(10805.6,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g></g><g transform=\"translate(12155.9,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(13211.7,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z\"></path></g><g transform=\"translate(500,0)\"><path d=\"M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g></g></g><g transform=\"translate(14859.9,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(15860.1,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(500,0)\"><path d=\"M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g></g></g><g transform=\"translate(17508.4,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(18508.6,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><g><path d=\"M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z\"></path></g><g transform=\"translate(500,0)\"><path d=\"M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g></g></g></g></g></g></svg>","orthoRes":"<svg style=\"vertical-align: -1.909ex;\" xmlns=\"http://www.w3.org/2000/svg\" width=\"30.364ex\" height=\"5.156ex\" role=\"img\" focusable=\"false\" viewBox=\"0 -1435 13421.1 2278.7\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(1026.8,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(2082.6,0)\"><g transform=\"translate(1020,0)\"><g><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,289) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-247) scale(0.707)\"><path d=\"M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z\"></path></g></g><g transform=\"translate(1463.1,0)\"><path d=\"M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z\"></path></g><g transform=\"translate(2463.3,0)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(837.3,289) scale(0.707)\"><path d=\"M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z\"></path></g><g transform=\"translate(676,-247) scale(0.707)\"><path d=\"M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g></g></g><g transform=\"translate(0,49.2)\"><path d=\"M1001 1150Q1017 1150 1020 1132Q1020 1127 741 244L460 -643Q453 -650 436 -650H424Q423 -647 423 -645T421 -640T419 -631T415 -617T408 -594T399 -560T385 -512T367 -448T343 -364T312 -259L203 119L138 41L111 67L212 188L264 248L472 -474L983 1140Q988 1150 1001 1150Z\"></path></g><rect width=\"3704.2\" height=\"60\" x=\"1020\" y=\"1139.2\"></rect></g><g transform=\"translate(6806.7,0)\"><path d=\"M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z\"></path></g><g transform=\"translate(7084.7,0)\"><g></g></g><g transform=\"translate(8251.4,0)\"><path d=\"M27 422Q80 426 109 478T141 600V615H181V431H316V385H181V241Q182 116 182 100T189 68Q203 29 238 29Q282 29 292 100Q293 108 293 146V181H333V146V134Q333 57 291 17Q264 -10 221 -10Q187 -10 162 2T124 33T105 68T98 100Q97 107 97 248V385H18V422H27Z\"></path><path d=\"M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z\" transform=\"translate(389,0)\"></path><path d=\"M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z\" transform=\"translate(889,0)\"></path></g><g transform=\"translate(9696.4,0)\"><path d=\"\"></path></g><g transform=\"translate(9863,0)\"><path d=\"M92 210Q92 176 106 149T142 108T185 85T220 72L235 70L237 71L250 112Q268 170 283 211T322 299T370 375T429 423T502 442Q547 442 582 410T618 302Q618 224 575 152T457 35T299 -10Q273 -10 273 -12L266 -48Q260 -83 252 -125T241 -179Q236 -203 215 -212Q204 -218 190 -218Q159 -215 159 -185Q159 -175 214 -2L209 0Q204 2 195 5T173 14T147 28T120 46T94 71T71 103T56 142T50 190Q50 238 76 311T149 431H162Q183 431 183 423Q183 417 175 409Q134 361 114 300T92 210ZM574 278Q574 320 550 344T486 369Q437 369 394 329T323 218Q309 184 295 109L286 64Q304 62 306 62Q423 62 498 131T574 278Z\"></path></g><g transform=\"translate(10794.8,0)\"><path d=\"M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z\"></path></g><g transform=\"translate(11850.6,0)\"><g><g transform=\"translate(249,755)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z\"></path></g></g><g transform=\"translate(220,-686)\"><g><path d=\"M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z\"></path></g><g transform=\"translate(676,-150) scale(0.707)\"><path d=\"M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z\"></path></g></g><rect width=\"1330.5\" height=\"60\" x=\"120\" y=\"220\"></rect></g></g></g></g></g></svg>"};
+
+</script>
+  <script>
+// 力的合成与分解：绘图与交互。计算见 physics.js，公式 SVG 见 formulas.js。
+(function () {
+  'use strict';
+  const P = window.FC;
+  const FML = window.FORMULAS || {};
+  const RAD = Math.PI / 180;
+
+  const COLORS = { f1: '#e07b1f', f2: '#2f6fd6', f3: '#8a4fb8', res: '#17212f', muted: '#9aa6b1', grid: '#eef2f6', axis: '#c6ced9', green: '#14936f', red: '#c94040', ghost: 'rgba(23,33,47,0.18)' };
+  const SERIF = '"Times New Roman", "STIX Two Text", Times, serif';
+  const SANS = '"PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif';
+
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  const panel = document.getElementById('panel');
+  const snapBox = document.getElementById('snap');
+  let W = 0, H = 0, DPR = 1, K = 1;
+
+  // ---------- 小工具 ----------
+  const fmt = (x, d = 1) => (Math.abs(x) < 0.05 && d === 1 ? 0 : x).toFixed(d);
+  const N = (x) => `${fmt(x)} N`;
+  const deg = (x) => `${fmt(x, 0)}°`;
+  // HTML 里的变量：斜体字母 + 真正的下标
+  const v = (b, s, prime) => `<i class="v">${b}</i>${prime ? '′' : ''}${s ? `<sub>${s}</sub>` : ''}`;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = (t) => t * t * (3 - 2 * t);
+
+  function snapPolar(p, mmax = 14) {
+    let m = Math.min(P.mag(p), mmax), a = P.angle(p);
+    if (snapBox.checked) { m = Math.round(m * 2) / 2; a = Math.round(a / 5) * 5; }
+    return P.polar(Math.max(m, 0.5), a);
+  }
+  function snapAngle(a) { return snapBox.checked ? Math.round(a / 5) * 5 : a; }
+
+  // ---------- 视图：世界坐标（N）↔ 屏幕 ----------
+  const view = { ox: 0, oy: 0, s: 30 };
+  function setView(fx, fy, rangeX, rangeY) {
+    view.s = Math.min(W / (2 * rangeX), H / (2 * rangeY));
+    view.ox = W * fx; view.oy = H * fy;
+  }
+  const S = (p) => ({ x: view.ox + p.x * view.s, y: view.oy - p.y * view.s });
+  const Wd = (x, y) => ({ x: (x - view.ox) / view.s, y: (view.oy - y) / view.s });
+
+  // ---------- 绘图 ----------
+  function grid() {
+    ctx.save();
+    ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 1;
+    const step = view.s;
+    if (step >= 10) {
+      for (let x = view.ox % step; x < W; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = view.oy % step; y < H; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+
+  function line(a, b, color, w = 2, dash) {
+    const A = S(a), B = S(b);
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = w; ctx.setLineDash(dash || []);
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.restore();
+  }
+
+  function arrow(a, b, color, w = 5, opts = {}) {
+    const A = S(a), B = S(b);
+    const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy);
+    if (L < 2) return;
+    const ux = dx / L, uy = dy / L;
+    w *= K;
+    const hs = Math.min((opts.head ? opts.head * K : (12 + w * 2)), L * 0.6);
+    ctx.save();
+    ctx.globalAlpha = opts.alpha == null ? 1 : opts.alpha;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+    ctx.setLineDash(opts.dash || []);
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x - ux * hs * 0.85, B.y - uy * hs * 0.85); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(B.x, B.y);
+    ctx.lineTo(B.x - ux * hs - uy * hs * 0.42, B.y - uy * hs + ux * hs * 0.42);
+    ctx.lineTo(B.x - ux * hs + uy * hs * 0.42, B.y - uy * hs - ux * hs * 0.42);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // 画一个物理量符号：斜体主字母 + 真正的下标（缩小、下移）+ 可选撇号。
+  function sym(base, sub, x, y, color, size = 26, opts = {}) {
+    size *= K;
+    ctx.save();
+    ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
+    if (opts.halo !== false) { ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 5; ctx.lineJoin = 'round'; }
+    const parts = [];
+    parts.push({ t: base, font: `italic ${size}px ${SERIF}`, dy: 0 });
+    if (sub) parts.push({ t: sub, font: `${/^[a-z]+$/.test(sub) ? 'italic ' : ''}${Math.round(size * 0.68)}px ${SERIF}`, dy: size * 0.28 });
+    if (opts.prime) parts.push({ t: '′', font: `${size}px ${SERIF}`, dy: -size * 0.05 });
+    let width = 0;
+    for (const p of parts) { ctx.font = p.font; width += ctx.measureText(p.t).width; }
+    let cx = x - (opts.align === 'left' ? 0 : opts.align === 'right' ? width : width / 2);
+    const cy = y + size * 0.35;
+    for (const p of parts) {
+      ctx.font = p.font;
+      if (opts.halo !== false) ctx.strokeText(p.t, cx, cy + p.dy);
+      ctx.fillText(p.t, cx, cy + p.dy);
+      cx += ctx.measureText(p.t).width;
+    }
+    ctx.restore();
+  }
+
+  function text(t, x, y, color = COLORS.res, size = 18, align = 'center', weight = 500) {
+    size *= K;
+    ctx.save();
+    ctx.font = `${weight} ${size}px ${SANS}`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 5; ctx.lineJoin = 'round';
+    ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y);
+    ctx.restore();
+  }
+
+  // 在箭头中部旁边放标签（向箭头左侧偏移）。
+  function labelAt(a, b, base, sub, color, opts = {}) {
+    const A = S(a), B = S(b);
+    const t = opts.t == null ? 0.55 : opts.t;
+    const mx = lerp(A.x, B.x, t), my = lerp(A.y, B.y, t);
+    const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1;
+    let side = opts.side || 1;
+    if (opts.away) { const Q = S(opts.away), off0 = 24 * K; const d1 = Math.hypot(mx - (dy / L) * off0 - Q.x, my + (dx / L) * off0 - Q.y), d2 = Math.hypot(mx + (dy / L) * off0 - Q.x, my - (dx / L) * off0 - Q.y); side = d1 >= d2 ? 1 : -1; }
+    const off = (opts.off || 24) * K;
+    sym(base, sub, mx - (dy / L) * off * side, my + (dx / L) * off * side, color, opts.size || 26, opts);
+  }
+
+  function dot(p, color, r = 5) {
+    const A = S(p); ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(A.x, A.y, r, 0, 7); ctx.fill(); ctx.restore();
+  }
+
+  function handle(p, color, active) {
+    const A = S(p);
+    ctx.save();
+    ctx.lineWidth = 3; ctx.strokeStyle = color; ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); ctx.arc(A.x, A.y, (active ? 15 : 12) * K, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  // 两个方向之间的角度弧（屏幕坐标里画），返回弧中点位置。
+  function arcBetween(center, a1, a2, rpx, color, lw = 2) {
+    rpx *= K;
+    const C = S(center);
+    let d = P.wrap(a2 - a1);
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw;
+    ctx.beginPath();
+    ctx.arc(C.x, C.y, rpx, -a1 * RAD, -(a1 + d) * RAD, d > 0);
+    ctx.stroke(); ctx.restore();
+    const mid = (a1 + d / 2) * RAD;
+    return { x: C.x + Math.cos(mid) * (rpx + 20 * K), y: C.y - Math.sin(mid) * (rpx + 20 * K) };
+  }
+
+  function rightAngle(at, dirA, dirB, size = 14) {
+    const A = S(at);
+    const ua = { x: Math.cos(dirA * RAD), y: -Math.sin(dirA * RAD) }, ub = { x: Math.cos(dirB * RAD), y: -Math.sin(dirB * RAD) };
+    ctx.save(); ctx.strokeStyle = COLORS.muted; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(A.x + ua.x * size, A.y + ua.y * size);
+    ctx.lineTo(A.x + ua.x * size + ub.x * size, A.y + ua.y * size + ub.y * size);
+    ctx.lineTo(A.x + ub.x * size, A.y + ub.y * size);
+    ctx.stroke(); ctx.restore();
+  }
+
+  function polyWorld(points, fill, stroke, lw = 2) {
+    ctx.save(); ctx.beginPath();
+    points.forEach((p, i) => { const A = S(p); if (i) ctx.lineTo(A.x, A.y); else ctx.moveTo(A.x, A.y); });
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+    ctx.restore();
+  }
+
+  // ---------- 状态 ----------
+  const O = { x: 0, y: 0 };
+  const state = {
+    mode: 'compose',
+    compose: { f1: P.polar(5, 0), f2: P.polar(4, 60), rule: 'para', tri: 0, sweep: null },
+    multi: { f: [P.polar(5, 10), P.polar(4, 80), P.polar(3, 200)], step: 2, polygon: false },
+    effect: { kind: 'pull', angle: { pull: 30, incline: 30, ball: 30, hang: 37 }, free: { F: P.polar(8, 60), d1: 10, d2: 120 } },
+    unique: { alpha: 30, F2: 6, F: 10 },
+    ortho: { f: [P.polar(6, 20), P.polar(5, 130), P.polar(4, 250)], axis: 0, comps: true }
+  };
+  const defaults = JSON.parse(JSON.stringify(state));
+
+  let handles = [];
+  let drag = null;
+  let hover = null;
+
+  // ---------- 各模式 ----------
+  const modes = {};
+
+  // 1. 两个力的合成
+  modes.compose = {
+    title: '两个力的合成',
+    hint: '拖动 F₁、F₂ 的箭头端点。切换“三角形定则”看 F₂ 平移到 F₁ 的末端；“扫描夹角”看合力怎样随夹角变化。',
+    panel() {
+      return `
+      <div class="block"><h3>合成方法</h3>
+        <div class="seg" id="ruleSeg"><button data-rule="para">平行四边形定则</button><button data-rule="tri">三角形定则</button></div></div>
+      <div class="block"><h3>大小不变，改变夹角</h3>
+        <button class="primary-button" id="sweepBtn" type="button">扫描夹角 0° → 180°</button></div>
+      <div class="block"><h3>典型情况</h3>
+        <div class="button-row">
+          <button class="secondary-button" data-preset="perp">垂直：3 N 与 4 N</button>
+          <button class="secondary-button" data-preset="eq120">等大，夹角 120°</button>
+          <button class="secondary-button" data-preset="same">同向</button>
+          <button class="secondary-button" data-preset="opp">反向</button>
+        </div></div>
+      <div class="readouts">
+        <div class="readout f1"><span>分力 ${v('F', 1)}</span><strong id="r1">—</strong></div>
+        <div class="readout f2"><span>分力 ${v('F', 2)}</span><strong id="r2">—</strong></div>
+        <div class="readout"><span>夹角 ${v('θ')}</span><strong id="rth">—</strong></div>
+        <div class="readout"><span>合力 ${v('F')}</span><strong id="rF">—</strong></div>
+        <div class="readout wide"><span>合力 ${v('F')} 与 ${v('F', 1)} 的夹角 ${v('φ')}</span><strong id="rphi">—</strong></div>
+      </div>
+      <div class="block"><h3>合力的范围（${v('F', 1)}、${v('F', 2)} 大小不变）</h3>
+        <div class="rangebar" id="rangebar"><div class="track"></div><div class="span" id="rbSpan"></div><div class="dot" id="rbDot"></div><span class="lab" id="rbMin"></span><span class="lab" id="rbMax"></span></div></div>
+      <div class="formula">${FML.cosine || ''}</div>
+      <div class="formula">${FML.range2 || ''}</div>`;
+    },
+    bind() {
+      const st = state.compose;
+      panel.querySelectorAll('#ruleSeg button').forEach((b) => b.addEventListener('click', () => { st.rule = b.dataset.rule; syncSeg('ruleSeg', 'rule', st.rule); }));
+      syncSeg('ruleSeg', 'rule', st.rule);
+      document.getElementById('sweepBtn').addEventListener('click', () => {
+        st.sweep = st.sweep ? null : { t: 0, base: P.angle(st.f1), m2: P.mag(st.f2) };
+        if (st.sweep) { st.rule = 'para'; syncSeg('ruleSeg', 'rule', 'para'); }
+      });
+      panel.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => {
+        st.sweep = null;
+        const p = b.dataset.preset;
+        if (p === 'perp') { st.f1 = P.polar(4, 0); st.f2 = P.polar(3, 90); }
+        if (p === 'eq120') { st.f1 = P.polar(5, 0); st.f2 = P.polar(5, 120); }
+        if (p === 'same') { st.f1 = P.polar(5, 0); st.f2 = P.polar(3, 0); }
+        if (p === 'opp') { st.f1 = P.polar(5, 0); st.f2 = P.polar(3, 180); }
+      }));
+    },
+    update(dt) {
+      const st = state.compose;
+      st.tri = clamp(st.tri + (st.rule === 'tri' ? 1 : -1) * dt / 0.7, 0, 1);
+      if (st.sweep) {
+        st.sweep.t += dt / 7;
+        if (st.sweep.t >= 1) { st.sweep = null; return; }
+        const u = st.sweep.t < 0.5 ? st.sweep.t * 2 : 2 - st.sweep.t * 2;
+        st.f2 = P.polar(st.sweep.m2, st.sweep.base + 180 * ease(u));
+      }
+    },
+    draw() {
+      const st = state.compose;
+      setView(0.3, 0.66, 9.5, 8);
+      grid();
+      const F = P.add(st.f1, st.f2);
+      const k = ease(st.tri);
+      // 平行四边形虚线（三角形定则时淡出）
+      if (k < 1) {
+        line(st.f1, F, COLORS.muted, 2, [8, 7]);
+        line(st.f2, F, COLORS.muted, 2, [8, 7]);
+      }
+      // 夹角弧
+      const a1 = P.angle(st.f1), a2 = P.angle(st.f2);
+      if (P.mag(st.f1) > 0.4 && P.mag(st.f2) > 0.4 && k < 0.5) {
+        const m = arcBetween(O, a1, a2, 40, COLORS.res, 2);
+        sym('θ', '', m.x, m.y, COLORS.res, 22);
+      }
+      arrow(O, F, COLORS.res, 6);
+      arrow(O, st.f1, COLORS.f1, 6);
+      // F₂：三角形定则时平移到 F₁ 末端
+      const start = { x: st.f1.x * k, y: st.f1.y * k };
+      if (k > 0) arrow(O, st.f2, COLORS.f2, 4, { alpha: 0.25 });
+      arrow(start, P.add(start, st.f2), COLORS.f2, 6);
+      labelAt(O, st.f1, 'F', '1', COLORS.f1, { side: P.wrap(a2 - a1) > 0 ? 1 : -1 });
+      labelAt(start, P.add(start, st.f2), 'F', '2', COLORS.f2, { side: P.wrap(a2 - a1) > 0 ? -1 : 1 });
+      labelAt(O, F, 'F', '', COLORS.res, { t: 0.62, side: (P.wrap(P.angle(F) - a1) > 0) ? 1 : -1 });
+      dot(O, COLORS.res, 6);
+      sym('O', '', S(O).x - 18, S(O).y + 18, COLORS.res, 22);
+      handles = [
+        { id: 'f1', pos: st.f1, color: COLORS.f1, set: (p) => { st.f1 = snapPolar(p); st.sweep = null; } },
+        { id: 'f2', pos: P.add(start, st.f2), color: COLORS.f2, set: (p) => { st.f2 = snapPolar(P.sub(p, start)); st.sweep = null; } }
+      ];
+      this.chart();
+      // 读数
+      const m1 = P.mag(st.f1), m2 = P.mag(st.f2), th = P.between(st.f1, st.f2), Fm = P.mag(F);
+      setText('r1', N(m1)); setText('r2', N(m2)); setText('rth', deg(th)); setText('rF', N(Fm));
+      setText('rphi', Fm < 0.05 ? '—' : deg(P.between(F, st.f1)));
+      const r = P.range2(m1, m2), top = m1 + m2 || 1;
+      const sp = document.getElementById('rbSpan');
+      if (sp) {
+        sp.style.left = `${(r.min / top) * 100}%`; sp.style.width = `${((r.max - r.min) / top) * 100}%`;
+        document.getElementById('rbDot').style.left = `${(Fm / top) * 100}%`;
+        const mn = document.getElementById('rbMin'), mx = document.getElementById('rbMax');
+        mn.style.left = `${(r.min / top) * 100}%`; mn.textContent = `最小 ${fmt(r.min)} N`;
+        mx.style.left = '100%'; mx.textContent = `最大 ${fmt(r.max)} N`;
+      }
+    },
+    // 右上角：F–θ 图像
+    chart() {
+      const st = state.compose;
+      const m1 = P.mag(st.f1), m2 = P.mag(st.f2);
+      const w = Math.min(280 * K, W * 0.3), h = w * 0.62, x0 = W - w - 24, y0 = H - h - 64 * K;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.94)'; ctx.strokeStyle = '#d8dee8'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(x0 - 10, y0 - 8, w + 20, h + 50, 8); ctx.fill(); ctx.stroke();
+      const px = (th) => x0 + 30 * K + (w - 40 * K) * th / 180, py = (F) => y0 + h - 4 - (h - 20) * F / (m1 + m2 || 1);
+      ctx.strokeStyle = '#9aa6b1'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(px(0), py(0)); ctx.lineTo(px(180) + 8, py(0)); ctx.moveTo(px(0), py(0)); ctx.lineTo(px(0), y0 + 4); ctx.stroke();
+      ctx.strokeStyle = COLORS.res; ctx.lineWidth = 2.5; ctx.beginPath();
+      for (let t = 0; t <= 180; t += 2) { const X = px(t), Y = py(P.resultantMagnitude(m1, m2, t)); if (t) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }
+      ctx.stroke();
+      const th = P.between(st.f1, st.f2), Fm = P.mag(P.add(st.f1, st.f2));
+      ctx.fillStyle = COLORS.red; ctx.beginPath(); ctx.arc(px(th), py(Fm), 6, 0, 7); ctx.fill();
+      ctx.restore();
+      sym('F', '', px(0) - 14, y0 + 10, COLORS.res, 20, { halo: false });
+      sym('θ', '', px(180) + 6, py(0) + 16, COLORS.res, 20, { halo: false });
+      text('0°', px(0), py(0) + 16, COLORS.muted, 13); text('90°', px(90), py(0) + 16, COLORS.muted, 13); text('180°', px(180), py(0) + 16, COLORS.muted, 13);
+      text('夹角越大，合力越小', x0 + w / 2, y0 + h + 32, COLORS.muted, 14);
+    }
+  };
+
+  // 2. 多个力的合成
+  modes.multi = {
+    title: '多个力的合成：逐次合成',
+    hint: '拖动三个力的端点。分三步：先看分力，再求 F₁、F₂ 的合力 F₁₂，最后与 F₃ 合成。也可以切换为“首尾相接”。',
+    panel() {
+      return `
+      <div class="block"><h3>步骤</h3>
+        <div class="seg three" id="stepSeg"><button data-step="0">① 三个分力</button><button data-step="1">② 合成 ${v('F', 1)}、${v('F', 2)}</button><button data-step="2">③ 再合成 ${v('F', 3)}</button></div></div>
+      <label class="check-row"><input type="checkbox" id="polyBox"><span>首尾相接（多边形定则）</span></label>
+      <div class="readouts">
+        <div class="readout f1"><span>${v('F', 1)}</span><strong id="m1">—</strong></div>
+        <div class="readout f2"><span>${v('F', 2)}</span><strong id="m2">—</strong></div>
+        <div class="readout f3"><span>${v('F', 3)}</span><strong id="m3">—</strong></div>
+        <div class="readout"><span>${v('F', 12)}</span><strong id="m12">—</strong></div>
+        <div class="readout wide"><span>合力 ${v('F')}</span><strong id="mF">—</strong></div>
+        <div class="readout wide"><span>三力大小不变、方向任意时，合力的范围</span><strong id="mR">—</strong></div>
+      </div>
+      <div class="formula">${FML.range3 || ''}</div>
+      <p class="hint">最小值：若某个力的大小在另两个力的“差与和”之间，最小值为 0；否则等于最大的力减去另两力之和。</p>
+      <div class="button-row"><button class="secondary-button" data-p="a">3 N、4 N、5 N</button><button class="secondary-button" data-p="b">2 N、3 N、8 N</button></div>`;
+    },
+    bind() {
+      const st = state.multi;
+      panel.querySelectorAll('#stepSeg button').forEach((b) => b.addEventListener('click', () => { st.step = +b.dataset.step; syncSeg('stepSeg', 'step', String(st.step)); }));
+      syncSeg('stepSeg', 'step', String(st.step));
+      const pb = document.getElementById('polyBox'); pb.checked = st.polygon;
+      pb.addEventListener('change', () => { st.polygon = pb.checked; if (st.polygon) { st.step = 2; syncSeg('stepSeg', 'step', '2'); } });
+      panel.querySelectorAll('[data-p]').forEach((b) => b.addEventListener('click', () => {
+        st.f = b.dataset.p === 'a' ? [P.polar(3, 0), P.polar(4, 90), P.polar(5, 215)] : [P.polar(2, 0), P.polar(3, 100), P.polar(8, 230)];
+      }));
+    },
+    draw() {
+      const st = state.multi;
+      setView(0.45, 0.55, 10, 8.5);
+      grid();
+      const [a, b, c] = st.f;
+      const f12 = P.add(a, b), F = P.add(f12, c);
+      if (st.polygon) {
+        const p1 = a, p2 = f12;
+        arrow(O, F, COLORS.res, 6);
+        arrow(O, a, COLORS.f1, 6); arrow(p1, p2, COLORS.f2, 6); arrow(p2, F, COLORS.f3, 6);
+        const cen = P.scale(P.add(P.add(a, p2), F), 1 / 4);
+        labelAt(O, a, 'F', '1', COLORS.f1, { away: cen, t: 0.5 }); labelAt(p1, p2, 'F', '2', COLORS.f2, { away: cen, t: 0.5 }); labelAt(p2, F, 'F', '3', COLORS.f3, { away: cen, t: 0.5 });
+        labelAt(O, F, 'F', '', COLORS.res, { away: cen, t: 0.5 });
+        handles = [
+          { id: 'a', pos: a, color: COLORS.f1, set: (p) => { st.f[0] = snapPolar(p); } },
+          { id: 'b', pos: p2, color: COLORS.f2, set: (p) => { st.f[1] = snapPolar(P.sub(p, a)); } },
+          { id: 'c', pos: F, color: COLORS.f3, set: (p) => { st.f[2] = snapPolar(P.sub(p, f12)); } }
+        ];
+      } else {
+        if (st.step >= 1) {
+          line(a, f12, COLORS.muted, 2, [8, 7]); line(b, f12, COLORS.muted, 2, [8, 7]);
+          arrow(O, f12, '#5d6879', 5, { alpha: st.step === 2 ? 0.55 : 1 });
+          labelAt(O, f12, 'F', '12', '#5d6879', { t: 0.7 });
+        }
+        if (st.step >= 2) {
+          line(f12, F, COLORS.muted, 2, [8, 7]); line(c, F, COLORS.muted, 2, [8, 7]);
+          arrow(O, F, COLORS.res, 6); labelAt(O, F, 'F', '', COLORS.res, { t: 0.7, side: -1 });
+        }
+        arrow(O, a, COLORS.f1, 6, { alpha: 1 }); arrow(O, b, COLORS.f2, 6); arrow(O, c, COLORS.f3, 6, { alpha: st.step === 1 ? 0.35 : 1 });
+        labelAt(O, a, 'F', '1', COLORS.f1, { side: -1 }); labelAt(O, b, 'F', '2', COLORS.f2); labelAt(O, c, 'F', '3', COLORS.f3);
+        handles = st.f.map((f, i) => ({ id: 'f' + i, pos: f, color: [COLORS.f1, COLORS.f2, COLORS.f3][i], set: (p) => { st.f[i] = snapPolar(p); } }));
+      }
+      dot(O, COLORS.res, 6);
+      setText('m1', N(P.mag(a))); setText('m2', N(P.mag(b))); setText('m3', N(P.mag(c)));
+      setText('m12', N(P.mag(f12))); setText('mF', N(P.mag(F)));
+      const r = P.range3(P.mag(a), P.mag(b), P.mag(c));
+      setText('mR', `${fmt(r.min)} N ～ ${fmt(r.max)} N`);
+    }
+  };
+
+  // 3. 按效果分解
+  const EFFECT = {
+    pull: { name: '斜向上拉物体', angle: 'θ', min: 0, max: 80, formula: 'pull' },
+    incline: { name: '斜面上的物体', angle: 'α', min: 5, max: 60, formula: 'incline' },
+    ball: { name: '挡板挡住的球', angle: 'α', min: 5, max: 60, formula: 'ball' },
+    hang: { name: '两绳悬挂物体', angle: 'θ', min: 5, max: 70, formula: 'hang' },
+    free: { name: '任意两个方向', formula: null }
+  };
+  modes.effect = {
+    title: '按实际作用效果分解',
+    hint: '先想清楚这个力产生了哪两个效果，就确定了两个分力的方向，再作平行四边形。拖动滑杆改变角度。',
+    panel() {
+      const st = state.effect;
+      return `
+      <div class="block"><h3>情境</h3>
+        <div class="seg" id="kindSeg">
+          <button data-kind="pull">斜向上拉物体</button><button data-kind="incline">斜面上的物体</button>
+          <button data-kind="ball">挡板挡住的球</button><button data-kind="hang">两绳悬挂物体</button>
+          <button data-kind="free" style="grid-column: span 2">任意两个方向（自由分解）</button>
+        </div></div>
+      <div id="effectBody"></div>`;
+    },
+    body() {
+      const st = state.effect, k = st.kind, e = EFFECT[k];
+      if (k === 'free') {
+        return `<p class="hint">拖动 ${v('F')} 的端点，以及两条虚线上的圆点改变两个分力的方向。已知两个分力的方向时，分解是唯一的。</p>
+        <div class="readouts">
+          <div class="readout"><span>${v('F')}</span><strong id="e0">—</strong></div>
+          <div class="readout"><span>两方向夹角</span><strong id="eAng">—</strong></div>
+          <div class="readout f1"><span>${v('F', 1)}</span><strong id="e1">—</strong></div>
+          <div class="readout f2"><span>${v('F', 2)}</span><strong id="e2">—</strong></div>
+        </div><p class="note" id="eNote">分量为负值时，表示分力与所画方向相反。</p>`;
+      }
+      const lab = { pull: ['拉力', 'F', '水平向前拉', '竖直向上提', ['F', '1'], ['F', '2']], incline: ['重力', 'G', '使物体沿斜面下滑', '使物体压紧斜面', ['G', '1'], ['G', '2']], ball: ['重力', 'G', '使球压紧挡板', '使球压紧斜面', ['F', '1'], ['F', '2']], hang: ['O 点受到的向下拉力', 'G', '拉紧 OA', '拉紧 OB', ['F', 'OA'], ['F', 'OB']] }[k];
+      const subv = (x) => x[1] === 'OA' || x[1] === 'OB' ? `<i class="v">${x[0]}</i><sub>${x[1]}</sub>` : v(x[0], x[1]);
+      return `
+      <label class="slider-row"><span>角度 ${v(e.angle)}</span><input id="angRange" type="range" min="${e.min}" max="${e.max}" step="1" value="${st.angle[k]}"><strong id="angVal">—</strong></label>
+      <div class="readouts">
+        <div class="readout wide"><span>${lab[0]} ${v(lab[1])}</span><strong id="e0">—</strong></div>
+        <div class="readout f1"><span>${subv(lab[4])}：${lab[2]}</span><strong id="e1">—</strong></div>
+        <div class="readout f2"><span>${subv(lab[5])}：${lab[3]}</span><strong id="e2">—</strong></div>
+      </div>
+      <div class="formula">${FML[e.formula] || ''}</div>
+      <p class="note" id="eNote"></p>`;
+    },
+    bind() {
+      const st = state.effect;
+      const rebuild = () => {
+        syncSeg('kindSeg', 'kind', st.kind);
+        document.getElementById('effectBody').innerHTML = this.body();
+        const r = document.getElementById('angRange');
+        if (r) r.addEventListener('input', () => { st.angle[st.kind] = +r.value; });
+      };
+      panel.querySelectorAll('#kindSeg button').forEach((b) => b.addEventListener('click', () => { st.kind = b.dataset.kind; rebuild(); }));
+      rebuild();
+    },
+    draw() {
+      const st = state.effect, k = st.kind;
+      if (k === 'free') return this.drawFree();
+      const a = st.angle[k];
+      setText('angVal', deg(a));
+      if (k === 'pull') {
+        setView(0.42, 0.62, 11, 7.5);
+        grid();
+        const F = P.polar(10, a);
+        polyWorld([{ x: -14, y: -2 }, { x: 18, y: -2 }, { x: 18, y: -2.6 }, { x: -14, y: -2.6 }], '#d9dee6');
+        polyWorld([{ x: -3, y: -2 }, { x: 3, y: -2 }, { x: 3, y: 2 }, { x: -3, y: 2 }], '#e9e4d8', '#5d6879', 2);
+        this.decomp(F, 0, 90, 'F', '', ['F', '1'], ['F', '2']);
+        if (a > 1) { const m = arcBetween(O, 0, a, 54, COLORS.res); sym('θ', '', m.x, m.y, COLORS.res, 22); }
+        const r = P.scenarios.pull(10, a);
+        setText('e0', '10.0 N'); setText('e1', N(r.a)); setText('e2', N(r.b));
+        setNote(a >= 75 ? '拉力接近竖直时，主要效果变成“向上提”。' : `${v('θ')} 越大，向前拉的分力越小，向上提的分力越大。`);
+      } else if (k === 'incline') {
+        setView(0.5, 0.45, 13, 10.5);
+        grid();
+        const n = P.polar(1, 90 + a), u = P.polar(1, a);
+        const base = P.scale(n, -1.8); // 斜面上与物块接触的点
+        const far = 40;
+        const A = P.add(base, P.scale(u, -far)), B = P.add(base, P.scale(u, far));
+        const bottom = Math.min(A.y, B.y) - 50;
+        polyWorld([A, B, { x: B.x, y: bottom }, { x: A.x, y: bottom }], '#efeae0', '#5d6879', 2);
+        const hw = 2.4, hh = 1.8;
+        polyWorld([P.add(P.scale(u, -hw), P.scale(n, -hh)), P.add(P.scale(u, hw), P.scale(n, -hh)), P.add(P.scale(u, hw), P.scale(n, hh)), P.add(P.scale(u, -hw), P.scale(n, hh))], '#c9d6e2', '#5d6879', 2);
+        const G = { x: 0, y: -10 }; // 图中按 0.5 倍比例画 20 N 的力
+        this.decomp(G, 180 + a, -90 + a, 'G', '', ['G', '1'], ['G', '2']);
+        const r = P.scenarios.incline(20, a);
+        setText('e0', '20.0 N'); setText('e1', N(r.a)); setText('e2', N(r.b));
+        const m = arcBetween(O, -90, -90 + a, 70, COLORS.muted, 1.5); sym('α', '', m.x, m.y, '#5d6879', 22);
+        setNote(`图中 ${v('G')} 与 ${v('G', 2)} 的夹角等于斜面倾角 ${v('α')}。倾角越大，下滑分力越大、压紧斜面的分力越小。`);
+      } else if (k === 'ball') {
+        setView(0.45, 0.45, 13, 10.5);
+        grid();
+        const R = 2.2;
+        const n = { x: Math.sin(a * RAD), y: Math.cos(a * RAD) }; // 斜面的法线（指向球）
+        const contact = P.scale(n, -R);
+        const u = { x: Math.cos(a * RAD), y: -Math.sin(a * RAD) }; // 沿斜面向右下
+        const A = P.add(contact, P.scale(u, -40)), B = P.add(contact, P.scale(u, 40));
+        polyWorld([A, B, { x: B.x, y: B.y - 40 }, { x: A.x, y: A.y - 60 }], '#efeae0', '#5d6879', 2);
+        // 竖直挡板
+        const boardBottomY = contact.y - (R - contact.x) * Math.tan(a * RAD) - 0.4;
+        polyWorld([{ x: R, y: boardBottomY }, { x: R + 0.5, y: boardBottomY }, { x: R + 0.5, y: R + 2 }, { x: R, y: R + 2 }], '#4a5662');
+        const C = S(O); ctx.save(); ctx.fillStyle = '#c9d6e2'; ctx.strokeStyle = '#5d6879'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(C.x, C.y, R * view.s, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
+        const G = { x: 0, y: -10 }; // 图中按 0.5 倍比例画 20 N 的力
+        this.decomp(G, 0, -(90 + a), 'G', '', ['F', '1'], ['F', '2']);
+        const m = arcBetween(O, -90, -90 - a, 70, COLORS.muted, 1.5); sym('α', '', m.x, m.y, '#5d6879', 22);
+        const r = P.scenarios.ball(20, a);
+        setText('e0', '20.0 N'); setText('e1', N(r.a)); setText('e2', N(r.b));
+        setNote(`${v('F', 2)} 与 ${v('G')} 的夹角等于 ${v('α')}，所以 ${v('F', 1)} = ${v('G')} tan${v('α')}，${v('F', 2)} = ${v('G')}/cos${v('α')}。${v('α')} 越大，两个分力都越大。`);
+      } else if (k === 'hang') {
+        setView(0.45, 0.45, 13, 10.5);
+        grid();
+        const A = P.polar(9, 90 + a), Bp = { x: 11, y: 0 };
+        polyWorld([{ x: A.x - 4, y: A.y }, { x: A.x + 4, y: A.y }, { x: A.x + 4, y: A.y + 0.6 }, { x: A.x - 4, y: A.y + 0.6 }], '#4a5662');
+        polyWorld([{ x: Bp.x, y: -4 }, { x: Bp.x + 0.6, y: -4 }, { x: Bp.x + 0.6, y: 4 }, { x: Bp.x, y: 4 }], '#4a5662');
+        line(O, A, '#9aa6b1', 3); line(O, Bp, '#9aa6b1', 3);
+        line(O, { x: 0, y: 6 }, '#c6ced9', 1.5, [6, 6]);
+        line(O, { x: 0, y: -11.5 }, '#c6ced9', 2);
+        const L = S({ x: 0, y: -13 }); ctx.save(); ctx.fillStyle = '#e07b1f'; ctx.globalAlpha = 0.85; ctx.beginPath(); ctx.ellipse(L.x, L.y, 1.1 * view.s, 1.5 * view.s, 0, 0, 7); ctx.fill(); ctx.restore();
+        sym('A', '', S(A).x - 16, S(A).y + 18, COLORS.res, 22, { prime: false });
+        sym('B', '', S(Bp).x - 16, S(Bp).y - 16, COLORS.res, 22);
+        const G = { x: 0, y: -10 }; // 图中按 0.5 倍比例画 20 N 的力
+        this.decomp(G, a - 90, 180, 'G', '', ['F', 'OA'], ['F', 'OB']);
+        const m = arcBetween(O, 90, 90 + a, 60, COLORS.res, 1.5); sym('θ', '', m.x, m.y, COLORS.res, 22);
+        const r = P.scenarios.hang(20, a);
+        setText('e0', '20.0 N'); setText('e1', N(r.a)); setText('e2', N(r.b));
+        setNote(`${v('θ')} 越大，两根绳上的拉力都越大；${v('θ')} 接近 90° 时，绳子几乎水平，拉力趋于无穷大——这就是晾衣绳拉不成水平的原因。`);
+      }
+      dot(O, COLORS.res, 6);
+    },
+    // 沿两个方向分解 F，画分力、平行四边形和标签
+    decomp(F, d1, d2, fb, fs, s1, s2) {
+      const d = P.decompose(F, d1, d2);
+      line(d.f1, F, COLORS.muted, 2, [8, 7]); line(d.f2, F, COLORS.muted, 2, [8, 7]);
+      arrow(O, F, COLORS.res, 6);
+      arrow(O, d.f1, COLORS.f1, 6); arrow(O, d.f2, COLORS.f2, 6);
+      const lab = (base, sub, p, color) => {
+        const T = S(p), C = S(O), dx = T.x - C.x, dy = T.y - C.y, L = Math.hypot(dx, dy) || 1;
+        const isUpper = /^[A-Z]+$/.test(sub);
+        const o = 28 * K;
+        if (isUpper) symUpperSub(base, sub, T.x + dx / L * o, T.y + dy / L * o, color);
+        else sym(base, sub, T.x + dx / L * o, T.y + dy / L * o, color, 26);
+      };
+      lab(fb, fs, F, COLORS.res); lab(s1[0], s1[1], d.f1, COLORS.f1); lab(s2[0], s2[1], d.f2, COLORS.f2);
+      return d;
+    },
+    drawFree() {
+      const st = state.effect.free;
+      setView(0.45, 0.55, 11, 8.5);
+      grid();
+      const L = 30;
+      line(P.polar(-L, st.d1), P.polar(L, st.d1), '#f2c9a1', 2, [10, 8]);
+      line(P.polar(-L, st.d2), P.polar(L, st.d2), '#b9cff2', 2, [10, 8]);
+      const d = P.decompose(st.F, st.d1, st.d2);
+      const h1 = P.polar(10.5, st.d1), h2 = P.polar(10.5, st.d2);
+      if (d) this.decomp(st.F, st.d1, st.d2, 'F', '', ['F', '1'], ['F', '2']);
+      else arrow(O, st.F, COLORS.res, 6);
+      dot(O, COLORS.res, 6);
+      handles = [
+        { id: 'F', pos: st.F, color: COLORS.res, set: (p) => { st.F = snapPolar(p); } },
+        { id: 'd1', pos: h1, color: COLORS.f1, set: (p) => { st.d1 = snapAngle(P.angle(p)); } },
+        { id: 'd2', pos: h2, color: COLORS.f2, set: (p) => { st.d2 = snapAngle(P.angle(p)); } }
+      ];
+      setText('e0', N(P.mag(st.F)));
+      setText('eAng', deg(Math.abs(P.wrap(st.d2 - st.d1))));
+      if (d) {
+        setText('e1', `${fmt(d.k1)} N`); setText('e2', `${fmt(d.k2)} N`);
+        setNote(d.k1 < -0.05 || d.k2 < -0.05 ? '有一个分量为负：这个分力与所画的方向相反（沿虚线的另一侧）。' : '两个分力的方向一旦确定，平行四边形就唯一确定。');
+      } else {
+        setText('e1', '—'); setText('e2', '—');
+        setNote('两个方向在同一直线上，无法作出平行四边形。');
+      }
+    }
+  };
+
+  // 下标是大写字母（如 OA）时，下标用正体。
+  function symUpperSub(base, sub, x, y, color, size = 26) {
+    size *= K;
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 5; ctx.lineJoin = 'round';
+    ctx.font = `italic ${size}px ${SERIF}`; const w1 = ctx.measureText(base).width;
+    ctx.font = `${Math.round(size * 0.68)}px ${SERIF}`; const w2 = ctx.measureText(sub).width;
+    let cx = x - (w1 + w2) / 2; const cy = y + size * 0.35;
+    ctx.fillStyle = color;
+    ctx.font = `italic ${size}px ${SERIF}`; ctx.strokeText(base, cx, cy); ctx.fillText(base, cx, cy);
+    ctx.font = `${Math.round(size * 0.68)}px ${SERIF}`; ctx.strokeText(sub, cx + w1, cy + size * 0.28); ctx.fillText(sub, cx + w1, cy + size * 0.28);
+    ctx.restore();
+  }
+
+  // 4. 分解的唯一性
+  modes.unique = {
+    title: '分解的唯一性：已知一个分力的方向和另一个分力的大小',
+    hint: '以 F 的末端为圆心、F₂ 的大小为半径画圆，看圆与 F₁ 方向线（x 轴正方向）有几个交点。也可以直接拖动圆上的点改变 F₂。',
+    panel() {
+      const st = state.unique;
+      return `
+      <label class="slider-row"><span>夹角 ${v('α')}</span><input id="alphaRange" type="range" min="10" max="80" step="1" value="${st.alpha}"><strong id="alphaVal">—</strong></label>
+      <label class="slider-row"><span>${v('F', 2)} 大小</span><input id="f2Range" type="range" min="0" max="16" step="0.1" value="${st.F2}"><strong id="f2Val">—</strong></label>
+      <div class="button-row">
+        <button class="secondary-button" data-u="tan">${v('F', 2)} = ${v('F')} sin${v('α')}</button>
+        <button class="secondary-button" data-u="eq">${v('F', 2)} = ${v('F')}</button>
+      </div>
+      <div class="readouts">
+        <div class="readout"><span>${v('F')}</span><strong>10.0 N</strong></div>
+        <div class="readout"><span>${v('F')} sin${v('α')}</span><strong id="uS">—</strong></div>
+        <div class="readout f1 wide"><span>${v('F', 1)} 的大小（解）</span><strong id="uR">—</strong></div>
+      </div>
+      <p class="note" id="uNote"></p>
+      <div class="formula">${FML.uniq || ''}</div>
+      <p class="hint">${v('F', 2)} &lt; ${v('F')} sin${v('α')}：无解；${v('F', 2)} = ${v('F')} sin${v('α')}：一解（${v('F', 2)} 最小）；${v('F')} sin${v('α')} &lt; ${v('F', 2)} &lt; ${v('F')}：两解；${v('F', 2)} ≥ ${v('F')}：一解。</p>`;
+    },
+    bind() {
+      const st = state.unique;
+      const ar = document.getElementById('alphaRange'), fr = document.getElementById('f2Range');
+      ar.addEventListener('input', () => { st.alpha = +ar.value; });
+      fr.addEventListener('input', () => { st.F2 = +fr.value; });
+      panel.querySelectorAll('[data-u]').forEach((b) => b.addEventListener('click', () => {
+        st.F2 = b.dataset.u === 'tan' ? st.F * Math.sin(st.alpha * RAD) : st.F;
+        fr.value = st.F2;
+      }));
+    },
+    draw() {
+      const st = state.unique;
+      setView(0.2, 0.68, 13, 9);
+      grid();
+      const Ft = P.polar(st.F, st.alpha);
+      // F₁ 方向线
+      line({ x: -1, y: 0 }, { x: 30, y: 0 }, '#c6ced9', 2, [4, 6]);
+      // 圆
+      const C = S(Ft);
+      ctx.save(); ctx.strokeStyle = '#9fbbe0'; ctx.lineWidth = 2; ctx.setLineDash([9, 8]);
+      ctx.beginPath(); ctx.arc(C.x, C.y, st.F2 * view.s, 0, 7); ctx.stroke(); ctx.restore();
+      // F sinα
+      line(Ft, { x: Ft.x, y: 0 }, COLORS.muted, 1.5, [6, 6]);
+      rightAngle({ x: Ft.x, y: 0 }, 180, 90, 12);
+      const mid = S({ x: Ft.x, y: Ft.y * 0.22 });
+      sym('F', '', mid.x + 10 * K, mid.y, '#5d6879', 20, { align: 'left' });
+      text('sin', mid.x + 26 * K, mid.y + 1, '#5d6879', 17, 'left');
+      sym('α', '', mid.x + 52 * K, mid.y, '#5d6879', 20, { align: 'left' });
+      const res = P.uniqueness(st.F, st.alpha, st.F2);
+      const cols = [[COLORS.f1, COLORS.f2], ['#f0b27a', '#8fb1ea']];
+      res.roots.slice().sort((p, q) => p - q).forEach((r, i) => {
+        const p = { x: r, y: 0 };
+        arrow(O, p, cols[i][0], i ? 5 : 6, { alpha: i ? 0.9 : 1 });
+        arrow(p, Ft, cols[i][1], i ? 5 : 6, { alpha: i ? 0.9 : 1 });
+        sym('F', '1', S(p).x - (i ? -14 : 36) * K, S(p).y + 28 * K, cols[i][0], 24, { prime: i === 1 });
+        labelAt(p, Ft, 'F', '2', cols[i][1], { side: i ? -1 : 1, prime: i === 1, size: 24 });
+      });
+      arrow(O, Ft, COLORS.res, 6);
+      labelAt(O, Ft, 'F', '', COLORS.res, { side: 1, t: 0.45 });
+      const m = arcBetween(O, 0, st.alpha, 60, COLORS.res); sym('α', '', m.x, m.y, COLORS.res, 22);
+      dot(O, COLORS.res, 6);
+      const hp = P.add(Ft, P.polar(st.F2, 90));
+      handles = [{ id: 'r', pos: hp, color: '#6f97d0', set: (p) => { st.F2 = clamp(Math.round(P.mag(P.sub(p, Ft)) * 10) / 10, 0, 16); const fr = document.getElementById('f2Range'); if (fr) fr.value = st.F2; } }];
+      setText('alphaVal', deg(st.alpha)); setText('f2Val', N(st.F2)); setText('uS', N(res.Fsin));
+      setText('uR', res.roots.length ? res.roots.slice().sort((p, q) => p - q).map((r) => `${fmt(r)} N`).join('，') : '无');
+      const notes = { none: ['bad', '圆与 F₁ 方向线不相交：无解。'], tangent: ['ok', '圆与方向线相切：只有一组解，此时 F₂ 垂直于 F₁ 方向，F₂ 最小。'], two: ['ok', '圆与方向线有两个交点：两组解。'], one: ['ok', 'F₂ ≥ F：另一个交点落在 O 点另一侧（F₁ 反向），只剩一组解。'] };
+      const n = notes[res.kase];
+      const el = document.getElementById('uNote');
+      if (el) { el.className = 'note ' + n[0]; el.innerHTML = n[1].replace(/F₁/g, v('F', 1)).replace(/F₂/g, v('F', 2)).replace(/(^|[^>])F([^<]|$)/g, `$1${v('F')}$2`); }
+    }
+  };
+
+  // 5. 正交分解
+  modes.ortho = {
+    title: '正交分解法',
+    hint: '拖动三个力的端点；拖动 x 轴左端的圆点（或滑杆）转动坐标轴。轴怎么转，合力都不变——但让更多的力落在轴上，计算最简单。',
+    panel() {
+      const st = state.ortho;
+      return `
+      <label class="slider-row"><span>坐标轴转角</span><input id="axisRange" type="range" min="-90" max="90" step="1" value="${st.axis}"><strong id="axisVal">—</strong></label>
+      <div class="button-row"><button class="secondary-button" id="alignBtn" type="button">让 ${v('x')} 轴沿 ${v('F', 1)}</button><button class="secondary-button" id="zeroBtn" type="button">轴回到水平</button></div>
+      <label class="check-row"><input type="checkbox" id="compBox"><span>显示每个力的分量</span></label>
+      <table class="comp"><thead><tr><th></th><th>${v('x')} 分量</th><th>${v('y')} 分量</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--f1)">${v('F', 1)}</td><td id="c1x"></td><td id="c1y"></td></tr>
+          <tr><td style="color:var(--f2)">${v('F', 2)}</td><td id="c2x"></td><td id="c2y"></td></tr>
+          <tr><td style="color:var(--f3)">${v('F', 3)}</td><td id="c3x"></td><td id="c3y"></td></tr>
+          <tr class="sum"><td>合计</td><td id="cX"></td><td id="cY"></td></tr>
+        </tbody></table>
+      <div class="readouts"><div class="readout"><span>合力 ${v('F')}</span><strong id="oF">—</strong></div><div class="readout"><span>与 ${v('x')} 轴夹角 ${v('φ')}</span><strong id="oP">—</strong></div></div>
+      <div class="formula">${FML.orthoSum || ''}</div>
+      <div class="formula">${FML.orthoRes || ''}</div>
+      <button class="secondary-button" id="ex3Btn" type="button">载入：10 N、5 N（与 −${v('x')} 轴成 37°）、5 N</button>`;
+    },
+    bind() {
+      const st = state.ortho;
+      const ar = document.getElementById('axisRange');
+      ar.addEventListener('input', () => { st.axis = +ar.value; });
+      document.getElementById('alignBtn').addEventListener('click', () => { st.axis = Math.round(P.wrap(P.angle(st.f[0]))); if (st.axis > 90) st.axis -= 180; if (st.axis < -90) st.axis += 180; ar.value = st.axis; });
+      document.getElementById('zeroBtn').addEventListener('click', () => { st.axis = 0; ar.value = 0; });
+      const cb = document.getElementById('compBox'); cb.checked = st.comps; cb.addEventListener('change', () => { st.comps = cb.checked; });
+      document.getElementById('ex3Btn').addEventListener('click', () => { st.f = [P.polar(10, 0), P.polar(5, 180 - 36.8699), P.polar(5, 90)]; st.axis = 0; ar.value = 0; });
+    },
+    draw() {
+      const st = state.ortho;
+      setView(0.5, 0.52, 10, 8.5);
+      grid();
+      const ax = st.axis, ux = P.polar(1, ax), uy = P.polar(1, ax + 90);
+      const L = 9.5;
+      arrow(P.scale(ux, -L), P.scale(ux, L), '#7d8796', 2, { head: 14 });
+      arrow(P.scale(uy, -L * 0.85), P.scale(uy, L * 0.85), '#7d8796', 2, { head: 14 });
+      const xe = S(P.scale(ux, L)), ye = S(P.scale(uy, L * 0.85));
+      sym('x', '', xe.x + 16 * Math.cos(ax * RAD), xe.y - 16 * Math.sin(ax * RAD) + 14, '#5d6879', 24);
+      sym('y', '', ye.x - 18, ye.y + 4, '#5d6879', 24);
+      const c = P.components(st.f, ax);
+      const cols = [COLORS.f1, COLORS.f2, COLORS.f3];
+      if (st.comps) {
+        st.f.forEach((f, i) => {
+          const px = P.scale(ux, c.list[i].x), py = P.scale(uy, c.list[i].y);
+          line(f, px, cols[i], 1.2, [5, 5]); line(f, py, cols[i], 1.2, [5, 5]);
+          arrow(O, px, cols[i], 3, { alpha: 0.6, head: 12 }); arrow(O, py, cols[i], 3, { alpha: 0.6, head: 12 });
+        });
+      }
+      const Fx = P.scale(ux, c.Fx), Fy = P.scale(uy, c.Fy), F = P.add(Fx, Fy);
+      line(Fx, F, COLORS.muted, 1.5, [8, 7]); line(Fy, F, COLORS.muted, 1.5, [8, 7]);
+      st.f.forEach((f, i) => { arrow(O, f, cols[i], 5); labelAt(O, f, 'F', String(i + 1), cols[i], { t: 0.8 }); });
+      arrow(O, Fx, COLORS.res, 4, { alpha: 0.75 }); arrow(O, Fy, COLORS.res, 4, { alpha: 0.75 });
+      const Xs = S(Fx), Ys = S(Fy);
+      if (Math.abs(c.Fx) > 0.4) sym('F', 'x', Xs.x + 10 * Math.sign(c.Fx || 1) * Math.cos(ax * RAD) + 6, Xs.y + 26, COLORS.res, 22);
+      if (Math.abs(c.Fy) > 0.4) sym('F', 'y', Ys.x - 26, Ys.y - 6, COLORS.res, 22);
+      arrow(O, F, COLORS.res, 6);
+      labelAt(O, F, 'F', '', COLORS.res, { t: 0.9, side: -1 });
+      dot(O, COLORS.res, 6);
+      handles = st.f.map((f, i) => ({ id: 'o' + i, pos: f, color: cols[i], set: (p) => { st.f[i] = snapPolar(p); } }));
+      handles.push({ id: 'axis', pos: P.scale(ux, -L), color: '#7d8796', set: (p) => { let a = Math.round(P.wrap(P.angle(p) + 180)); a = clamp(a, -90, 90); st.axis = snapBox.checked ? Math.round(a / 5) * 5 : a; const r = document.getElementById('axisRange'); if (r) r.value = st.axis; } });
+      setText('axisVal', deg(ax));
+      c.list.forEach((q, i) => { setText(`c${i + 1}x`, fmt(q.x)); setText(`c${i + 1}y`, fmt(q.y)); });
+      setText('cX', `${fmt(c.Fx)} N`); setText('cY', `${fmt(c.Fy)} N`);
+      setText('oF', N(c.F)); setText('oP', c.F < 0.05 ? '—' : deg(c.phi));
+    }
+  };
+
+  // ---------- 面板与读数 ----------
+  function setText(id, t) { const el = document.getElementById(id); if (el && el.textContent !== t) el.textContent = t; }
+  function setNote(html) { const el = document.getElementById('eNote'); if (el && el.innerHTML !== html) el.innerHTML = html; }
+  function syncSeg(id, key, val) { document.querySelectorAll(`#${id} button`).forEach((b) => b.classList.toggle('active', b.dataset[key] === val)); }
+
+  function renderMode() {
+    const m = modes[state.mode];
+    document.querySelectorAll('.mode-button').forEach((b) => b.classList.toggle('active', b.dataset.mode === state.mode));
+    document.getElementById('stageTitle').textContent = m.title;
+    document.getElementById('stageHint').innerHTML = m.hint.replace(/F₁₂/g, v('F', 12)).replace(/F₁/g, v('F', 1)).replace(/F₂/g, v('F', 2)).replace(/F₃/g, v('F', 3)).replace(/ F /g, ` ${v('F')} `).replace(/^以 F /, `以 ${v('F')} `).replace(/([ （])x 轴/g, `$1${v('x')} 轴`);
+    panel.innerHTML = m.panel();
+    m.bind && m.bind();
+  }
+
+  document.querySelectorAll('.mode-button').forEach((b) => b.addEventListener('click', () => { state.mode = b.dataset.mode; renderMode(); }));
+  document.getElementById('resetButton').addEventListener('click', () => {
+    state[state.mode] = JSON.parse(JSON.stringify(defaults[state.mode]));
+    renderMode();
+  });
+
+  // ---------- 拖动 ----------
+  function pointerPos(e) { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  function pick(pt) {
+    let best = null, bd = 34 * K;
+    for (const h of handles) { const A = S(h.pos), d = Math.hypot(A.x - pt.x, A.y - pt.y); if (d < bd) { bd = d; best = h; } }
+    return best;
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    const h = pick(pointerPos(e));
+    if (!h) return;
+    drag = h.id; canvas.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    const pt = pointerPos(e);
+    if (drag) {
+      const h = handles.find((q) => q.id === drag);
+      if (h) h.set(Wd(pt.x, pt.y));
+    } else {
+      const h = pick(pt); hover = h ? h.id : null;
+      canvas.style.cursor = h ? 'grab' : 'default';
+    }
+  });
+  const end = () => { drag = null; };
+  canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+
+  // ---------- 主循环 ----------
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    DPR = window.devicePixelRatio || 1;
+    W = r.width; H = r.height;
+    K = clamp(Math.min(W, H * 1.6) / 900, 0.9, 1.6);
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  }
+  new ResizeObserver(resize).observe(canvas);
+  resize();
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const m = modes[state.mode];
+    m.update && m.update(dt);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+    handles = [];
+    m.draw();
+    for (const h of handles) handle(h.pos, h.color, h.id === drag || h.id === hover);
+    requestAnimationFrame(frame);
+  }
+
+  // 键盘：1–5 切换，R 重置
+  window.addEventListener('keydown', (e) => {
+    if (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    const keys = ['compose', 'multi', 'effect', 'unique', 'ortho'];
+    if (/^[1-5]$/.test(e.key)) { state.mode = keys[+e.key - 1]; renderMode(); }
+    if (e.key === 'r' || e.key === 'R') document.getElementById('resetButton').click();
+  });
+
+  renderMode();
+  requestAnimationFrame(frame);
+})();
+
+</script>
 </body>
 </html>
