@@ -4,8 +4,9 @@
 guides/<id>.md 的格式：每题以「## 题号」开头，后面是脚本正文。
 插入后每题多出一个「**问答脚本**」块；答案页不显示它，大屏问答页把它连同完整解析一起交给 AI。
 重复运行会替换旧脚本。
-用法：python3 tutor/guides/insert_guides.py k09 ks22 ...
-      分书存放的脚本写成「书/章节id」，如 xx2/k01（读 guides/xx2/k01.md，写 content/xx2/topics/k01.md）。
+用法：python3 tutor/guides/insert_guides.py 书/章节id ...
+      例如 xx2/k01（读 guides/xx2/k01.md，写 content/xx2/topics/k01*.md）、bx1/k09、exams/s01。
+      脚本按书分文件夹存放：guides/bx1、guides/xx1、guides/xx2、guides/exams。
 """
 import re, sys
 from pathlib import Path
