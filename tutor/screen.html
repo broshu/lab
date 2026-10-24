@@ -321,7 +321,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=5f0afb59"></script>
+  <script src="data.js?v=6c26f031"></script>
   <script src="assets/exams/releases.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
           integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
@@ -378,7 +378,7 @@
       $("other").hidden = view !== "talk";
       const crumbs = [];
       if (view !== "toc" && state.chapter) crumbs.push(state.book.title, state.chapter.title);
-      if (view === "talk" && state.question) crumbs.push(`第 ${state.question.no} 题`);
+      if (view === "talk" && state.question) crumbs.push(state.book.id === "olympiad3" ? state.question.section : `第 ${state.question.no} 题`);
       $("crumbs").textContent = crumbs.join("　/　");
       // 首页已有大标题，左上角不再重复；进入章节和题目后才显示，兼作当前位置
       $("brand").style.visibility = view === "toc" ? "hidden" : "visible";
@@ -463,6 +463,7 @@
         b.className = "qtile";
         b.innerHTML = `<span class="no"></span><span class="what"><b></b><span></span></span>`;
         b.querySelector(".no").textContent = q.no;
+        if (state.book.id === "olympiad3") b.querySelector(".no").style.display = "none";
         b.querySelector("b").textContent = q.type || "题目";
         b.querySelector(".what > span").textContent = q.section || "";
         b.addEventListener("click", () => openQuestion(q));
@@ -502,7 +503,7 @@
         "学生说懂了、你已总结完、整道题结束时，不写 @@选项，改写一行 @@完成。",
         "",
         "【题目】",
-        `${state.book.title} ${state.chapter.title} 第 ${q.no} 题（${q.type || "题目"}）`,
+        `${state.book.title} ${state.chapter.title} ${state.book.id === "olympiad3" ? q.section : `第 ${q.no} 题`}（${q.type || "题目"}）`,
         textOf(q.stem),
         "",
         "【标准答案】（学生手上也有）",
@@ -539,7 +540,7 @@
         "学生总结完、整道题结束时，不写 @@选项，改写一行 @@完成。",
         "",
         "【题目】",
-        `${state.book.title} ${state.chapter.title} 第 ${q.no} 题（${q.type || "题目"}）`,
+        `${state.book.title} ${state.chapter.title} ${state.book.id === "olympiad3" ? q.section : `第 ${q.no} 题`}（${q.type || "题目"}）`,
         textOf(q.stem),
         "",
         "【标准答案】（只给你看，绝不直接告诉学生）",
@@ -739,7 +740,8 @@
 
       $("big-no").innerHTML = `${q.no}<small></small>`;
       $("big-no").querySelector("small").textContent = q.type || "";
-      $("source").textContent = state.chapter.title;
+      $("big-no").style.display = state.book.id === "olympiad3" ? "none" : "";
+      $("source").textContent = state.chapter.title + (state.book.id === "olympiad3" ? " · " + q.section : "");
       $("stem").innerHTML = q.stem;
       $("stem").querySelectorAll("a").forEach((a) => a.replaceWith(...a.childNodes));
       // 题图挪到题干文字后、选项前：大屏上不用往下翻就能看到图
