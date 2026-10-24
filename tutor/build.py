@@ -23,7 +23,7 @@ SCREEN = ROOT / "screen.html"  # 大屏苏格拉底问答页（网站上是 /tut
 # 一本书 = 一个内容目录（里面放 chapters.txt 和 topics/*.md）。
 # slug 是网址里的书名：/answers/b1/ 对答案，/answers/b1/solution/ 看解析，/tutor/#b1/k05/3 大屏问答。
 BOOKS = [
-    {"id": "olympiad3", "slug": "olympiad3", "title": "物理竞赛第三章", "dir": "content/olympiad3", "mode": "explain"},
+    {"id": "olympiad3", "slug": "olympiad3", "title": "第三章 运动和力的关系（学生讲义）", "dir": "content/olympiad3", "mode": "explain"},
     {"id": "bx1", "slug": "b1", "title": "必修一作业本", "dir": "content/bx1"},
     {"id": "xx1", "slug": "x1", "title": "选修一作业本", "dir": "content/xx1"},
     {"id": "xx2", "slug": "x2", "title": "选修二作业本", "dir": "content/xx2"},
