@@ -1,0 +1,1041 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="hz:slide-selector" content=".slide"><title>第三章 运动和力的关系</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#1d2634;font-family:Arial,sans-serif}*{box-sizing:border-box}#stage{position:absolute;width:1920px;height:1080px;transform-origin:0 0}.slide{display:none!important;position:relative;width:1920px;height:1080px;overflow:hidden}.slide.active{display:flex!important}h1,h2,h3,p{margin:0}img{display:block}aside{display:none}nav{position:fixed;bottom:0;left:0;right:0;height:46px;display:flex;justify-content:center;align-items:center;gap:12px;background:#152033;color:white}button,select,a{font-size:14px}button,select{padding:5px 8px}nav a{color:white}#notes{position:fixed;bottom:46px;left:0;right:0;background:#fff9e8;padding:16px;max-height:30vh;overflow:auto;white-space:pre-wrap}</style></head><body><main id="stage"><section class="slide" data-qa="l1/1" id="cover" style="display:flex; flex-direction:column; gap:40px; justify-content:center; padding:128px; background:#1d3557">
+  <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:30px; font-weight:700; letter-spacing:4px; color:#f2a65a">高中物理竞赛 · 新课</p>
+  <h1 style="font-family:'Noto Serif SC', Georgia, serif; font-size:104px; font-weight:700; line-height:1.1; color:#f4efe6">第三章　运动和力的关系</h1>
+  <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:36px; color:#bfd0e0">物理竞赛班</p>
+  <div style="display:flex; flex-direction:column; gap:4px; padding:8px 0 8px 32px; border-left:4px solid #f2a65a">
+    <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:30px; line-height:1.5; color:#d6e0ea">第1讲　牛顿运动定律</p>
+    <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:30px; line-height:1.5; color:#d6e0ea">第2讲　牛顿第二定律的应用</p>
+    <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:30px; line-height:1.5; color:#d6e0ea">专题突破3　牛顿运动定律的综合应用</p>
+    <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:30px; line-height:1.5; color:#d6e0ea">专题突破4　“传送带”模型</p>
+    <p style="font-family:'Noto Sans SC', Arial, sans-serif; font-size:30px; line-height:1.5; color:#d6e0ea">专题突破5　“滑块—木板”模型</p>
+  </div>
+  <aside>本章用一轮复习主书讲义当新课上。节奏：每个考点先过1—2页知识，再直接讲例题。实验4（探究加速度与力、质量的关系）不在本课件内。</aside>
+</section>
+<section class="slide" data-qa="l1/1" id="l1" data-transition="fade" style="background:#1D3557;color:#F4EFE6;font-family:'Noto Sans SC', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:40px;color:#F2A65A;font-weight:700">第1讲</p>
+<h1 style="font-family:'Noto Serif SC', Georgia, serif;font-size:112px;line-height:1.1;font-weight:700;color:#F4EFE6">牛顿运动定律</h1>
+<p style="font-size:36px;color:#BFD0E0">惯性 · F = ma · 作用力与反作用力</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#BFD0E0;text-align:right">2 / 94</p>
+</section><section class="slide" data-qa="l1/1" id="l1-k1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">牛顿第一定律　惯性</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k1.png" alt="牛顿第一定律　惯性" style="width:1016px;height:741px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=640;
+function draw(T){const t=T%7;const v=110,tb=1.4,db=1.6,acc=v/db;
+let xc;if(t&lt;tb)xc=20+v*t;else if(t&lt;tb+db){const s=t-tb;xc=20+v*tb+v*s-acc*s*s/2;}else xc=20+v*tb+v*db/2;
+const vc=t&lt;tb?v:(t&lt;tb+db?v-acc*(t-tb):0);
+const L=300,front=xc+L-14;let xb=20+60+v*t;if(xb+16&gt;front)xb=front-16;const vb=(xb+16&gt;=front-0.1)?vc:v;
+tx(&#x27;车厢刹车时，光滑地板上的小球&#x27;,300,40,NV,28,&#x27;center&#x27;,1);
+const gy=420;hatch(0,gy+40,600);for(let i=0;i&lt;600;i+=60)ln(i,gy+44,i,gy+56,GR,2);
+// cart
+rr(xc,gy-150,L,150,6,&#x27;#F4F6F9&#x27;,NV,3);ln(xc+14,gy-10,xc+L-14,gy-10,NV,3);
+circ(xc+60,gy+12,26,&#x27;#FFFFFF&#x27;,NV);circ(xc+L-60,gy+12,26,&#x27;#FFFFFF&#x27;,NV);circ(xc+60,gy+12,5,NV);circ(xc+L-60,gy+12,5,NV);
+ln(xc+L-14,gy-150,xc+L-14,gy-10,NV,4);
+circ(xb,gy-26,16,OR);
+// arrows
+ar(xc+L/2-40,gy-190,xc+L/2-40+vc*0.9,gy-190,BL,5);tx(&#x27;车厢 &#x27;,xc+L/2-50,gy-190,BL,24,&#x27;right&#x27;);
+if(vb&gt;0){ar(xb,gy-70,xb+vb*0.9,gy-70,OR,5);}
+let msg,col=TX;if(t&lt;tb){msg=&#x27;一起匀速向右&#x27;;}else if(t&lt;tb+db){msg=&#x27;车厢减速；小球不受水平力，仍匀速&#x27;;col=OR;}else{msg=&#x27;车厢停下，小球“向前冲”到前壁&#x27;;col=OR;}
+tx(msg,300,540,col,26,&#x27;center&#x27;,1);tx(&#x27;小球相对地面：保持原来的运动状态&#x27;,300,590,GR,24,&#x27;center&#x27;);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">3 / 94</p>
+<aside>动画：小车先加速再急刹，光滑车厢地板上的小球不受水平力，相对地面始终匀速直线运动；相对车厢，刹车时“向前冲”。追问：小球“向前冲”是受了向前的力吗？</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">牛顿第一定律的理解　惯性的两种表现</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k2.png" alt="牛顿第一定律的理解　惯性的两种表现" style="width:1664px;height:537px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">4 / 94</p>
+<aside>原书“考点一 核心提炼”。对竞赛生可追问：第一定律能否看作第二定律在 F = 0 时的特例？（不能——第一定律定义了惯性参考系，第二定律要在惯性系中才成立。）</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">牛顿第二定律</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k3.png" alt="牛顿第二定律" style="width:1016px;height:652px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=640;let th=0,sh=0;
+function draw(T){const t=T%10;let tg=0,ph=&#x27;静止&#x27;,ac=0;
+if(t&gt;=1&amp;&amp;t&lt;4){tg=-0.42;ph=&#x27;向右加速&#x27;;ac=1;}else if(t&gt;=4&amp;&amp;t&lt;5.5){tg=0;ph=&#x27;匀速&#x27;;}else if(t&gt;=5.5&amp;&amp;t&lt;8.5){tg=0.42;ph=&#x27;刹车（a 向左）&#x27;;ac=-1;}
+th+=(tg-th)*0.06;sh+=(ac===0?0:ac)*1.2;
+tx(&#x27;车厢中悬挂的小球&#x27;,300,40,NV,28,&#x27;center&#x27;,1);
+const gy=470;hatch(0,gy+40,600);for(let i=-60;i&lt;660;i+=60){const p=((i-sh)%660+660)%660-30;ln(p,gy+44,p,gy+56,GR,2);}
+rr(60,gy-330,480,320,8,&#x27;#F4F6F9&#x27;,NV,3);circ(150,gy+12,26,&#x27;#FFFFFF&#x27;,NV);circ(450,gy+12,26,&#x27;#FFFFFF&#x27;,NV);
+const px=300,py=gy-330,l=210,bx=px+l*Math.sin(th),by=py+l*Math.cos(th);
+ln(px,py,px,py+l+20,GR,2,[8,8]);ln(px,py,bx,by,TX,3);circ(bx,by,18,OR);
+if(Math.abs(th)&gt;0.05){ar(bx,by,bx,by+90,NV,4);mv(&#x27;mg&#x27;,bx+10,by+80,NV,26);
+const Tm=90/Math.cos(th);ar(bx,by,bx-Tm*Math.sin(th)*0.95,by-Tm*Math.cos(th)*0.95,NV,4);mv(&#x27;T&#x27;,bx-Tm*Math.sin(th)-30,by-Tm*Math.cos(th)+10,NV,26);
+const fx=-90*Math.tan(th);ar(bx,by,bx+fx,by,OR,5);mv(&#x27;F&#x27;,bx+fx+(fx&gt;0?12:-34),by-18,OR,26,&#x27;left&#x27;,&#x27;合&#x27;);
+x.save();x.strokeStyle=TX;x.lineWidth=2;x.beginPath();const a0=Math.PI/2,a1=Math.PI/2-th;x.arc(px,py,60,Math.min(a0,a1),Math.max(a0,a1));x.stroke();x.restore();mv(&#x27;θ&#x27;,px+(th&gt;0?-8:22)+(th&gt;0?18*0:0)+(th&gt;0?6:-30),py+82,TX,26);}
+tx(ph,300,560,ac?OR:TX,28,&#x27;center&#x27;,1);
+if(ac){ar(300-50*ac,600,300+50*ac,600,OR,5);mv(&#x27;a&#x27;,300+70*ac,600,OR,28,&#x27;center&#x27;);}}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">5 / 94</p>
+<aside>动画：车厢加速（或刹车）时细线偏离竖直方向 θ 并相对车厢静止。小球只受重力和拉力，合力水平，故 a = g tan θ。刹车时小球摆到前面，加速度向后。这正是下一道“教材挖掘”题。</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">牛顿第二定律的六个性质　力学单位制</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k4.png" alt="牛顿第二定律的六个性质　力学单位制" style="width:1664px;height:720px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">6 / 94</p>
+<aside>六个性质：同体性、独立性、瞬时性、矢量性、相对性、局限性。独立性就是“分力各自产生分加速度，矢量叠加”，为后面正交分解列 Fx = max、Fy = may 做铺垫。</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">牛顿第三定律</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k5.png" alt="牛顿第三定律" style="width:1664px;height:705px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">7 / 94</p>
+<aside>原书必备知识三 + 考点三的“六同、三异、二无关”和对比表合在这一页。</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k5b" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 拓展</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">第三定律也有边界：费曼的问题</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k5b.png" alt="第三定律也有边界：费曼的问题" style="width:1664px;height:501px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">8 / 94</p>
+<aside>先让学生用右手定则判断：q2 垂直连线运动，在 q1 处产生磁场，q1 受侧向磁力；q1 沿连线运动，在 q2 处不产生磁场，q2 不受磁力。再抛出费曼的问题。</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k5c" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 拓展</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">第三定律也有边界：动量去哪了</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k5c.png" alt="第三定律也有边界：动量去哪了" style="width:1664px;height:743px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">9 / 94</p>
+<aside>结论：动量守恒比第三定律更基本。原文在线：feynmanlectures.caltech.edu 第二卷第 26、27 章。</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-k6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 拓展</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">非惯性系与惯性力</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-k6.png" alt="非惯性系与惯性力" style="width:1664px;height:676px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">10 / 94</p>
+<aside>竞赛常用工具；高考仍以惯性系分析为主。和上一页对照：惯性力没有反作用力，不是第三定律意义上的相互作用。转动参考系中的惯性力（离心力）留到第四章圆周运动再讲。下一题“刹车时车厢里的小球”可以用两种参考系各解一遍。</aside>
+</section><section class="slide" data-qa="l1/1" id="l1-q0" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 教材挖掘</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">刹车时车厢里的小球</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q0.png" alt="刹车时车厢里的小球" style="width:1664px;height:328px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">11 / 94</p>
+</section><section class="slide" data-qa="l1/1" id="l1-a0" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 教材挖掘</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">刹车时车厢里的小球 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a0.png" alt="刹车时车厢里的小球 · 解答" style="width:1664px;height:291px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">12 / 94</p>
+<aside>惯性力解法：在车厢参考系中小球静止，受重力 mg、拉力 T 和惯性力 ma0（与车厢加速度反向，即向前），三力平衡得 tan θ = ma0/(mg)，a0 = g tan θ；小球摆向前，说明惯性力向前，车厢加速度向后（向左）。</aside>
+</section><section class="slide" data-qa="l1/2" id="l1-q1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">判断对错：公交车上的行李箱</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q1.png" alt="判断对错：公交车上的行李箱" style="width:1664px;height:536px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">13 / 94</p>
+</section><section class="slide" data-qa="l1/2" id="l1-a1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">判断对错 · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a1.png" alt="判断对错 · 答案" style="width:1664px;height:74px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">14 / 94</p>
+<aside>（1）缓慢启动加速度小，不一定摔倒，且即使倾倒也是向后。（2）惯性只由质量决定，滑行距离与轮子摩擦等有关。（3）滑行中合外力（摩擦）与运动方向相反。（4）相互作用力等大反向。（5）作用力与反作用力始终等大。</aside>
+</section><section class="slide" data-qa="l1/3" id="l1-q2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">关于惯性</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q2.png" alt="关于惯性" style="width:1664px;height:315px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">15 / 94</p>
+</section><section class="slide" data-qa="l1/3" id="l1-a2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">关于惯性 · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a2.png" alt="关于惯性 · 答案" style="width:1664px;height:127px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">16 / 94</p>
+</section><section class="slide" data-qa="l1/4" id="l1-q3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">货车上的石块 B</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q3.png" alt="货车上的石块 B" style="width:1664px;height:571px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">17 / 94</p>
+</section><section class="slide" data-qa="l1/4" id="l1-a3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">货车上的石块 B · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a3.png" alt="货车上的石块 B · 答案" style="width:1664px;height:230px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">18 / 94</p>
+<aside>原书只给答案 C。课上可让学生自己写出 F 的两个分量，并说明 tan α = g/a（α 为 F 与水平方向夹角）。</aside>
+</section><section class="slide" data-qa="l1/5" id="l1-q4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点一 牛顿第一定律的理解及应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">足球中的惯性</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q4.png" alt="足球中的惯性" style="width:1664px;height:315px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">19 / 94</p>
+</section><section class="slide" data-qa="l1/5" id="l1-a4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">足球中的惯性 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a4.png" alt="足球中的惯性 · 解答" style="width:1664px;height:313px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">20 / 94</p>
+</section><section class="slide" data-qa="l1/6" id="l1-q5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点一 牛顿第一定律的理解及应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">投掷铅球</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q5.png" alt="投掷铅球" style="width:1664px;height:371px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">21 / 94</p>
+</section><section class="slide" data-qa="l1/6" id="l1-a5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">投掷铅球 · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a5.png" alt="投掷铅球 · 答案" style="width:1664px;height:74px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">22 / 94</p>
+<aside>原书只给答案 D。A：铅球运动状态在变，不是平衡力；B：相互作用力等大；C：惯性不会消失；D：牛顿第一定律。</aside>
+</section><section class="slide" data-qa="l1/7" id="l1-q6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点二 牛顿第二定律的理解及应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　弹簧上的匀加速</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q6.png" alt="例1　弹簧上的匀加速" style="width:1664px;height:347px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">23 / 94</p>
+</section><section class="slide" data-qa="l1/7" id="l1-a6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　弹簧上的匀加速 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a6.png" alt="例1　弹簧上的匀加速 · 解答" style="width:1664px;height:284px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">24 / 94</p>
+<aside>追问：任意位置 x 处，F + k(x0 − x) − mg = ma，所以 F = ma + kx，图线斜率为 k、截距为 ma——这就是“先建立函数关系再读图”。</aside>
+</section><section class="slide" data-qa="l1/8" id="l1-q7" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点三 牛顿第三定律的理解</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　《车马出行图》</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q7.png" alt="例2　《车马出行图》" style="width:1664px;height:576px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">25 / 94</p>
+</section><section class="slide" data-qa="l1/8" id="l1-a7" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　《车马出行图》 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a7.png" alt="例2　《车马出行图》 · 解答" style="width:1664px;height:364px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">26 / 94</p>
+</section><section class="slide" data-qa="l1/9" id="l1-q8" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点三 应用牛顿第三定律进行受力分析</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例3　箱中杆上的环</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-q8.png" alt="例3　箱中杆上的环" style="width:1664px;height:347px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">27 / 94</p>
+</section><section class="slide" data-qa="l1/9" id="l1-a8" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第1讲　牛顿运动定律 · 考点三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例3　箱中杆上的环 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l1-a8.png" alt="例3　箱中杆上的环 · 解答" style="width:1664px;height:393px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第1讲　牛顿运动定律</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">28 / 94</p>
+</section><section class="slide" data-qa="l2/1" id="l2" data-transition="fade" style="background:#1D3557;color:#F4EFE6;font-family:'Noto Sans SC', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:40px;color:#F2A65A;font-weight:700">第2讲</p>
+<h1 style="font-family:'Noto Serif SC', Georgia, serif;font-size:112px;line-height:1.1;font-weight:700;color:#F4EFE6">牛顿第二定律的应用</h1>
+<p style="font-size:36px;color:#BFD0E0">两类动力学问题 · 超重与失重 · 瞬时性</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#BFD0E0;text-align:right">29 / 94</p>
+</section><section class="slide" data-qa="l2/1" id="l2-k1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">两类动力学问题</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k1.png" alt="两类动力学问题" style="width:1664px;height:591px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">30 / 94</p>
+</section><section class="slide" data-qa="l2/1" id="l2-k2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">解题的基本步骤</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k2.png" alt="解题的基本步骤" style="width:1664px;height:660px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">31 / 94</p>
+<aside>流程图中最后一步：沿加速度方向建坐标系，F合 = ma，或分量式 Fx = max、Fy = may。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">超重　失重</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k3.png" alt="超重　失重" style="width:1664px;height:599px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">32 / 94</p>
+<aside>动画：电梯里的人站在台秤上，电梯从静止向上加速→匀速→减速→停→向下加速→匀速→减速。台秤示数 FN = m(g + a)，a 以向上为正。注意“向下减速”也是超重。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k3x" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">电梯里的台秤：超重与失重</h2>
+</div>
+<iframe title="物理动画" style="position:absolute;left:258px;top:204px;width:1404px;height:600px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=1100,VH=470;const ph=[[1,0,&#x27;静止&#x27;],[1.6,1,&#x27;向上加速&#x27;],[1.4,0,&#x27;向上匀速&#x27;],[1.6,-1,&#x27;向上减速&#x27;],[1,0,&#x27;静止&#x27;],[1.6,-1,&#x27;向下加速&#x27;],[1.4,0,&#x27;向下匀速&#x27;],[1.6,1,&#x27;向下减速&#x27;],[1,0,&#x27;静止&#x27;]];
+const TT=ph.reduce((s,p)=&gt;s+p[0],0),A0=2.2;const yv=[];{let y=0,v=0;for(let i=0;i&lt;=TT*100;i++){const tt=i/100;let s=0,a=0;for(const p of ph){if(tt&lt;s+p[0]){a=p[1];break;}s+=p[0];}yv.push([y,a]);v+=a*A0*0.01;y+=v*0.01;}}
+function st(t){const i=Math.min(yv.length-1,Math.round(t*100));let s=0,n=&#x27;&#x27;;for(const p of ph){if(t&lt;s+p[0]){n=p[2];break;}s+=p[0];}return [yv[i][0],yv[i][1],n];}
+function draw(T){const t=T%(TT+0.8);const [y,a,n]=st(Math.min(t,TT));
+// shaft
+const sx=60,sw=230,top=20,bot=450;rr(sx,top,sw,bot-top,4,&#x27;#F4F6F9&#x27;,LG,2);
+const cy=440-y*17,ch=170;rr(sx+20,cy-ch,sw-40,ch,6,&#x27;#FFFFFF&#x27;,NV,3);ln(sx+sw/2,top,sx+sw/2,cy-ch,GR,2);
+// scale + person
+rr(sx+80,cy-22,70,14,3,GR);const hx=sx+115,fy=cy-22;ln(hx,fy,hx-12,fy-40,TX,4);ln(hx,fy,hx+12,fy-40,TX,4);ln(hx-12,fy-40,hx,fy-80,TX,4);ln(hx+12,fy-40,hx,fy-80,TX,4);ln(hx,fy-80,hx,fy-118,TX,4);circ(hx,fy-132,14,null,TX);
+if(a)ar(sx+sw+30,cy-80,sx+sw+30,cy-80-a*60,OR,5);if(a)mv(&#x27;a&#x27;,sx+sw+48,cy-80-a*40,OR,28);
+// graph
+const gx=420,gy0=400,gw=640,gh=330,mg=gy0-gh*0.5;ln(gx,gy0,gx+gw,gy0,TX,2);ln(gx,gy0,gx,gy0-gh-10,TX,2);
+ln(gx,mg,gx+gw,mg,GR,2,[8,6]);mv(&#x27;mg&#x27;,gx+gw-50,mg-22,GR,26);tx(&#x27;台秤示数&#x27;,gx+14,gy0-gh+20,TX,24);mv(&#x27;t&#x27;,gx+gw+14,gy0,TX,26);
+x.save();x.strokeStyle=BL;x.lineWidth=4;x.beginPath();for(let k=0;k&lt;=Math.min(t,TT)*100;k+=2){const tt=k/100,N=1+st(tt)[1]*0.3;const X=gx+tt/TT*gw,Y=gy0-gh*0.5*N;k?x.lineTo(X,Y):x.moveTo(X,Y);}x.stroke();x.restore();
+const N=1+a*0.3;tx(n,sx+sw/2,top+0,NV,1,&#x27;center&#x27;);
+rr(gx+20,10,620,50,10,a&gt;0?&#x27;#FDEBDD&#x27;:(a&lt;0?&#x27;#E3EEF9&#x27;:&#x27;#F4F6F9&#x27;));
+tx(n+&#x27;：&#x27;+(a&gt;0?&#x27;加速度向上 → 超重（示数 &gt; mg）&#x27;:(a&lt;0?&#x27;加速度向下 → 失重（示数 &lt; mg）&#x27;:&#x27;加速度为零 → 示数 = mg&#x27;)),gx+330,35,a&gt;0?OR:(a&lt;0?BL:TX),26,&#x27;center&#x27;,1);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<img src="/tutor/assets/olympiad3/l2-k3x.png" alt="台秤示数 $F_{\mathrm N} = m(g + a)$（$a$ 以竖直向上为正）" style="position:absolute;left:128px;top:828px;width:1664px;height:48px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">33 / 94</p>
+<aside>电梯从静止向上加速→匀速→减速→停→向下加速→匀速→减速。让学生先预测每一段示数比 mg 大还是小，再看动画。注意“向下减速”也是超重。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">判断超重和失重的三个角度</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k4.png" alt="判断超重和失重的三个角度" style="width:1664px;height:624px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">34 / 94</p>
+<aside>原书“考点三 核心提炼”。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k4b" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 拓展</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">用惯性力看超重和失重：等效重力</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k4b.png" alt="用惯性力看超重和失重：等效重力" style="width:1664px;height:522px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">35 / 94</p>
+<aside>等效重力在竞赛中很常用：加速车厢里的单摆周期、液面倾斜、气泡运动方向等，都可以把 g 换成 g效 来处理。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">牛顿第二定律的瞬时性</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k5.png" alt="牛顿第二定律的瞬时性" style="width:1664px;height:735px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">36 / 94</p>
+<aside>动画：左边小球用两根细绳、右边小球用细绳+弹簧悬挂，同时剪断水平细绳。剪断瞬间：绳模型拉力突变，小球加速度垂直于绳 g sin θ；弹簧模型弹力不变，加速度 g tan θ（与原水平绳拉力反向）。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k5x" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">剪断瞬间：细绳与弹簧</h2>
+</div>
+<iframe title="物理动画" style="position:absolute;left:258px;top:204px;width:1404px;height:600px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=1100,VH=470;const g=900,th=0.6,L=230,L0=0.5*L,ks=g/(Math.cos(th)*(L-L0));let st=null;
+function init(){st={a:{ang:th,w:0},b:{x:L*Math.sin(th),y:L*Math.cos(th),vx:0,vy:0}};}
+function draw(T){const t=T%7;if(t&lt;0.05||!st)init();const cut=t&gt;1.6,frozen=t&gt;1.6&amp;&amp;t&lt;3.4;
+if(t&gt;=3.4){const dt=1/240;for(let k=0;k&lt;4;k++){const a=st.a;a.w+=-g/L*Math.sin(a.ang)*dt;a.ang+=a.w*dt;const b=st.b,r=Math.hypot(b.x,b.y),f=ks*(r-L0);b.vx+=(-f*b.x/r)*dt;b.vy+=(g-f*b.y/r)*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;}}
+[[0,&#x27;细绳&#x27;,1],[550,&#x27;弹簧&#x27;,2]].forEach(([ox,nm,ty])=&gt;{const px=ox+150,py=60;hatch(px-90,py-12,180);
+let bx,by;if(ty===1){bx=px+L*Math.sin(st.a.ang);by=py+L*Math.cos(st.a.ang);ln(px,py,bx,by,TX,3);}else{bx=px+st.b.x;by=py+st.b.y;const n=14,dx=bx-px,dy=by-py,r=Math.hypot(dx,dy),ux=dx/r,uy=dy/r;x.save();x.strokeStyle=TX;x.lineWidth=2.5;x.beginPath();x.moveTo(px,py);for(let i=1;i&lt;n;i++){const s=i/n,o=(i%2?1:-1)*10;x.lineTo(px+dx*s-uy*o,py+dy*s+ux*o);}x.lineTo(bx,by);x.stroke();x.restore();}
+ln(px,py,px,py+L+30,GR,1.5,[6,6]);
+const wx=px+L*Math.sin(th)+130,wy=py+L*Math.cos(th);ln(wx,wy-60,wx,wy+60,TX,4);for(let i=wy-56;i&lt;wy+60;i+=14)ln(wx,i,wx+12,i-10,TX,1.5);if(!cut)ln(bx,by,wx,wy,TX,2.5);
+circ(bx,by,16,OR);tx(nm+&#x27;悬挂&#x27;,px+60,py+L+70,NV,26,&#x27;center&#x27;,1);
+if(frozen){if(ty===1){ar(bx,by,bx-Math.cos(th)*110,by+Math.sin(th)*110,OR,5);mv(&#x27;a&#x27;,bx-230,by+30,OR,28);tx(&#x27;垂直于绳&#x27;,bx-210,by+30,OR,24);}else{ar(bx,by,bx-150,by,OR,5);mv(&#x27;a&#x27;,bx-150,by+40,OR,28);tx(&#x27;水平向左&#x27;,bx-130,by+40,OR,24);}}});
+tx(t&lt;1.6?&#x27;剪断前：两球都被水平细绳拉住&#x27;:(t&lt;3.4?&#x27;剪断瞬间：绳的拉力突变，弹簧弹力不变&#x27;:&#x27;之后的运动&#x27;),550,440,cut?OR:TX,28,&#x27;center&#x27;,1);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<img src="/tutor/assets/olympiad3/l2-k5x.png" alt="左：剪断水平绳后，细绳拉力突变，$a = g\sin\theta$（垂直于绳）；右：弹簧弹力不突变，$a = g\tan\theta$（水平）" style="position:absolute;left:128px;top:828px;width:1664px;height:48px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">37 / 94</p>
+<aside>两球都用一根水平细绳拉住，偏离竖直方向 θ；同时剪断水平细绳。左边悬线是细绳，右边是弹簧。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-k6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 视野拓展</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">等时圆模型</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-k6.png" alt="等时圆模型" style="width:1016px;height:672px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=640;const R=200,cx=300,cy=290,Tt=2.4;const ang=[-1.0,-0.55,0,0.4,0.85];
+function draw(T){const t=T%5.4;const s=Math.max(0,Math.min(Tt,t-0.6));
+tx(&#x27;从最高点沿光滑弦同时释放&#x27;,300,30,NV,28,&#x27;center&#x27;,1);
+circ(cx,cy,R,null,NV);ln(cx,cy-R,cx,cy+R,GR,2,[8,6]);circ(cx,cy,4,NV);
+const g2=4*R/(Tt*Tt);const top=[cx,cy-R];
+ang.forEach((p,i)=&gt;{const L=2*R*Math.cos(p);const ex=top[0]+L*Math.sin(p),ey=top[1]+L*Math.cos(p);ln(top[0],top[1],ex,ey,TX,2.5);
+const d=0.5*g2*Math.cos(p)*s*s,bx=top[0]+d*Math.sin(p),by=top[1]+d*Math.cos(p);circ(bx,by,12,[OR,BL,NV,BL,OR][i]);});
+tx(&#x27;t = &#x27;+s.toFixed(2)+&#x27; s&#x27;,300,540,TX,26,&#x27;center&#x27;);
+if(s&gt;=Tt)tx(&#x27;同时到达圆周！&#x27;,300,590,OR,30,&#x27;center&#x27;,1);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">38 / 94</p>
+<aside>推导（可让学生自证）：弦与竖直方向夹角 θ，弦长 l = 2R cos θ，加速度 a = g cos θ，由 l = ½at² 得 t = 2√(R/g)，与 θ 无关。动画：从最高点沿各光滑弦同时释放，小球同时到达圆周。</aside>
+</section><section class="slide" data-qa="l2/1" id="l2-q0" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 教材挖掘</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">站在体重计上下蹲</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q0.png" alt="站在体重计上下蹲" style="width:1664px;height:560px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">39 / 94</p>
+</section><section class="slide" data-qa="l2/1" id="l2-a0" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 教材挖掘</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">站在体重计上下蹲 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a0.png" alt="站在体重计上下蹲 · 解答" style="width:1664px;height:134px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">40 / 94</p>
+<aside>示数“最后再变小”回到重力值附近，是减速阶段结束、人重新静止的过程。</aside>
+</section><section class="slide" data-qa="l2/2" id="l2-q1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">判断对错：空间站与观光电梯</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q1.png" alt="判断对错：空间站与观光电梯" style="width:1664px;height:575px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">41 / 94</p>
+</section><section class="slide" data-qa="l2/2" id="l2-a1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">判断对错 · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a1.png" alt="判断对错 · 答案" style="width:1664px;height:74px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">42 / 94</p>
+<aside>（4）重力不变，变的是视重。（5）还要求加速度方向竖直向下，例如水平方向加速度为 g 的物体不是完全失重。</aside>
+</section><section class="slide" data-qa="l2/3" id="l2-q2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">两个互成 120° 的力</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q2.png" alt="两个互成 120° 的力" style="width:1664px;height:244px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">43 / 94</p>
+</section><section class="slide" data-qa="l2/3" id="l2-a2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">两个互成 120° 的力 · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a2.png" alt="两个互成 120° 的力 · 答案" style="width:1664px;height:246px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">44 / 94</p>
+<aside>原书只给答案 AC，计算过程为课堂补充。</aside>
+</section><section class="slide" data-qa="l2/4" id="l2-q3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">“下蹲”与“起立”的 F–t 图像</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q3.png" alt="“下蹲”与“起立”的 F–t 图像" style="width:1664px;height:444px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">45 / 94</p>
+</section><section class="slide" data-qa="l2/4" id="l2-a3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 自主评价</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">“下蹲”与“起立” · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a3.png" alt="“下蹲”与“起立” · 答案" style="width:1664px;height:318px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">46 / 94</p>
+<aside>原书只给答案 BCD，分析为课堂补充。</aside>
+</section><section class="slide" data-qa="l2/5" id="l2-q4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点一 牛顿第二定律的瞬时性问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　剪断 B、C 间的细线</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q4.png" alt="例1　剪断 B、C 间的细线" style="width:1664px;height:293px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">47 / 94</p>
+</section><section class="slide" data-qa="l2/5" id="l2-a4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　剪断 B、C 间的细线 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a4.png" alt="例1　剪断 B、C 间的细线 · 解答" style="width:1016px;height:483px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=680;const k=40,g=9.8,m=[4,3,2,1];let Y=null,V=null,frz=0;
+function init(){const L0=60;Y=[110,0,0,0];Y[1]=Y[0]+L0+6*g/k*10;Y[2]=Y[1]+40;Y[3]=Y[2]+L0+1*g/k*10;V=[0,0,0,0];}
+function draw(T){const t=T%6;if(t&lt;0.03||!Y)init();const cut=t&gt;1.5;
+if(t&gt;3.2&amp;&amp;t&lt;5.2){for(let n=0;n&lt;4;n++){const dt=1/240,L0=60;const f1=k*((Y[1]-Y[0]-L0)/10),f3=k*((Y[3]-Y[2]-L0)/10);const aB=(-f1+3*g)/3,aC=(f3+2*g)/2,aD=(-f3+g)/1;V[1]+=aB*dt*10;V[2]+=aC*dt*10;V[3]+=aD*dt*10;for(const i of[1,2,3])Y[i]+=V[i]*dt*1;}}
+const X=300;hatch(200,40,200);ln(200,52,400,52,TX,3);ln(X,52,X,Y[0],TX,3);
+function spr(a,b){x.save();x.strokeStyle=TX;x.lineWidth=2.5;x.beginPath();x.moveTo(X,a+14);const n=12;for(let i=1;i&lt;n;i++)x.lineTo(X+(i%2?12:-12),a+14+(b-a-28)*i/n);x.lineTo(X,b-14);x.stroke();x.restore();}
+spr(Y[0],Y[1]);if(!cut)ln(X,Y[1],X,Y[2],TX,3);spr(Y[2],Y[3]);
+[&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;,&#x27;D&#x27;].forEach((n,i)=&gt;{circ(X,Y[i],14,i===1||i===2?OR:GR);mv(n,X-40,Y[i],TX,28,&#x27;right&#x27;);tx(m[i]+&#x27;m&#x27;,X+30,Y[i],GR,24);});
+if(cut&amp;&amp;t&lt;=3.2){ar(X+90,Y[1],X+90,Y[1]-90,OR,5);tx(&#x27;a = g（向上）&#x27;,X+110,Y[1]-50,OR,24);ar(X+90,Y[2],X+90,Y[2]+135,OR,5);tx(&#x27;a = 1.5g（向下）&#x27;,X+110,Y[2]+80,OR,24);tx(&#x27;A、D：此瞬间 a = 0&#x27;,300,620,NV,26,&#x27;center&#x27;,1);}
+tx(cut?(t&lt;3.2?&#x27;剪断瞬间（弹簧弹力不突变）&#x27;:&#x27;之后的运动&#x27;):&#x27;剪断前：静止&#x27;,300,580,cut?OR:TX,26,&#x27;center&#x27;,1);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">48 / 94</p>
+<aside>动画：剪断瞬间 B 向上、C 向下加速；A、D 的加速度此瞬间为 0（受力未变）。</aside>
+</section><section class="slide" data-qa="l2/6" id="l2-q5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点二 已知运动情况求受力情况</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　平板车上坡</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q5.png" alt="例2　平板车上坡" style="width:1664px;height:609px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">49 / 94</p>
+</section><section class="slide" data-qa="l2/6" id="l2-a5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　平板车上坡 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a5.png" alt="例2　平板车上坡 · 解答" style="width:1664px;height:371px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">50 / 94</p>
+</section><section class="slide" data-qa="l2/7" id="l2-q6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点二 已知受力情况求运动情况</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例3　物流滑轨（2022 浙江 6 月选考）</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q6.png" alt="例3　物流滑轨（2022 浙江 6 月选考）" style="width:1664px;height:613px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">51 / 94</p>
+</section><section class="slide" data-qa="l2/7" id="l2-a6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例3　物流滑轨 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a6.png" alt="例3　物流滑轨 · 解答" style="width:1664px;height:447px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">52 / 94</p>
+</section><section class="slide" data-qa="l2/8" id="l2-q7" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点三 超重、失重问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">背越式跳高</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q7.png" alt="背越式跳高" style="width:1664px;height:390px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">53 / 94</p>
+</section><section class="slide" data-qa="l2/8" id="l2-a7" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">背越式跳高 · 答案</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a7.png" alt="背越式跳高 · 答案" style="width:1664px;height:192px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">54 / 94</p>
+<aside>原书只给答案 B，分析为课堂补充。</aside>
+</section><section class="slide" data-qa="l2/9" id="l2-q8" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点三 超重、失重的应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">蹦床的 F–t 图像</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q8.png" alt="蹦床的 F–t 图像" style="width:1664px;height:563px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">55 / 94</p>
+</section><section class="slide" data-qa="l2/9" id="l2-a8" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 考点三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">蹦床的 F–t 图像 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a8.png" alt="蹦床的 F–t 图像 · 解答" style="width:1664px;height:408px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">56 / 94</p>
+</section><section class="slide" data-qa="l2/10" id="l2-q9" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 视野拓展 等时圆</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例4　光滑细杆上的滑环</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-q9.png" alt="例4　光滑细杆上的滑环" style="width:1664px;height:560px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">57 / 94</p>
+</section><section class="slide" data-qa="l2/10" id="l2-a9" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">第2讲　牛顿第二定律的应用 · 视野拓展 等时圆</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例4　光滑细杆上的滑环 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/l2-a9.png" alt="例4　光滑细杆上的滑环 · 解答" style="width:1664px;height:480px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 第2讲　牛顿第二定律的应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">58 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3" data-transition="fade" style="background:#1D3557;color:#F4EFE6;font-family:'Noto Sans SC', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:40px;color:#F2A65A;font-weight:700">专题突破3</p>
+<h1 style="font-family:'Noto Serif SC', Georgia, serif;font-size:112px;line-height:1.1;font-weight:700;color:#F4EFE6">牛顿运动定律的综合应用</h1>
+<p style="font-size:36px;color:#BFD0E0">动力学图像 · 连接体 · 临界与极值</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#BFD0E0;text-align:right">59 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-k1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">动力学图像问题</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-k1.png" alt="动力学图像问题" style="width:1664px;height:593px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">60 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-k2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">动力学图像的解题策略</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-k2.png" alt="动力学图像的解题策略" style="width:1664px;height:690px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">61 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-q1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型一 动力学图像问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　力传感器与木板（经典高考）</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-q1.png" alt="例1　力传感器与木板（经典高考）" style="width:1664px;height:443px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">62 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-a1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　力传感器与木板 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-a1.png" alt="例1　力传感器与木板 · 解答" style="width:1664px;height:508px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">63 / 94</p>
+<aside>思路点拨：0～2 s 摩擦力逐渐增大、木板速度为零 → 木板静止；2～4 s 摩擦力不变、速度均匀增加 → 匀加速；4～5 s 摩擦力不变、速度均匀减小 → 匀减速。</aside>
+</section><section class="slide" data-qa="z3/2" id="z3-q2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型一 迁移应用1</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">斜面上的 v–t 图像</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-q2.png" alt="斜面上的 v–t 图像" style="width:1664px;height:413px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">64 / 94</p>
+</section><section class="slide" data-qa="z3/2" id="z3-a2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型一 迁移应用1</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">斜面上的 v–t 图像 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-a2.png" alt="斜面上的 v–t 图像 · 解答" style="width:1664px;height:480px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">65 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-k3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">连接体的类型</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-k3.png" alt="连接体的类型" style="width:1664px;height:686px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">66 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-k4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">整体法与隔离法　力的“分配”</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-k4.png" alt="整体法与隔离法　力的“分配”" style="width:1664px;height:614px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">67 / 94</p>
+</section><section class="slide" data-qa="z3/3" id="z3-q3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二 共速连接体</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　斜面上的 A、B</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-q3.png" alt="例2　斜面上的 A、B" style="width:1664px;height:347px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">68 / 94</p>
+</section><section class="slide" data-qa="z3/3" id="z3-a3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　斜面上的 A、B · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-a3.png" alt="例2　斜面上的 A、B · 解答" style="width:1664px;height:371px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">69 / 94</p>
+</section><section class="slide" data-qa="z3/4" id="z3-q4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二 迁移应用2</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">A 对 B 的作用力</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-q4.png" alt="A 对 B 的作用力" style="width:1664px;height:390px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">70 / 94</p>
+</section><section class="slide" data-qa="z3/4" id="z3-a4" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二 迁移应用2</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">A 对 B 的作用力 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-a4.png" alt="A 对 B 的作用力 · 解答" style="width:1664px;height:444px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">71 / 94</p>
+</section><section class="slide" data-qa="z3/5" id="z3-q5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二 关联速度连接体</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例3　动滑轮与斜面体</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-q5.png" alt="例3　动滑轮与斜面体" style="width:1664px;height:544px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">72 / 94</p>
+</section><section class="slide" data-qa="z3/5" id="z3-a5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例3　动滑轮与斜面体 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-a5.png" alt="例3　动滑轮与斜面体 · 解答" style="width:1664px;height:513px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">73 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-k5" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">动力学中的临界和极值问题</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-k5.png" alt="动力学中的临界和极值问题" style="width:1664px;height:593px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">74 / 94</p>
+</section><section class="slide" data-qa="z3/1" id="z3-k6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">临界问题的三种思想方法</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-k6.png" alt="临界问题的三种思想方法" style="width:1664px;height:408px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">75 / 94</p>
+</section><section class="slide" data-qa="z3/6" id="z3-q6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型三 临界和极值问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例4　旋转一周的外力 F</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-q6.png" alt="例4　旋转一周的外力 F" style="width:1664px;height:503px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">76 / 94</p>
+</section><section class="slide" data-qa="z3/6" id="z3-a6" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破3　牛顿运动定律的综合应用 · 题型三</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例4　旋转一周的外力 F · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z3-a6.png" alt="例4　旋转一周的外力 F · 解答" style="width:1016px;height:468px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=680;const k=Math.sqrt(3)/3;
+function av(th){return -k*Math.sin(th+Math.PI/3)+k;}
+function draw(T){const P=9,t=T%P,th=Math.min(1,t/8)*2*Math.PI;
+const gy=200;hatch(60,gy,480);rr(240,gy-90,120,90,4,&#x27;#F4F6F9&#x27;,NV,3);const ox=300,oy=gy-45;
+ar(400,gy-110,470,gy-110,GR,4);mv(&#x27;v&#x27;,480,gy-110,GR,26);
+ar(ox,oy,ox+110*Math.cos(th),oy-110*Math.sin(th),OR,5);mv(&#x27;F&#x27;,ox+130*Math.cos(th)-8,oy-130*Math.sin(th),OR,28);
+tx(&#x27;θ = &#x27;+Math.round(th*180/Math.PI)+&#x27;°&#x27;,80,40,NV,28,&#x27;left&#x27;,1);
+const gx=80,g0=600,gw=460,gh=280;ln(gx,g0,gx+gw,g0,TX,2);ln(gx,g0,gx,g0-gh-10,TX,2);mv(&#x27;θ&#x27;,gx+gw+10,g0,TX,26);tx(&#x27;a（向左为正）&#x27;,gx+8,g0-gh-24,TX,24);
+const mx=1.2;const Y=v=&gt;g0-v/mx*gh;ln(gx,Y(2*k),gx+gw,Y(2*k),GR,1.5,[6,6]);
+[[30,&#x27;30°&#x27;],[210,&#x27;210°&#x27;],[360,&#x27;360°&#x27;]].forEach(([d,s])=&gt;{const X=gx+d/360*gw;ln(X,g0,X,g0+8,TX,2);tx(s,X,g0+28,TX,24,&#x27;center&#x27;);});
+x.save();x.strokeStyle=BL;x.lineWidth=4;x.beginPath();for(let d=0;d&lt;=th*180/Math.PI;d+=2){const X=gx+d/360*gw,yy=Y(av(d*Math.PI/180));d?x.lineTo(X,yy):x.moveTo(X,yy);}x.stroke();x.restore();
+circ(gx+th/(2*Math.PI)*gw,Y(av(th)),8,OR);
+const d=th*180/Math.PI;if(Math.abs(d-30)&lt;14)tx(&#x27;a 最小 = 0&#x27;,300,300,OR,26,&#x27;center&#x27;,1);if(Math.abs(d-210)&lt;14)tx(&#x27;a 最大，F 斜向左下 30°&#x27;,300,300,OR,26,&#x27;center&#x27;,1);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破3　牛顿运动定律的综合应用</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">77 / 94</p>
+<aside>动画：F 逆时针旋转一周，右侧实时画出 a（向左为正）随 θ 的变化，最低点 θ = 30°（a = 0），最高点 θ = 210°。可强调“辅助角”：μ sin θ + cos θ = √(1+μ²) sin(θ + φ)，tan φ = 1/μ。</aside>
+</section><section class="slide" data-qa="z4/1" id="z4" data-transition="fade" style="background:#1D3557;color:#F4EFE6;font-family:'Noto Sans SC', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:40px;color:#F2A65A;font-weight:700">专题突破4</p>
+<h1 style="font-family:'Noto Serif SC', Georgia, serif;font-size:112px;line-height:1.1;font-weight:700;color:#F4EFE6">“传送带”模型</h1>
+<p style="font-size:36px;color:#BFD0E0">水平传送带 · 倾斜传送带</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#BFD0E0;text-align:right">78 / 94</p>
+</section><section class="slide" data-qa="z4/1" id="z4-k1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">水平传送带 conveyor belt</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-k1.png" alt="水平传送带 conveyor belt" style="width:1016px;height:547px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=680;const v=120,mu=60,L=440;
+function draw(T){const tc=v/mu,xa=v*tc/2,ttot=tc+(L-xa)/v,t=T%(ttot+1.2),s=Math.min(t,ttot);
+const xb=s&lt;tc?0.5*mu*s*s:xa+v*(s-tc),vb=s&lt;tc?mu*s:v;
+tx(&#x27;物块轻放在水平传送带上&#x27;,300,36,NV,28,&#x27;center&#x27;,1);
+const y0=170,x0=60;circ(x0+20,y0+30,30,&#x27;#FFFFFF&#x27;,NV);circ(x0+L+20,y0+30,30,&#x27;#FFFFFF&#x27;,NV);ln(x0+20,y0,x0+L+20,y0,NV,3);ln(x0+20,y0+60,x0+L+20,y0+60,NV,3);
+for(let i=0;i&lt;L;i+=40){const p=x0+20+((i+t*v)%L);ln(p,y0,p+16,y0,BL,5);}
+ar(440,y0-80,520,y0-80,BL,4);mv(&#x27;v&#x27;,530,y0-80,BL,26);
+rr(x0+xb,y0-46,46,46,4,&#x27;#C9D3DD&#x27;,TX,2);if(s&lt;tc)ar(x0+xb+23,y0-23,x0+xb+23+60,y0-23,OR,4);if(s&lt;tc)mv(&#x27;f&#x27;,x0+xb+90,y0-30,OR,26);
+tx(s&lt;tc?&#x27;滑动摩擦力使物块加速：a = μg&#x27;:&#x27;共速后无摩擦，与传送带一起匀速&#x27;,300,y0+110,s&lt;tc?OR:TX,26,&#x27;center&#x27;,1);
+const gx=80,g0=620,gw=460,gh=250,Ts=ttot;ln(gx,g0,gx+gw,g0,TX,2);ln(gx,g0,gx,g0-gh-10,TX,2);mv(&#x27;t&#x27;,gx+gw+12,g0,TX,26);mv(&#x27;v&#x27;,gx-24,g0-gh,TX,26);
+const X=q=&gt;gx+q/Ts*gw,Y=q=&gt;g0-q/v*gh*0.85;ln(gx,Y(v),gx+gw,Y(v),BL,3);tx(&#x27;传送带&#x27;,gx+gw-90,Y(v)-22,BL,24);
+x.save();x.fillStyle=&#x27;rgba(180,83,26,0.15)&#x27;;x.beginPath();x.moveTo(X(0),Y(0));const ss=Math.min(s,tc);x.lineTo(X(ss),Y(mu*ss));x.lineTo(X(ss),Y(v));x.lineTo(X(0),Y(v));x.fill();x.restore();
+x.save();x.strokeStyle=OR;x.lineWidth=4;x.beginPath();x.moveTo(X(0),Y(0));if(s&lt;tc)x.lineTo(X(s),Y(mu*s));else{x.lineTo(X(tc),Y(v));x.lineTo(X(s),Y(v));}x.stroke();x.restore();
+tx(&#x27;物块&#x27;,X(Math.min(s,tc))+10,Y(vb)+30,OR,24);if(s&gt;=tc)tx(&#x27;阴影面积 = 相对滑动距离&#x27;,gx+gw/2+40,g0-40,OR,24,&#x27;center&#x27;);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">79 / 94</p>
+<aside>动画：物块轻放（v0 = 0）在水平传送带左端，滑动摩擦力使其加速 a = μg，共速后与传送带一起匀速；下方同步画出物块与传送带的 v–t 图，两线之间的面积就是相对滑动距离。</aside>
+</section><section class="slide" data-qa="z4/1" id="z4-k2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">倾斜传送带（一）：物块与传送带同向</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-k2.png" alt="倾斜传送带（一）：物块与传送带同向" style="width:1664px;height:499px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">80 / 94</p>
+<aside>a1 = g sin θ + μg cos θ（物块比传送带慢，摩擦沿斜面向下）；共速后若 μ &lt; tan θ，摩擦力反向，a2 = g sin θ − μg cos θ。</aside>
+</section><section class="slide" data-qa="z4/1" id="z4-k3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">倾斜传送带（二）：有初速度的物块</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-k3.png" alt="倾斜传送带（二）：有初速度的物块" style="width:1664px;height:469px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">81 / 94</p>
+</section><section class="slide" data-qa="z4/1" id="z4-q1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型一 水平传送带问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　工件滑上传送带</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-q1.png" alt="例1　工件滑上传送带" style="width:1664px;height:573px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">82 / 94</p>
+</section><section class="slide" data-qa="z4/1" id="z4-a1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型一</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　工件滑上传送带 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-a1.png" alt="例1　工件滑上传送带 · 解答" style="width:1664px;height:409px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">83 / 94</p>
+<aside>图中 A 在右端、B 在左端：工件从 A 向左滑。“顺时针转动”时上表面向右运动，与工件运动方向相反；“逆时针转动”时上表面向左，与工件同向。</aside>
+</section><section class="slide" data-qa="z4/2" id="z4-q2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型二 倾斜传送带问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　物块随传送带上行</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-q2.png" alt="例2　物块随传送带上行" style="width:1664px;height:463px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">84 / 94</p>
+</section><section class="slide" data-qa="z4/2" id="z4-a2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破4　“传送带”模型 · 题型二</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　物块随传送带上行 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z4-a2.png" alt="例2　物块随传送带上行 · 解答" style="width:1664px;height:428px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破4　“传送带”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">85 / 94</p>
+</section><section class="slide" data-qa="z5/1" id="z5" data-transition="fade" style="background:#1D3557;color:#F4EFE6;font-family:'Noto Sans SC', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:40px;color:#F2A65A;font-weight:700">专题突破5</p>
+<h1 style="font-family:'Noto Serif SC', Georgia, serif;font-size:112px;line-height:1.1;font-weight:700;color:#F4EFE6">“滑块—木板”模型</h1>
+<p style="font-size:36px;color:#BFD0E0">两种类型 · 临界速度 · 位移关系</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#BFD0E0;text-align:right">86 / 94</p>
+</section><section class="slide" data-qa="z5/1" id="z5-k1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">“滑块—木板”模型的两种类型</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-k1.png" alt="“滑块—木板”模型的两种类型" style="width:1016px;height:710px;object-fit:contain">
+<iframe title="物理动画" style="position:absolute;left:1192px;top:204px;width:600px;height:680px;border:0" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;html,body{margin:0;height:100%;overflow:hidden;background:#FFFFFF}canvas{display:block}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;canvas id=&quot;c&quot;&gt;&lt;/canvas&gt;&lt;script&gt;
+const c=document.getElementById(&#x27;c&#x27;),x=c.getContext(&#x27;2d&#x27;);let S=1,D=1,OX=0,OY=0;
+const NV=&#x27;#1D3557&#x27;,OR=&#x27;#B4531A&#x27;,BL=&#x27;#1F5FA8&#x27;,GR=&#x27;#8A96A3&#x27;,LG=&#x27;#DCE3EA&#x27;,TX=&#x27;#22303F&#x27;;
+const FF=&#x27;&quot;PingFang SC&quot;,&quot;Noto Sans CJK SC&quot;,&quot;Microsoft YaHei&quot;,sans-serif&#x27;,MF=&#x27;&quot;Times New Roman&quot;,Times,serif&#x27;;
+function fit(){D=devicePixelRatio||1;const w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;c.style.width=w+&#x27;px&#x27;;c.style.height=h+&#x27;px&#x27;;S=Math.min(w/VW,h/VH);OX=(w-VW*S)/2;OY=(h-VH*S)/2;}
+addEventListener(&#x27;resize&#x27;,fit);
+function clr(){x.setTransform(1,0,0,1,0,0);x.fillStyle=&#x27;#FFFFFF&#x27;;x.fillRect(0,0,c.width,c.height);x.setTransform(D*S,0,0,D*S,OX*D,OY*D);}
+function ln(a,b,p,q,col,w,dash){x.save();x.strokeStyle=col||TX;x.lineWidth=w||2;if(dash)x.setLineDash(dash);x.beginPath();x.moveTo(a,b);x.lineTo(p,q);x.stroke();x.restore();}
+function ar(a,b,p,q,col,w){const L=Math.hypot(p-a,q-b);if(L&lt;2)return;w=w||4;ln(a,b,p,q,col,w);const u=(p-a)/L,v=(q-b)/L,h=Math.min(18,L*.6);x.save();x.fillStyle=col;x.beginPath();x.moveTo(p,q);x.lineTo(p-u*h-v*h*.5,q-v*h+u*h*.5);x.lineTo(p-u*h+v*h*.5,q-v*h-u*h*.5);x.closePath();x.fill();x.restore();}
+function tx(s,a,b,col,sz,al,bold){x.save();x.fillStyle=col||TX;x.font=(bold?&#x27;700 &#x27;:&#x27;&#x27;)+(sz||26)+&#x27;px &#x27;+FF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);x.restore();}
+function mv(s,a,b,col,sz,al,sub){x.save();x.fillStyle=col||TX;x.font=&#x27;italic &#x27;+(sz||28)+&#x27;px &#x27;+MF;x.textAlign=al||&#x27;left&#x27;;x.textBaseline=&#x27;middle&#x27;;x.fillText(s,a,b);if(sub){const w=x.measureText(s).width,o=al===&#x27;center&#x27;?w/2:(al===&#x27;right&#x27;?0:w);x.font=(sz*.7|0)+&#x27;px &#x27;+FF;x.fillText(sub,a+o+2,b+sz*.3);}x.restore();}
+function rr(a,b,w,h,r,f,s,lw){x.save();x.beginPath();x.roundRect(a,b,w,h,r);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=lw||2;x.stroke();}x.restore();}
+function circ(a,b,r,f,s){x.save();x.beginPath();x.arc(a,b,r,0,7);if(f){x.fillStyle=f;x.fill();}if(s){x.strokeStyle=s;x.lineWidth=2;x.stroke();}x.restore();}
+function hatch(a,b,w){ln(a,b,a+w,b,TX,3);for(let i=a;i&lt;a+w;i+=16)ln(i,b,i-10,b+12,TX,1.5);}
+let T0=null;function loop(t){if(T0===null)T0=t;clr();draw((t-T0)/1000);requestAnimationFrame(loop);}
+const VW=600,VH=680;const v0=150,a1=90,a2=60,tc=v0/(a1+a2),vc=a2*tc,Lb=0.5*v0*tc;
+function draw(T){const t=T%(tc+3),s=Math.min(t,tc+1.6);
+const xa=s&lt;tc?v0*s-0.5*a1*s*s:(v0*tc-0.5*a1*tc*tc)+vc*(s-tc),xbd=s&lt;tc?0.5*a2*s*s:0.5*a2*tc*tc+vc*(s-tc);
+tx(&#x27;滑块以初速度滑上静止的长木板&#x27;,300,36,NV,28,&#x27;center&#x27;,1);
+const gy=210,ox=30-xbd*0.0;ln(0,gy,600,gy,TX,3);tx(&#x27;光滑水平面&#x27;,520,gy+26,GR,24,&#x27;center&#x27;);
+const bL=Lb+30,bx=ox+xbd;rr(bx,gy-28,bL,28,3,&#x27;#C9D3DD&#x27;,TX,2);rr(ox+xa,gy-70,40,42,4,OR);
+mv(&#x27;A&#x27;,ox+xa+20,gy-94,OR,26,&#x27;center&#x27;);mv(&#x27;B&#x27;,bx+bL/2,gy+26,NV,26,&#x27;center&#x27;);
+tx(s&lt;tc?&#x27;A 减速、B 加速&#x27;:&#x27;共速：A 恰好滑到木板右端&#x27;,300,gy+80,s&lt;tc?TX:OR,26,&#x27;center&#x27;,1);
+const gx=80,g0=620,gw=460,gh=250,Ts=tc+1.6;ln(gx,g0,gx+gw,g0,TX,2);ln(gx,g0,gx,g0-gh-10,TX,2);mv(&#x27;t&#x27;,gx+gw+12,g0,TX,26);mv(&#x27;v&#x27;,gx-24,g0-gh,TX,26);
+const X=q=&gt;gx+q/Ts*gw,Y=q=&gt;g0-q/v0*gh;const ss=Math.min(s,tc);
+x.save();x.fillStyle=&#x27;rgba(31,95,168,0.13)&#x27;;x.beginPath();x.moveTo(X(0),Y(v0));x.lineTo(X(ss),Y(v0-a1*ss));x.lineTo(X(ss),Y(a2*ss));x.lineTo(X(0),Y(0));x.fill();x.restore();
+x.save();x.lineWidth=4;x.strokeStyle=OR;x.beginPath();x.moveTo(X(0),Y(v0));x.lineTo(X(ss),Y(v0-a1*ss));if(s&gt;tc)x.lineTo(X(s),Y(vc));x.stroke();x.strokeStyle=NV;x.beginPath();x.moveTo(X(0),Y(0));x.lineTo(X(ss),Y(a2*ss));if(s&gt;tc)x.lineTo(X(s),Y(vc));x.stroke();x.restore();
+tx(&#x27;A&#x27;,X(0)+14,Y(v0)+4,OR,24);tx(&#x27;B&#x27;,X(0)+20,Y(0)-24,NV,24);if(s&gt;=tc)tx(&#x27;阴影面积 = 相对位移 = 板长 L&#x27;,gx+gw/2+20,Y(v0)+10,BL,24,&#x27;center&#x27;);}
+fit();requestAnimationFrame(loop);&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">87 / 94</p>
+<aside>动画：滑块以初速度滑上静止木板（光滑地面），滑块减速、木板加速，直到共速；下方 v–t 图两线之间面积 = 相对位移，恰好等于板长 L 就是“恰好不掉下”的临界。</aside>
+</section><section class="slide" data-qa="z5/1" id="z5-k2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">处理“滑块—木板”问题的流程</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-k2.png" alt="处理“滑块—木板”问题的流程" style="width:1664px;height:543px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">88 / 94</p>
+<aside>原书为竖排流程图，这里按原图内容重排成横向。</aside>
+</section><section class="slide" data-qa="z5/1" id="z5-q1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型 · 水平面上的板块问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　抽出薄木板</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-q1.png" alt="例1　抽出薄木板" style="width:1664px;height:484px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">89 / 94</p>
+</section><section class="slide" data-qa="z5/1" id="z5-a1" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型 · 水平面上的板块问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例1　抽出薄木板 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-a1.png" alt="例1　抽出薄木板 · 解答" style="width:1664px;height:324px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">90 / 94</p>
+</section><section class="slide" data-qa="z5/2" id="z5-q2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型 · 水平面上的板块问题 迁移应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">a–F 图像与板块</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-q2.png" alt="a–F 图像与板块" style="width:1664px;height:497px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">91 / 94</p>
+</section><section class="slide" data-qa="z5/2" id="z5-a2" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型 · 迁移应用</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">a–F 图像与板块 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-a2.png" alt="a–F 图像与板块 · 解答" style="width:1664px;height:352px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">92 / 94</p>
+</section><section class="slide" data-qa="z5/3" id="z5-q3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型 · 斜面上的板块问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　光滑平板与滑块</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-q3.png" alt="例2　光滑平板与滑块" style="width:1664px;height:359px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">93 / 94</p>
+</section><section class="slide" data-qa="z5/3" id="z5-a3" style="background:#FDFCF9;color:#22303F;font-family:'Noto Sans SC', Arial, sans-serif;padding:72px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;line-height:1.4;color:#B4531A;font-weight:700">专题突破5　“滑块—木板”模型 · 斜面上的板块问题</p>
+<h2 style="font-family:'Noto Serif SC', Georgia, serif;font-size:52px;line-height:1.15;font-weight:700;color:#1D3557">例2　光滑平板与滑块 · 解答</h2>
+</div>
+<img src="/tutor/assets/olympiad3/z5-a3.png" alt="例2　光滑平板与滑块 · 解答" style="width:1664px;height:402px;object-fit:contain">
+<p style="position:absolute;left:128px;bottom:48px;width:1300px;font-size:24px;color:#8A96A3">第三章　运动和力的关系 · 专题突破5　“滑块—木板”模型</p>
+<p style="position:absolute;right:128px;bottom:48px;width:200px;font-size:24px;color:#8A96A3;text-align:right">94 / 94</p>
+<aside>关键一步是判断平板动不动：滑块在平板上时，平板受滑块的压力 mg cos θ（上表面光滑，无摩擦），斜面对平板的最大静摩擦 μ(M+m)g cos θ = 6.4 N &gt; Mg sin θ = 6 N，所以平板静止。</aside>
+</section></main><div id="notes" hidden></div><nav><button id="prev">上一页</button><select aria-label="跳转到课件页"><option value="0">1. 第三章　运动和力的关系</option><option value="1">2. 牛顿运动定律</option><option value="2">3. 牛顿第一定律　惯性</option><option value="3">4. 牛顿第一定律的理解　惯性的两种表现</option><option value="4">5. 牛顿第二定律</option><option value="5">6. 牛顿第二定律的六个性质　力学单位制</option><option value="6">7. 牛顿第三定律</option><option value="7">8. 第三定律也有边界：费曼的问题</option><option value="8">9. 第三定律也有边界：动量去哪了</option><option value="9">10. 非惯性系与惯性力</option><option value="10">11. 刹车时车厢里的小球</option><option value="11">12. 刹车时车厢里的小球 · 解答</option><option value="12">13. 判断对错：公交车上的行李箱</option><option value="13">14. 判断对错 · 答案</option><option value="14">15. 关于惯性</option><option value="15">16. 关于惯性 · 答案</option><option value="16">17. 货车上的石块 B</option><option value="17">18. 货车上的石块 B · 答案</option><option value="18">19. 足球中的惯性</option><option value="19">20. 足球中的惯性 · 解答</option><option value="20">21. 投掷铅球</option><option value="21">22. 投掷铅球 · 答案</option><option value="22">23. 例1　弹簧上的匀加速</option><option value="23">24. 例1　弹簧上的匀加速 · 解答</option><option value="24">25. 例2　《车马出行图》</option><option value="25">26. 例2　《车马出行图》 · 解答</option><option value="26">27. 例3　箱中杆上的环</option><option value="27">28. 例3　箱中杆上的环 · 解答</option><option value="28">29. 牛顿第二定律的应用</option><option value="29">30. 两类动力学问题</option><option value="30">31. 解题的基本步骤</option><option value="31">32. 超重　失重</option><option value="32">33. 电梯里的台秤：超重与失重</option><option value="33">34. 判断超重和失重的三个角度</option><option value="34">35. 用惯性力看超重和失重：等效重力</option><option value="35">36. 牛顿第二定律的瞬时性</option><option value="36">37. 剪断瞬间：细绳与弹簧</option><option value="37">38. 等时圆模型</option><option value="38">39. 站在体重计上下蹲</option><option value="39">40. 站在体重计上下蹲 · 解答</option><option value="40">41. 判断对错：空间站与观光电梯</option><option value="41">42. 判断对错 · 答案</option><option value="42">43. 两个互成 120° 的力</option><option value="43">44. 两个互成 120° 的力 · 答案</option><option value="44">45. “下蹲”与“起立”的 F–t 图像</option><option value="45">46. “下蹲”与“起立” · 答案</option><option value="46">47. 例1　剪断 B、C 间的细线</option><option value="47">48. 例1　剪断 B、C 间的细线 · 解答</option><option value="48">49. 例2　平板车上坡</option><option value="49">50. 例2　平板车上坡 · 解答</option><option value="50">51. 例3　物流滑轨（2022 浙江 6 月选考）</option><option value="51">52. 例3　物流滑轨 · 解答</option><option value="52">53. 背越式跳高</option><option value="53">54. 背越式跳高 · 答案</option><option value="54">55. 蹦床的 F–t 图像</option><option value="55">56. 蹦床的 F–t 图像 · 解答</option><option value="56">57. 例4　光滑细杆上的滑环</option><option value="57">58. 例4　光滑细杆上的滑环 · 解答</option><option value="58">59. 牛顿运动定律的综合应用</option><option value="59">60. 动力学图像问题</option><option value="60">61. 动力学图像的解题策略</option><option value="61">62. 例1　力传感器与木板（经典高考）</option><option value="62">63. 例1　力传感器与木板 · 解答</option><option value="63">64. 斜面上的 v–t 图像</option><option value="64">65. 斜面上的 v–t 图像 · 解答</option><option value="65">66. 连接体的类型</option><option value="66">67. 整体法与隔离法　力的“分配”</option><option value="67">68. 例2　斜面上的 A、B</option><option value="68">69. 例2　斜面上的 A、B · 解答</option><option value="69">70. A 对 B 的作用力</option><option value="70">71. A 对 B 的作用力 · 解答</option><option value="71">72. 例3　动滑轮与斜面体</option><option value="72">73. 例3　动滑轮与斜面体 · 解答</option><option value="73">74. 动力学中的临界和极值问题</option><option value="74">75. 临界问题的三种思想方法</option><option value="75">76. 例4　旋转一周的外力 F</option><option value="76">77. 例4　旋转一周的外力 F · 解答</option><option value="77">78. “传送带”模型</option><option value="78">79. 水平传送带 &lt;span&gt;conveyor belt&lt;/span&gt;</option><option value="79">80. 倾斜传送带（一）：物块与传送带同向</option><option value="80">81. 倾斜传送带（二）：有初速度的物块</option><option value="81">82. 例1　工件滑上传送带</option><option value="82">83. 例1　工件滑上传送带 · 解答</option><option value="83">84. 例2　物块随传送带上行</option><option value="84">85. 例2　物块随传送带上行 · 解答</option><option value="85">86. “滑块—木板”模型</option><option value="86">87. “滑块—木板”模型的两种类型</option><option value="87">88. 处理“滑块—木板”问题的流程</option><option value="88">89. 例1　抽出薄木板</option><option value="89">90. 例1　抽出薄木板 · 解答</option><option value="90">91. a–F 图像与板块</option><option value="91">92. a–F 图像与板块 · 解答</option><option value="92">93. 例2　光滑平板与滑块</option><option value="93">94. 例2　光滑平板与滑块 · 解答</option></select><button id="next">下一页</button><button id="full">全屏</button><button id="memo">备注</button><a id="qa" target="_blank" rel="noopener">本题答疑</a></nav><script>const slides=[...document.querySelectorAll('.slide')],sel=document.querySelector('select');let pos=0;function resize(){let z=Math.min(innerWidth/1920,(innerHeight-46)/1080);stage.style.transform=`scale(${z})`;stage.style.left=(innerWidth-1920*z)/2+'px';stage.style.top=(innerHeight-46-1080*z)/2+'px'}function show(n){pos=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.classList.toggle('active',i===pos));sel.value=pos;location.hash=pos+1;document.querySelector('#qa').href='/tutor/#olympiad3/'+(slides[pos].dataset.qa||'l1/1');notes.textContent=slides[pos].querySelector('aside')?.textContent||'本页无备注';}sel.onchange=()=>show(+sel.value);prev.onclick=()=>show(pos-1);next.onclick=()=>show(pos+1);full.onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();memo.onclick=()=>notes.hidden=!notes.hidden;onkeydown=e=>{if(e.target.tagName==='SELECT')return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(pos+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(pos-1)}if(e.key==='Home')show(0);if(e.key==='End')show(slides.length-1)};onresize=resize;show((+location.hash.slice(1)||1)-1);resize();</script></body></html>
