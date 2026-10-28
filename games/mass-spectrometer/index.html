@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>质谱仪 · 速度选择器与偏转磁场</title>
+    <meta name="copyright" content="学科网（zxxk.com）版权所有">
+    <link rel="stylesheet" href="css/theme.css?v=20261029">
+    <link rel="stylesheet" href="css/style.css?v=20261029">
+</head>
+<body>
+<div class="app">
+    <header class="top-bar">
+        <div>
+            <h1>质谱仪</h1>
+            <p class="sub">加速电场 · 速度选择器 · 偏转磁场 · 选择性必修第二册 第一章第 4 节</p>
+        </div>
+        <div class="top-actions">
+            <button id="explainBtn" class="ghost-button" type="button">原理讲解</button>
+            <a class="home-button" href="/games/" aria-label="返回互动实验" title="互动实验"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+        </div>
+    </header>
+
+    <main class="layout" style="--side: 440px">
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <h2>氢的三种同位素在质谱仪中的运动</h2>
+                <div class="legend" id="legend">
+                    <span><i class="swatch orange"></i><em>氕 <sup>1</sup>H</em></span>
+                    <span><i class="swatch blue"></i><em>氘 <sup>2</sup>H</em></span>
+                    <span><i class="swatch pink"></i><em>氚 <sup>3</sup>H</em></span>
+                </div>
+            </div>
+            <div class="figure">
+                <svg id="canvas" viewBox="0 0 920 660" role="img" aria-label="质谱仪：离子经加速电场、速度选择器后进入偏转磁场，做半圆运动后落在照相底片上">
+                    <defs>
+                        <marker id="arrowDown" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 5 10 L 10 0 z" fill="#B07A00"/></marker>
+                        <marker id="arrowRight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#B07A00"/></marker>
+                        <marker id="mArrowL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 10 0 L 0 5 L 10 10 z" fill="#555"/></marker>
+                        <marker id="mArrowR" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/></marker>
+                    </defs>
+
+                    <!-- ④ 偏转磁场 -->
+                    <circle cx="350" cy="410" r="230" fill="rgba(0,158,115,0.06)" stroke="#009E73" stroke-width="1.5" stroke-dasharray="6,4"/>
+                    <g id="bdots" opacity="0.7"></g>
+                    <circle cx="615" cy="520" r="13" fill="#009E73"/>
+                    <text x="615" y="525" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">4</text>
+                    <text class="mk" x="640" y="516" fill="#007a58" font-size="15" font-weight="600">偏转磁场 *B*_0</text>
+                    <text x="640" y="536" fill="#555" font-size="13">匀强磁场，垂直纸面向外</text>
+
+                    <line x1="450" y1="14" x2="450" y2="481" stroke="#999" stroke-width="1" stroke-dasharray="2,4"/>
+
+                    <!-- ① 容器 A -->
+                    <rect x="370" y="28" width="160" height="50" fill="#ffffff" stroke="#D55E00" stroke-width="2" rx="4"/>
+                    <text x="450" y="50" text-anchor="middle" fill="#D55E00" font-size="15" font-weight="700">容器 A</text>
+                    <text x="450" y="69" text-anchor="middle" fill="#555" font-size="12">电离产生正离子</text>
+                    <line x1="440" y1="78" x2="460" y2="78" stroke="#222" stroke-width="2.5"/>
+                    <text class="mk" x="468" y="83" fill="#333" font-size="14" font-weight="600">*S*_1</text>
+                    <circle cx="345" cy="53" r="13" fill="#D55E00"/>
+                    <text x="345" y="58" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">1</text>
+                    <text x="328" y="58" text-anchor="end" fill="#D55E00" font-size="14" font-weight="600">离子源</text>
+
+                    <!-- ② 加速电场 -->
+                    <rect x="370" y="95" width="160" height="9" fill="#D55E00" opacity="0.85"/>
+                    <text x="540" y="103" fill="#D55E00" font-size="14" font-weight="700">M（+）</text>
+                    <rect x="370" y="150" width="160" height="9" fill="#0072B2" opacity="0.85"/>
+                    <text x="540" y="160" fill="#0072B2" font-size="14" font-weight="700">N（−）</text>
+                    <line x1="405" y1="108" x2="405" y2="146" stroke="#B07A00" stroke-width="1.6" marker-end="url(#arrowDown)"/>
+                    <line x1="495" y1="108" x2="495" y2="146" stroke="#B07A00" stroke-width="1.6" marker-end="url(#arrowDown)"/>
+                    <line x1="440" y1="159" x2="460" y2="159" stroke="#222" stroke-width="2.5"/>
+                    <text class="mk" x="468" y="180" fill="#333" font-size="14" font-weight="600">*S*_2</text>
+                    <circle cx="300" cy="120" r="13" fill="#B07A00"/>
+                    <text x="300" y="125" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">2</text>
+                    <text class="mk" x="283" y="115" text-anchor="end" fill="#8a5f00" font-size="14" font-weight="600">加速电场 *U*</text>
+                    <text x="283" y="134" text-anchor="end" fill="#555" font-size="12">电场方向向下</text>
+
+                    <!-- ③ 速度选择器 -->
+                    <rect x="385" y="190" width="9" height="90" fill="#D55E00" opacity="0.85"/>
+                    <text class="mk" x="377" y="205" text-anchor="end" fill="#D55E00" font-size="14" font-weight="700">*P*_1（+）</text>
+                    <rect x="517" y="190" width="9" height="90" fill="#0072B2" opacity="0.85"/>
+                    <text class="mk" x="534" y="205" fill="#0072B2" font-size="14" font-weight="700">*P*_2（−）</text>
+                    <line x1="404" y1="212" x2="506" y2="212" stroke="#B07A00" stroke-width="1.6" marker-end="url(#arrowRight)"/>
+                    <line x1="404" y1="240" x2="506" y2="240" stroke="#B07A00" stroke-width="1.6" marker-end="url(#arrowRight)"/>
+                    <line x1="404" y1="268" x2="506" y2="268" stroke="#B07A00" stroke-width="1.6" marker-end="url(#arrowRight)"/>
+                    <g id="seldots" opacity="0.7"></g>
+                    <circle cx="350" cy="240" r="13" fill="#009E73"/>
+                    <text x="350" y="245" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">3</text>
+                    <text x="333" y="235" text-anchor="end" fill="#007a58" font-size="14" font-weight="600">速度选择器</text>
+                    <text x="333" y="254" text-anchor="end" fill="#555" font-size="12">电场力 = 洛伦兹力</text>
+                    <text class="mk" id="selE" x="555" y="228" fill="#8a5f00" font-size="13" font-weight="600">*E* = -- （向右）</text>
+                    <text class="mk" id="selB1" x="555" y="246" fill="#007a58" font-size="13" font-weight="600">*B*_1 = 0.50 T（垂直纸面向外）</text>
+                    <text class="mk" id="selV" x="555" y="264" fill="#222" font-size="13" font-weight="600">*v* = *E*/*B*_1 = --</text>
+                    <text class="mk" id="selTune" x="555" y="282" fill="#555" font-size="12">已按 *U* 自动调谐</text>
+
+                    <line x1="440" y1="292" x2="460" y2="292" stroke="#222" stroke-width="2.5"/>
+                    <text class="mk" x="468" y="297" fill="#333" font-size="14" font-weight="600">*S*_3</text>
+
+                    <!-- ⑤ 底片 -->
+                    <rect x="180" y="286" width="258" height="12" fill="#009E73" opacity="0.3" rx="2"/>
+                    <rect x="180" y="286" width="258" height="3.5" fill="#009E73"/>
+                    <circle cx="150" cy="292" r="13" fill="#009E73"/>
+                    <text x="150" y="297" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">5</text>
+                    <text x="150" y="325" text-anchor="middle" fill="#555" font-size="13">照相底片 D</text>
+
+                    <g id="particles"></g>
+                    <g id="hits"></g>
+                    <g id="dims"></g>
+                </svg>
+            </div>
+        </section>
+
+        <aside class="side">
+            <div class="card">
+                <h3>参数调节</h3>
+                <div class="group-label">加速电压 <span class="tex" data-f="U"></span>：<b id="valU">1000 V</b></div>
+                <div class="chip-grid" id="grpU">
+                    <button class="chip" type="button" data-v="500">500</button>
+                    <button class="chip on" type="button" data-v="1000">1000</button>
+                    <button class="chip" type="button" data-v="2000">2000</button>
+                    <button class="chip" type="button" data-v="3000">3000</button>
+                </div>
+                <div class="group-label">偏转磁场 <span class="tex" data-f="B0"></span>：<b id="valB2">1.0 T</b></div>
+                <div class="chip-grid" id="grpB">
+                    <button class="chip" type="button" data-v="0.5">0.5</button>
+                    <button class="chip on" type="button" data-v="1.0">1.0</button>
+                    <button class="chip" type="button" data-v="1.5">1.5</button>
+                    <button class="chip" type="button" data-v="2.0">2.0</button>
+                </div>
+                <div class="group-label">选择同位素</div>
+                <div class="iso-list" id="isoList"></div>
+                <div class="button-row" style="margin-top:12px">
+                    <button class="primary-button" id="btnPause" type="button">暂停</button>
+                    <button class="ghost-button" id="btnReset" type="button">清除落点</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>当前读数</h3>
+                <div class="stat-list">
+                    <div class="stat-row"><span class="lb">通过速度 <span class="tex" data-f="v0eq"></span></span><b id="infoV">--</b></div>
+                    <div class="stat-row"><span class="lb">偏转半径 <span class="tex" data-f="rS"></span></span><b id="infoR">--</b></div>
+                    <div class="stat-row"><span class="lb">落点距离 <span class="tex" data-f="X2r"></span></span><b id="infoX">--</b></div>
+                </div>
+                <p class="note" style="margin-top:8px">读数取已选同位素中质量最小的一种；取 <i class="v">q</i> = 1，<i class="v">m</i> 以相对质量计，数值只用来比较大小。<span id="scaleNote" style="display:none">　图中轨迹已按比例缩小。</span></p>
+            </div>
+
+            <div class="card">
+                <h3>核心公式</h3>
+                <div class="stat-list">
+                    <div class="stat-row"><span class="lb">② 加速电场</span><span class="tex" data-f="accel"></span></div>
+                    <div class="stat-row"><span class="lb">③ 速度选择器</span><span class="tex" data-f="select"></span></div>
+                    <div class="stat-row"><span class="lb">④ 偏转磁场</span><span class="tex" data-f="radius"></span></div>
+                    <div class="stat-row"><span class="lb">⑤ 落点距离</span><span class="tex" data-f="X"></span></div>
+                    <div class="stat-row"><span class="lb">由落点求质量</span><span class="tex" data-f="m"></span></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<dialog class="explain" id="explain">
+    <div class="explain-head">
+        <h2>质谱仪 · 原理讲解</h2>
+        <button class="ghost-button" id="explainClose" type="button">关闭</button>
+    </div>
+    <div class="explain-body">
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4 style="color:var(--orange)">① 容器 A · 电离</h4>
+                <p>容器 A 中气体被电离，产生<span class="key">正离子</span>，经小孔 <i class="v">S</i><sub>1</sub> 飘入加速电场。</p>
+                <div class="fm tex" data-f="s1"></div>
+                <p>初速极小，动能全部来自电场力做功，这是下一步推导的前提。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--amber)">② 加速电场 · 动能定理</h4>
+                <p>两板 M（+）、N（−）间电压为 <i class="v">U</i>，电场力做正功：</p>
+                <div class="fm tex" data-f="s2a"></div>
+                <div class="fm tex" data-f="s2b"></div>
+                <p><i class="v">U</i> 越大，<i class="v">v</i> 越大；质量越大，同样电压加速出的速度越<span class="key">小</span>。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--teal)">③ 速度选择器 · 二力平衡</h4>
+                <p>电场 <i class="v">E</i> 向右、磁场 <i class="v">B</i><sub>1</sub> 垂直纸面向外，离子竖直向下通过。只有电场力等于洛伦兹力时才沿直线通过：</p>
+                <div class="fm tex" data-f="s3a"></div>
+                <div class="fm tex" data-f="s3b"></div>
+                <p>速度偏大，洛伦兹力占优，向左偏；偏小，电场力占优，向右偏。演示中 <i class="v">E</i> 随 <i class="v">U</i> 自动调谐，保证束流通过。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--blue)">④ 偏转磁场 · 圆周运动</h4>
+                <p>从 <i class="v">S</i><sub>3</sub> 以<span class="key">相同速度</span> <i class="v">v</i><sub>0</sub> 进入 <i class="v">B</i><sub>0</sub>，洛伦兹力全部提供向心力：</p>
+                <div class="fm tex" data-f="s4a"></div>
+                <div class="fm tex" data-f="s4b"></div>
+                <p><i class="v">v</i><sub>0</sub> 相同，所以 <i class="v">r</i> ∝ <i class="v">m</i>：质量越大，半径越大。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--pink)">⑤ 照相底片 · 落点</h4>
+                <p>离子偏转<span class="key">半个圆周</span>，落在与 <i class="v">S</i><sub>3</sub> 同一水平线的底片上：</p>
+                <div class="fm tex" data-f="s5"></div>
+                <div class="fm tex" data-f="s5m"></div>
+                <p><i class="v">X</i> 是半圆的直径；由落点可以反解出质量。</p>
+            </div>
+        </div>
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4>结论：为什么要加速度选择器？</h4>
+                <p>① 选择器保证进入 <i class="v">B</i><sub>0</sub> 的离子速度相同，于是 <i class="v">X</i> ∝ <i class="v">m</i>。</p>
+                <p>② 三种氢的同位素落点之比为</p>
+                <div class="fm tex" data-f="ratio"></div>
+                <p>等质量差对应等间距的谱线，质量读数更直观（没有选择器时 <i class="v">X</i> ∝ √<i class="v">m</i>）。</p>
+                <p>③ 测出 <i class="v">X</i> 就能求出质量，这是质谱仪测定同位素质量的原理；典型应用有分离氢的同位素，以及发现氖的同位素。</p>
+            </div>
+            <div class="dcard">
+                <h4>实时数据（随参数更新，灰色为未选中）</h4>
+                <table class="dtable">
+                    <thead><tr><th>同位素</th><th><span class="tex" data-f="mS"></span>（u）</th><th><span class="tex" data-f="v0eq"></span></th><th><span class="tex" data-f="th"></span></th><th><span class="tex" data-f="X2r"></span></th></tr></thead>
+                    <tbody id="deriveBody"></tbody>
+                </table>
+                <p class="note">加速电压 <i class="v">U</i> 增大，<i class="v">E</i>、<i class="v">v</i><sub>0</sub> 增大，<i class="v">r</i>、<i class="v">X</i> 增大；<i class="v">B</i><sub>0</sub> 增大，<i class="v">r</i>、<i class="v">X</i> 减小。三种离子 <i class="v">v</i><sub>0</sub> 相同，<i class="v">X</i> ∝ <i class="v">m</i>，谱线等间距。表中数值为相对值。</p>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<script src="js/formulas.js?v=20261029"></script>
+<script src="js/typeset.js?v=20261029"></script>
+<script src="js/main.js?v=20261029"></script>
+</body>
+</html>

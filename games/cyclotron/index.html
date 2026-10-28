@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回旋加速器 · 电场加速与磁场回旋</title>
+    <meta name="copyright" content="学科网（zxxk.com）版权所有">
+    <link rel="stylesheet" href="css/theme.css?v=20261029">
+    <link rel="stylesheet" href="css/style.css?v=20261029">
+</head>
+<body>
+<div class="app">
+    <header class="top-bar">
+        <div>
+            <h1>回旋加速器</h1>
+            <p class="sub">电场加速 · 磁场回旋 · 选择性必修第二册 第一章第 4 节</p>
+        </div>
+        <div class="top-actions">
+            <button id="explainBtn" class="ghost-button" type="button">原理讲解</button>
+            <a class="home-button" href="/games/" aria-label="返回互动实验" title="互动实验"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+        </div>
+    </header>
+
+    <main class="layout" style="--side: 600px">
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <h2>粒子在 D 形盒中的螺旋轨迹</h2>
+                <div class="legend">
+                    <span><i class="swatch amber"></i>狭缝电场（加速）</span>
+                    <span><i class="swatch teal"></i>盒内磁场（回旋）</span>
+                    <span><i class="swatch blue"></i>高频电源</span>
+                </div>
+            </div>
+            <div class="figure">
+                <svg id="scene" viewBox="0 0 920 700" role="img" aria-label="回旋加速器：两个 D 形盒之间的狭缝加速粒子，盒内磁场使粒子回旋，轨迹半径逐渐增大，最后从边缘引出">
+                    <defs>
+                        <marker id="aY" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#B07A00"/>
+                        </marker>
+                    </defs>
+                    <g id="bfield" opacity="0.55"></g>
+                    <path d="M 422,120 A 250,250 0 0 0 422,620 Z" fill="rgba(0,114,178,0.05)" stroke="#555" stroke-width="2.5"/>
+                    <path d="M 438,120 A 250,250 0 0 1 438,620 Z" fill="rgba(0,114,178,0.05)" stroke="#555" stroke-width="2.5"/>
+                    <text x="300" y="205" fill="#555" font-size="24" font-weight="700" font-style="italic">D<tspan dy="6" font-size="16" font-style="normal">1</tspan></text>
+                    <text x="548" y="205" fill="#555" font-size="24" font-weight="700" font-style="italic">D<tspan dy="6" font-size="16" font-style="normal">2</tspan></text>
+
+                    <rect x="676" y="348" width="28" height="48" fill="#ffffff"/>
+                    <line x1="678" y1="350" x2="700" y2="350" stroke="#009E73" stroke-width="2.5"/>
+                    <line x1="678" y1="394" x2="700" y2="394" stroke="#009E73" stroke-width="2.5"/>
+                    <text x="708" y="356" fill="#007a58" font-size="14">引出通道</text>
+                    <rect x="672" y="512" width="60" height="11" rx="5" fill="#D55E00" opacity="0.85"/>
+                    <text x="702" y="548" fill="#D55E00" font-size="15" text-anchor="middle" font-weight="700">靶</text>
+
+                    <circle cx="430" cy="52" r="17" fill="#ffffff" stroke="#0072B2" stroke-width="2"/>
+                    <path d="M 420,52 q 5,-9 10,0 q 5,9 10,0" stroke="#0072B2" fill="none" stroke-width="2"/>
+                    <text x="430" y="18" fill="#0072B2" font-size="14" text-anchor="middle">高频电源</text>
+                    <path d="M 416,62 L 392,80 L 392,121" stroke="#777" stroke-width="2" fill="none"/>
+                    <path d="M 444,62 L 468,80 L 468,121" stroke="#777" stroke-width="2" fill="none"/>
+
+                    <text id="polL" x="400" y="152" fill="#D55E00" font-size="24" font-weight="800" text-anchor="end">+</text>
+                    <text id="polR" x="460" y="152" fill="#0072B2" font-size="24" font-weight="800" text-anchor="start">−</text>
+                    <g stroke="#B07A00" stroke-width="2.5">
+                        <line id="e1" x1="424" y1="250" x2="436" y2="250" marker-end="url(#aY)"/>
+                        <line id="e2" x1="424" y1="370" x2="436" y2="370" marker-end="url(#aY)"/>
+                        <line id="e3" x1="424" y1="490" x2="436" y2="490" marker-end="url(#aY)"/>
+                    </g>
+                    <text x="430" y="648" fill="#8a5f00" font-size="14" text-anchor="middle">狭缝交变电场 <tspan font-style="italic">E</tspan>（每半圈反向一次）</text>
+
+                    <g transform="translate(34,672)">
+                        <circle cx="6" cy="-4" r="5" fill="none" stroke="#009E73" stroke-width="1.6"/>
+                        <circle cx="6" cy="-4" r="1.5" fill="#009E73"/>
+                        <text x="20" y="0" fill="#007a58" font-size="14">匀强磁场 <tspan font-style="italic">B</tspan>（垂直纸面向外），盒内无电场（静电屏蔽）</text>
+                    </g>
+
+                    <path id="ghost" d="" fill="none" stroke="#999" stroke-width="1.2" stroke-dasharray="5 5" opacity="0.8"/>
+                    <path id="trail" d="" fill="none" stroke="#0072B2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <text x="430" y="352" fill="#D55E00" font-size="14" text-anchor="middle">粒子源 <tspan font-style="italic">A</tspan></text>
+                    <circle id="dotHalo" cx="430" cy="370" r="12" fill="#0072B2" opacity="0.2"/>
+                    <circle id="dot" cx="430" cy="370" r="6.5" fill="#0072B2" stroke="#ffffff" stroke-width="1.5"/>
+                </svg>
+            </div>
+        </section>
+
+        <aside class="side two">
+            <div class="col">
+                <div class="card">
+                    <h3>播放控制</h3>
+                    <div class="button-row">
+                        <button class="primary-button" id="btnPlay" type="button">暂停</button>
+                        <button class="ghost-button" id="btnReset" type="button">重置</button>
+                        <button class="ghost-button" id="btnSlow" type="button">慢速 0.5×</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>参数选择</h3>
+                    <div class="group-label">粒子种类</div>
+                    <div class="chip-grid" id="grpP"></div>
+                    <div class="group-label">磁感应强度 <span class="tex" data-f="BS"></span>（T）</div>
+                    <div class="chip-grid" id="grpB"></div>
+                    <div class="group-label">D 形盒半径 <span class="tex" data-f="RS"></span>（m）</div>
+                    <div class="chip-grid" id="grpR"></div>
+                    <div class="group-label">加速电压 <span class="tex" data-f="US"></span>（狭缝，kV）</div>
+                    <div class="chip-grid" id="grpU"></div>
+                    <p class="note" style="margin-top:10px">切换任一参数会重建轨迹并重新演示。动画只画出 15 段回旋；真实加速次数很多时，每次跨越狭缝代表多次加速，计数按真实值累计。</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <h3>实时读数</h3>
+                    <div class="stat-list">
+                        <div class="stat-row"><span class="lb">粒子</span><b id="lvP">—</b></div>
+                        <div class="stat-row"><span class="lb">加速进度</span><b id="lvN">—</b></div>
+                        <div class="stat-row"><span class="lb">当前速率 <span class="tex" data-f="v"></span></span><b id="lvV">0</b></div>
+                        <div class="stat-row"><span class="lb">回旋半径 <span class="tex" data-f="r"></span></span><b id="lvR">0</b></div>
+                        <div class="stat-row"><span class="lb">动能 <span class="tex" data-f="Ek"></span></span><b id="lvE">0</b></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>计算结果（决定出射极限）</h3>
+                    <div class="stat-list">
+                        <div class="stat-row"><span class="lb tex" data-f="T"></span><b id="stT">--</b></div>
+                        <div class="stat-row"><span class="lb tex" data-f="f"></span><b id="stF">--</b></div>
+                        <div class="stat-row"><span class="lb tex" data-f="vm"></span><b id="stVm">--</b></div>
+                        <div class="stat-row"><span class="lb tex" data-f="Ekm"></span><b id="stEkm">--</b></div>
+                        <div class="stat-row"><span class="lb tex" data-f="N"></span><b id="stN">--</b></div>
+                        <div class="stat-row"><span class="lb tex" data-f="tt"></span><b id="stTt">--</b></div>
+                    </div>
+                    <div class="figure wave-fig">
+                        <svg id="wave" viewBox="0 0 300 70" role="img" aria-label="狭缝两侧电势差随时间交替变化">
+                            <path id="wpath" d="" fill="none" stroke="#0072B2" stroke-width="2"/>
+                            <line id="wcur" x1="10" y1="8" x2="10" y2="56" stroke="#D55E00" stroke-width="1.5"/>
+                            <circle id="wdot" cx="10" cy="18" r="4" fill="#D55E00"/>
+                            <text x="10" y="67" fill="#555" font-size="10">D<tspan dy="2.5" font-size="7">1</tspan><tspan dy="-2.5"> 电势：每半格是一次狭缝加速</tspan></text>
+                            <text x="298" y="67" fill="#555" font-size="10" text-anchor="end">t →</text>
+                        </svg>
+                    </div>
+                    <p class="note" id="lvDir" style="margin-top:8px">狭缝电场：向右</p>
+                </div>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<dialog class="explain" id="explain">
+    <div class="explain-head">
+        <h2>回旋加速器 · 原理讲解</h2>
+        <button class="ghost-button" id="explainClose" type="button">关闭</button>
+    </div>
+    <div class="explain-body">
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4 style="color:var(--orange)">① 结构与分工</h4>
+                <p>两个半圆形<span class="key">D 形金属盒</span>置于真空中，盒间留狭缝并接<span class="key">高频交流电源</span>；磁场垂直盒面向外。</p>
+                <p><span class="key">狭缝电场</span>负责加速，<span class="key">盒内磁场</span>负责回旋。金属盒静电屏蔽，盒内电场为零；洛伦兹力不做功，动能全部来自电场。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--teal)">② 回旋周期（关键前提）</h4>
+                <p>盒内由洛伦兹力提供向心力：</p>
+                <div class="fm tex" data-f="d1"></div>
+                <p><span class="key">周期与速率、半径都无关</span>，粒子每转半圈用时恒为 <i class="v">T</i>/2，这是“反复同步加速”成立的基础。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--amber)">③ 电源同步条件</h4>
+                <p>交变电压的周期 <i class="v">T</i><sub>0</sub> 必须等于回旋周期：</p>
+                <div class="fm tex" data-f="d2"></div>
+                <p>粒子每次到达狭缝，电场恰好反向，所以<span class="key">每半圈加速一次，一圈加速两次</span>。同一台加速器（频率固定）只能加速<span class="key">比荷相同</span>的粒子，氘核与 α 粒子比荷相同，可以共用。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--blue)">④ 螺旋轨道规律</h4>
+                <p>第 <i class="v">n</i> 次加速后（初速近似为 0）：</p>
+                <div class="fm tex" data-f="d3a"></div>
+                <div class="fm tex" data-f="d3b"></div>
+                <p>半径按 √<i class="v">n</i> 增大：越转越快，圈层越来越密，但每半圈的时间不变。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--pink)">⑤ 出射与极限</h4>
+                <p>当 <i class="v">r</i> = <i class="v">R</i>（盒边缘）时，粒子经引出通道射出：</p>
+                <div class="fm tex" data-f="d4a"></div>
+                <div class="fm tex" data-f="d4b"></div>
+                <div class="fm tex" data-f="d4c"></div>
+                <div class="fm tex" data-f="d4d"></div>
+            </div>
+        </div>
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4>高考常考结论</h4>
+                <p>① <span class="key">最大动能 <span class="tex" data-f="EkmS"></span> 与加速电压 <i class="v">U</i> 无关</span>，只由 <i class="v">B</i>、<i class="v">R</i> 和粒子比荷决定。想提高末动能，必须增大 <i class="v">B</i> 或 <i class="v">R</i>。</p>
+                <p>② 增大 <i class="v">U</i>：末动能不变，但加速次数 <i class="v">N</i> 与在场时间 <i class="v">t</i> 都减小。</p>
+                <p>③ 磁场只“拐弯”不“加速”，电场每半圈加速一次。</p>
+                <p>④ 交变电源的周期和频率由粒子的回旋周期决定。</p>
+            </div>
+            <div class="dcard">
+                <h4>各粒子对比（随参数实时更新）</h4>
+                <table class="dtable" id="dTbl"></table>
+                <table class="dtable" style="margin-top:12px">
+                    <tr><th>调节</th><th><span class="tex" data-f="vmS"></span></th><th><span class="tex" data-f="EkmS"></span></th><th><span class="tex" data-f="NS"></span></th><th><span class="tex" data-f="tS"></span></th></tr>
+                    <tr><td><i class="v">U</i> 增大</td><td>不变</td><td>不变</td><td>减小</td><td>减小</td></tr>
+                    <tr><td><i class="v">B</i> 增大</td><td>增大</td><td>增大</td><td>增大</td><td>增大</td></tr>
+                    <tr><td><i class="v">R</i> 增大</td><td>增大</td><td>增大（∝ <i class="v">R</i><sup>2</sup>）</td><td>增大（∝ <i class="v">R</i><sup>2</sup>）</td><td>增大（∝ <i class="v">R</i><sup>2</sup>）</td></tr>
+                </table>
+            </div>
+        </div>
+        <p class="note">教学提示：狭缝宽度与穿越时间被放大以便观察；实际加速次数可达数千次，动画按 √<i class="v">n</i> 规律示意绘制部分回旋，计数与速度均按真实物理量计算。</p>
+    </div>
+</dialog>
+
+<script src="js/formulas.js?v=20261029"></script>
+<script src="js/main.js?v=20261029"></script>
+</body>
+</html>
