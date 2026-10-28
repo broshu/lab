@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>带电粒子在磁场中的圆周运动 · 四类边界模型</title>
+    <meta name="copyright" content="学科网（zxxk.com）版权所有">
+    <link rel="stylesheet" href="css/theme.css?v=20261029">
+    <link rel="stylesheet" href="css/style.css?v=20261029">
+</head>
+<body>
+<div class="app">
+    <header class="top-bar">
+        <div>
+            <h1>带电粒子在磁场中的圆周运动</h1>
+            <p class="sub">无边界、单边界、双边界、圆形边界 · 选择性必修第二册 第一章第 3 节</p>
+        </div>
+        <div class="top-actions">
+            <button id="explainBtn" class="ghost-button" type="button">原理讲解</button>
+            <a class="home-button" href="/games/" aria-label="返回互动实验" title="互动实验"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+        </div>
+    </header>
+
+    <main class="layout" style="--side: 520px">
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <div class="chip-grid modes" id="modes">
+                    <button class="chip on" type="button" data-mode="none">无边界磁场</button>
+                    <button class="chip" type="button" data-mode="single">单边界磁场</button>
+                    <button class="chip" type="button" data-mode="double">双边界磁场</button>
+                    <button class="chip" type="button" data-mode="circle">圆形边界磁场</button>
+                </div>
+                <div class="phase" id="phaseBox"><span id="phaseText">已暂停</span></div>
+            </div>
+            <div class="figure"><canvas id="scene" role="img" aria-label="带电粒子在匀强磁场中运动的轨迹"></canvas></div>
+            <div class="stage-foot">
+                <div class="button-row">
+                    <button class="primary-button" id="playBtn" type="button">开始</button>
+                    <button class="ghost-button" id="resetBtn" type="button">重置</button>
+                    <button class="ghost-button" id="qsignBtn" type="button">电荷：正（+）</button>
+                </div>
+                <div class="legend">
+                    <span><i class="swatch blue"></i>速度 <i class="v">v</i></span>
+                    <span><i class="swatch amber"></i>洛伦兹力 <i class="v">F</i></span>
+                    <span><i class="swatch orange"></i>磁场内：圆周运动</span>
+                    <span><i class="swatch grey"></i>磁场外：匀速直线</span>
+                    <span><i class="swatch teal"></i>磁场 <i class="v">B</i>（垂直纸面向里）</span>
+                </div>
+            </div>
+        </section>
+
+        <aside class="side">
+            <div class="card">
+                <h3>参数</h3>
+                <div class="sliders two">
+                    <label class="slider-row"><span>初速度 <span class="tex" data-f="v0"></span></span><output id="v0sets">4.0 m/s</output><input type="range" id="v0s" min="1" max="10" step="0.5" value="4"></label>
+                    <label class="slider-row"><span>磁感应强度 <span class="tex" data-f="B"></span></span><output id="bsets">2.0 T</output><input type="range" id="bs" min="0.5" max="5" step="0.1" value="2"></label>
+                    <label class="slider-row"><span>电荷量 <span class="tex" data-f="q"></span></span><output id="qsets">1.0</output><input type="range" id="qs" min="0.5" max="3" step="0.1" value="1"></label>
+                    <label class="slider-row"><span>质量 <span class="tex" data-f="m"></span></span><output id="msets">1.0</output><input type="range" id="ms" min="0.3" max="3" step="0.1" value="1"></label>
+                    <label class="slider-row" id="pTheta"><span>入射角 <span class="tex" data-f="th"></span></span><output id="thset">30°</output><input type="range" id="ths" min="0" max="90" step="1" value="30"></label>
+                    <label class="slider-row hidden" id="pWidth"><span>磁场宽度 <span class="tex" data-f="d"></span></span><output id="dset">2.0 m</output><input type="range" id="ds" min="0.5" max="4" step="0.1" value="2"></label>
+                    <label class="slider-row hidden" id="pRmag"><span>磁场区半径 <span class="tex" data-f="Rm"></span></span><output id="rmsets">1.5 m</output><input type="range" id="rms" min="0.5" max="4" step="0.1" value="1.5"></label>
+                    <label class="slider-row"><span>动画速度</span><output id="spdset">0.5×</output><input type="range" id="spds" min="0.1" max="3" step="0.1" value="0.5"></label>
+                </div>
+                <p class="note" style="margin-top:8px">电荷量与质量取相对值，以 <i class="v">q</i>/<i class="v">m</i> = 1 为基准。入射角 <i class="v">θ</i> 是速度与磁场<b>边界</b>的夹角。</p>
+            </div>
+
+            <div class="card">
+                <h3>计算结果</h3>
+                <div class="stat-list">
+                    <div class="stat-row"><span class="lb tex" data-f="R"></span><b><span id="rv">2.00</span> m</b></div>
+                    <div class="stat-row"><span class="lb tex" data-f="T"></span><b><span id="tv">3.14</span> s</b></div>
+                    <div class="stat-row"><span class="lb tex" data-f="w"></span><b><span id="wv">2.00</span> rad/s</b></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 id="modeTitle">本模型结论</h3>
+                <p id="hint" class="note"></p>
+                <div class="fm tex" id="modeFormula"></div>
+                <p id="modeVal" class="mode-val"></p>
+                <p id="conclude" class="note"></p>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<dialog class="explain" id="explain">
+    <div class="explain-head">
+        <h2>带电粒子在磁场中的圆周运动 · 原理讲解</h2>
+        <button class="ghost-button" id="explainClose" type="button">关闭</button>
+    </div>
+    <div class="explain-body">
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4 style="color:var(--blue)">洛伦兹力提供向心力</h4>
+                <p>洛伦兹力始终垂直于速度，不做功，只改变速度方向，粒子做匀速圆周运动：</p>
+                <div class="fm tex" data-f="e1"></div>
+                <div class="fm tex" data-f="e2"></div>
+                <p>半径与速率成正比、与磁感应强度成反比；周期与速率、半径无关。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--orange)">单边界与双边界</h4>
+                <p>粒子从磁场外斜射入，只转过一段圆弧。入射角 <i class="v">θ</i> 为速度与边界的夹角，则单边界时偏转角为 2<i class="v">θ</i>，最大穿入深度为：</p>
+                <div class="fm tex" data-f="e3"></div>
+                <p>双边界磁场宽度 <i class="v">d</i> ≤ <i class="v">R</i>(1 − cos <i class="v">θ</i>) 时，粒子穿出远边界；否则返回近边界。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--teal)">圆形边界</h4>
+                <p>粒子沿半径方向射入圆形磁场区，必沿半径方向射出，偏转角为：</p>
+                <div class="fm tex" data-f="e4"></div>
+                <p><i class="v">R</i><sub>m</sub> 越大、<i class="v">R</i> 越小，偏转越大。</p>
+            </div>
+        </div>
+        <p class="note">快捷键：空格开始 / 暂停，<kbd>R</kbd> 重置。</p>
+    </div>
+</dialog>
+
+<script src="js/formulas.js?v=20261029"></script>
+<script src="js/typeset.js?v=20261029"></script>
+<script src="js/main.js?v=20261029"></script>
+</body>
+</html>

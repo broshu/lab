@@ -64,7 +64,7 @@
         runs.forEach(r => {
             ctx.font = font(r);
             const dy = r.k === 'sub' ? size * 0.28 : r.k === 'sup' ? -size * 0.4 : 0;
-            ctx.fillText(r.t, cx, y + dy); cx += r.w;
+            CanvasRenderingContext2D.prototype.fillText.call(ctx, r.t, cx, y + dy); cx += r.w;
         });
         ctx.restore();
         return w;
