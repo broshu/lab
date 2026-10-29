@@ -1,0 +1,102 @@
+/* Shared UI colours. Figures, camera views and printable markers keep their own palettes. */
+:root {
+  color-scheme: light;
+  --site-bg: #f4f1e8;
+  --site-surface: #faf8f1;
+  --site-surface-soft: #eeebe2;
+  --site-surface-tint: #e3ebdf;
+  --site-text: #1c2b25;
+  --site-muted: #62695f;
+  --site-border: #c9c3b3;
+  --site-border-soft: #ded9cc;
+  --site-green: #2f5d4f;
+  --site-green-hover: #244c3f;
+  --site-accent: #66753a;
+  --site-on-accent: #ffffff;
+  --site-success: #247149;
+  --site-danger: #b7354a;
+  --site-info: #2468a6;
+  --site-amber: #94620e;
+  --site-focus: #2f5d4f;
+  --site-backdrop: rgba(20, 25, 23, .62);
+  --site-tint-green: rgba(47, 93, 79, .05);
+  --site-tint-accent: rgba(102, 117, 58, .06);
+  --site-shadow: 0 1px 2px rgba(28, 43, 37, .05), 0 12px 32px -16px rgba(28, 43, 37, .28);
+  --site-shadow-hover: 0 22px 48px -20px rgba(28, 43, 37, .45);
+  /* Fixed artwork has dark labels. Keep its paper white in either UI theme. */
+  --site-figure-bg: #ffffff;
+  --site-figure-ink: #111111;
+
+  /* Existing site names remain aliases so page styles share this palette. */
+  --paper: var(--site-bg);
+  --card: var(--site-surface);
+  --ink: var(--site-text);
+  --muted: var(--site-muted);
+  --line: var(--site-border);
+  --green: var(--site-green);
+  --green-2: var(--site-green-hover);
+  --accent: var(--site-accent);
+  --shadow: var(--site-shadow);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --site-bg: #14181b;
+    --site-surface: #1e2427;
+    --site-surface-soft: #282f32;
+    --site-surface-tint: #2a3d33;
+    --site-text: #e7ece8;
+    --site-muted: #abb6af;
+    --site-border: #4d5b54;
+    --site-border-soft: #35423b;
+    --site-green: #9ccbb4;
+    --site-green-hover: #c0e3ce;
+    --site-accent: #b7c78c;
+    --site-on-accent: #14241d;
+    --site-success: #88d4aa;
+    --site-danger: #ff99a7;
+    --site-info: #9bc9f5;
+    --site-amber: #eac477;
+    --site-focus: #b7d9c5;
+    --site-backdrop: rgba(0, 0, 0, .72);
+    --site-tint-green: rgba(156, 203, 180, .06);
+    --site-tint-accent: rgba(183, 199, 140, .05);
+    --site-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px -16px rgba(0, 0, 0, .65);
+    --site-shadow-hover: 0 22px 48px -20px rgba(0, 0, 0, .65);
+  }
+}
+
+::selection { background: var(--site-green); color: var(--site-on-accent); }
+:where(input, select, textarea, button) { accent-color: var(--site-green); }
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--site-focus);
+  outline-offset: 3px;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+    --site-bg: #ffffff;
+    --site-surface: #ffffff;
+    --site-surface-soft: #ffffff;
+    --site-surface-tint: #ffffff;
+    --site-text: #111111;
+    --site-muted: #444444;
+    --site-border: #888888;
+    --site-border-soft: #cccccc;
+    --site-green: #244c3f;
+    --site-green-hover: #244c3f;
+    --site-accent: #66753a;
+    --site-on-accent: #ffffff;
+    --site-success: #247149;
+    --site-danger: #b7354a;
+    --site-info: #2468a6;
+    --site-amber: #94620e;
+    --site-focus: #2f5d4f;
+    --site-shadow: none;
+    --site-shadow-hover: none;
+    --site-tint-green: transparent;
+    --site-tint-accent: transparent;
+  }
+}
