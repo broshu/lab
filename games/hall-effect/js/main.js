@@ -235,6 +235,11 @@
     bindGroup('grpMode', x => { mode = x; });
     bindGroup('grpCarrier', x => { carrier = x; });
     bindGroup('grpB', x => { bdir = x; });
+    $('btnReplay').addEventListener('click', () => {
+        mode = 'deflection';
+        $('grpMode').querySelectorAll('.chip').forEach(o => o.classList.toggle('on', o.dataset.v === 'deflection'));
+        reset();
+    });
     const bindS = (id, out, fmt, set) => $(id).addEventListener('input', e => { const x = +e.target.value; set(x); $(out).textContent = fmt(x); });
     bindS('sliderI', 'valI', x => x.toFixed(1) + ' mA', x => { Ima = x; });
     bindS('sliderB', 'valB', x => x.toFixed(2) + ' T', x => { Bf = x; });
