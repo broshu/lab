@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霍尔元件 · 霍尔电压的产生</title>
+    <link rel="stylesheet" href="css/theme.css?v=20261030">
+    <link rel="stylesheet" href="css/style.css?v=20261030">
+</head>
+<body>
+<div class="app">
+    <header class="top-bar">
+        <div>
+            <h1>霍尔元件</h1>
+            <p class="sub">薄片通电并置于磁场中，M、N 间出现霍尔电压 <span class="tex" data-f="d5"></span></p>
+        </div>
+        <div class="top-actions">
+            <button id="explainBtn" class="ghost-button" type="button">原理讲解</button>
+            <a class="home-button" href="/games/" aria-label="返回互动实验" title="互动实验"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+        </div>
+    </header>
+
+    <main class="layout half">
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <h2 id="stageTitle">偏转过程：载流子在洛伦兹力作用下偏向一侧</h2>
+                <div class="legend">
+                    <span><i class="swatch orange"></i>载流子（正）</span>
+                    <span><i class="swatch blue"></i>载流子（负）</span>
+                    <span><i class="swatch amber"></i>受力</span>
+                </div>
+            </div>
+            <div class="figure">
+                <canvas id="mainCanvas" width="780" height="540" role="img" aria-label="霍尔元件：薄片左右两端 E、F 通入电流，磁场垂直薄片，载流子偏向上侧或下侧，M、N 间接电压表"></canvas>
+            </div>
+        </section>
+
+        <aside class="side">
+            <div class="card">
+                <h3>演示与参数</h3>
+                <div class="group-label">演示模式</div>
+                <div class="chip-grid" id="grpMode">
+                    <button class="chip on" type="button" data-v="deflection">偏转过程</button>
+                    <button class="chip" type="button" data-v="steady">稳定状态</button>
+                </div>
+                <div class="group-label">载流子类型</div>
+                <div class="chip-grid" id="grpCarrier">
+                    <button class="chip on" type="button" data-v="pos">带正电（空穴）</button>
+                    <button class="chip" type="button" data-v="neg">带负电（自由电子）</button>
+                </div>
+                <div class="group-label">磁场方向</div>
+                <div class="chip-grid" id="grpB">
+                    <button class="chip on" type="button" data-v="in">垂直纸面向里</button>
+                    <button class="chip" type="button" data-v="out">垂直纸面向外</button>
+                </div>
+                <div class="sliders">
+                    <label class="slider-row"><span>电流 <span class="tex" data-f="Is"></span></span><output id="valI">10.0 mA</output><input id="sliderI" type="range" min="1" max="20" step="0.5" value="10"></label>
+                    <label class="slider-row"><span>磁感应强度 <span class="tex" data-f="Bs"></span></span><output id="valB">0.50 T</output><input id="sliderB" type="range" min="0.05" max="1" step="0.01" value="0.5"></label>
+                    <label class="slider-row"><span>薄片厚度 <span class="tex" data-f="ds"></span></span><output id="valD">0.50 mm</output><input id="sliderD" type="range" min="0.2" max="2" step="0.05" value="0.5"></label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>实时数据</h3>
+                <div class="stat-list">
+                    <div class="stat-row"><span class="lb">M、N 间距 <span class="tex" data-f="bs"></span></span><b>5.0 mm</b></div>
+                    <div class="stat-row"><span class="lb">载流子浓度 <span class="tex" data-f="ns"></span></span><b>1.0×10<sup>22</sup> m<sup>−3</sup></b></div>
+                    <div class="stat-row"><span class="lb">定向移动速率 <span class="tex" data-f="vs"></span></span><b id="dataV">2.50 m/s</b></div>
+                    <div class="stat-row"><span class="lb">稳定霍尔电压 <span class="tex" data-f="UH"></span></span><b id="dataUH">6.25 mV</b></div>
+                    <div class="stat-row"><span class="lb">电压表读数 <span class="tex" data-f="UMN"></span></span><b id="dataUMN">0.00 mV</b></div>
+                    <div class="stat-row"><span class="lb">电势较高的一端</span><b id="dataHigh">—</b></div>
+                </div>
+            </div>
+
+            <div class="card" style="grid-column:1 / -1">
+                <h3>怎么看</h3>
+                <p class="note"><b>偏转过程</b>：载流子沿电流方向定向移动，洛伦兹力使它们偏向薄片同一侧，两侧开始积累电荷，<i class="v">M</i>、<i class="v">N</i> 间电压逐渐增大。<br><b>稳定状态</b>：静电力与洛伦兹力平衡，载流子不再偏转，电压稳定。<br>电流方向相同时，正、负载流子都偏向同一侧，但电势高低相反——这就是用霍尔电压判断载流子正负的依据。改变磁场方向，电压正负也随之改变。</p>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<dialog class="explain" id="explain">
+    <div class="explain-head">
+        <h2>霍尔元件 · 原理讲解</h2>
+        <button class="ghost-button" id="explainClose" type="button">关闭</button>
+    </div>
+    <div class="explain-body">
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4 style="color:var(--orange)">① 偏转：电荷积累</h4>
+                <p>在 <i class="v">E</i>、<i class="v">F</i> 间通入恒定电流 <i class="v">I</i>，同时加上与薄片垂直的磁场 <i class="v">B</i>。载流子在洛伦兹力作用下，向着与电流和磁场都垂直的方向偏转。</p>
+                <p>于是薄片的一侧积累正电荷、另一侧积累负电荷，<i class="v">M</i>、<i class="v">N</i> 间出现电压 <span class="tex" data-f="UH"></span>。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--teal)">② 稳定：二力平衡</h4>
+                <p>电荷积累产生横向电场：</p>
+                <div class="fm tex" data-f="d2"></div>
+                <p>电流、电压稳定时，载流子所受静电力与洛伦兹力平衡：</p>
+                <div class="fm tex" data-f="d1"></div>
+                <div class="fm tex" data-f="d3"></div>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--blue)">③ 用电流表示速率</h4>
+                <p>设载流子浓度为 <i class="v">n</i>，电荷量为 <i class="v">q</i>，薄片宽 <i class="v">b</i>、厚 <i class="v">d</i>，则电流的微观表达式为：</p>
+                <div class="fm tex" data-f="d4"></div>
+                <p>由此得到 <span class="tex" data-f="vs"></span> = <i class="v">I</i> / (<i class="v">nqbd</i>)。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--amber)">④ 霍尔电压</h4>
+                <p>把速率代入 <span class="tex" data-f="d3"></span>，<i class="v">b</i> 被约去：</p>
+                <div class="fm tex" data-f="d5"></div>
+                <p>霍尔电压与 <i class="v">B</i>、<i class="v">I</i> 成正比，与厚度 <i class="v">d</i> 成反比。薄片越薄，电压越大。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--pink)">⑤ 霍尔系数与应用</h4>
+                <p>令</p>
+                <div class="fm tex" data-f="d6"></div>
+                <div class="fm tex" data-f="d7"></div>
+                <p>霍尔传感器可测磁场、测转速：自行车测速器、电脑散热风扇、录像机磁鼓里都有它。轮子每转一圈，磁铁靠近传感器一次，就输出一个脉冲电压。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--ink)">⑥ 判断电势高低</h4>
+                <p>先由左手定则（注意负电荷的受力方向与四指方向相反）判断载流子偏向哪一侧，再看这一侧积累的是正电荷还是负电荷。</p>
+                <table class="dtable">
+                    <tr><th>载流子</th><th>磁场向里</th><th>磁场向外</th></tr>
+                    <tr><td>正电荷</td><td>M 端电势高</td><td>N 端电势高</td></tr>
+                    <tr><td>负电荷</td><td>N 端电势高</td><td>M 端电势高</td></tr>
+                </table>
+                <p>（电流方向均为 <i class="v">E</i>→<i class="v">F</i>，<i class="v">M</i> 在上，<i class="v">N</i> 在下。）</p>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<script src="js/formulas.js?v=20261030"></script>
+<script src="js/typeset.js?v=20261030"></script>
+<script src="js/main.js?v=20261030"></script>
+</body>
+</html>
