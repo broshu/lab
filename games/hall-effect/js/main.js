@@ -78,15 +78,31 @@
     }
 
     function drawEdgeCharges() {
-        const n = Math.round(acc * 12);
-        if (n <= 0) return;
-        const topSign = sM();                           // 上侧积累电荷的符号
-        for (let i = 0; i < n; i++) {
-            const x = sx + 22 + i * ((sw - 44) / 11);
-            ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillStyle = topSign > 0 ? C.pos : C.neg; ctx.fillText(topSign > 0 ? '+' : '−', x, sy + 10);
-            ctx.fillStyle = topSign > 0 ? C.neg : C.pos; ctx.fillText(topSign > 0 ? '−' : '+', x, sy + sh - 10);
+        // 电荷在上、下两侧（M、N 一侧）逐层积累：先贴着边缘，越积越多
+        const PER = 21, ROWS = 3, total = Math.round(acc * PER * ROWS);
+        if (total <= 0) return;
+        const topSign = sM();
+        const colTop = topSign > 0 ? C.pos : C.neg, colBot = topSign > 0 ? C.neg : C.pos;
+        const rowsShown = Math.ceil(total / PER);
+        ctx.save();
+        ctx.globalAlpha = 0.13; ctx.fillStyle = colTop; ctx.fillRect(sx, sy, sw, 6 + rowsShown * 18);
+        ctx.fillStyle = colBot; ctx.fillRect(sx, sy + sh - 6 - rowsShown * 18, sw, 6 + rowsShown * 18);
+        ctx.restore();
+        for (let k = 0; k < total; k++) {
+            const row = Math.floor(k / PER), col = k % PER;
+            // 每一行从中间向两侧填充，看起来更自然
+            const order = col % 2 ? -Math.ceil(col / 2) : Math.ceil(col / 2);
+            const x = sx + sw / 2 + order * ((sw - 28) / (PER - 1));
+            const yT = sy + 11 + row * 18, yB = sy + sh - 11 - row * 18;
+            chargeDot(x, yT, topSign > 0 ? '+' : '−', colTop);
+            chargeDot(x, yB, topSign > 0 ? '−' : '+', colBot);
         }
+    }
+    function chargeDot(x, y, sign, col) {
+        ctx.fillStyle = col; ctx.globalAlpha = 0.92;
+        ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(sign, x, y + 0.5);
     }
 
     function drawField() {
@@ -144,7 +160,7 @@
             p.hist.push({ x: p.x, y: p.y }); if (p.hist.length > 7) p.hist.shift();
             if ((dirX > 0 && p.x > sx + sw + 14) || (dirX < 0 && p.x < sx - 14)) spawn(p, false);
         }
-        if (mode === 'deflection') acc = Math.min(1, acc + (1 - acc) * dt / 110 + dt * 0.0002);
+        if (mode === 'deflection') acc = Math.min(1, acc + (1 - acc) * dt / 16 + dt * 0.0005);
         else acc = 1;
     }
 
