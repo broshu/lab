@@ -144,7 +144,7 @@
             p.hist.push({ x: p.x, y: p.y }); if (p.hist.length > 7) p.hist.shift();
             if ((dirX > 0 && p.x > sx + sw + 14) || (dirX < 0 && p.x < sx - 14)) spawn(p, false);
         }
-        if (mode === 'deflection') acc = Math.min(1, acc + (1 - acc) * dt / 11 + dt * 0.002);
+        if (mode === 'deflection') acc = Math.min(1, acc + (1 - acc) * dt / 110 + dt * 0.0002);
         else acc = 1;
     }
 
