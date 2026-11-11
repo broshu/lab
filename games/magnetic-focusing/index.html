@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>磁聚焦与磁发散 · 圆形磁场中的会聚与平行出射</title>
+    <link rel="stylesheet" href="css/theme.css?v=20261111">
+    <link rel="stylesheet" href="css/style.css?v=20261111">
+</head>
+<body>
+<div class="app">
+    <header class="top-bar">
+        <div>
+            <h1>磁聚焦与磁发散</h1>
+            <p class="sub">圆形匀强磁场中，轨迹半径等于磁场区域半径时：平行入射 → 会聚于一点；一点入射 → 平行出射</p>
+        </div>
+        <div class="top-actions">
+            <button id="explainBtn" class="ghost-button" type="button">数学推导</button>
+            <a class="home-button" href="/games/" aria-label="返回互动实验" title="互动实验"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg></a>
+        </div>
+    </header>
+
+    <main class="layout" style="--side: 400px">
+        <section class="panel stage-panel">
+            <div class="section-title">
+                <h2>磁场 <i class="v">B</i> 垂直纸面向里（×），区域半径 <i class="v">R</i></h2>
+                <div class="legend">
+                    <span><i class="swatch orange"></i>粒子轨迹</span>
+                    <span><i class="swatch blue"></i>选中的粒子</span>
+                    <span><i class="swatch grey"></i>几何辅助线</span>
+                </div>
+            </div>
+            <div class="figure">
+                <canvas id="cv" width="700" height="500" role="img" aria-label="圆形磁场中的磁聚焦与磁发散轨迹"></canvas>
+            </div>
+        </section>
+
+        <aside class="side">
+            <div class="card">
+                <div class="chip-grid" id="modeTabs">
+                    <button class="chip on" type="button" data-mode="focus">磁聚焦</button>
+                    <button class="chip" type="button" data-mode="diverge">磁发散</button>
+                </div>
+                <div class="chip-grid" id="signTabs" style="margin-top:8px">
+                    <button class="chip on" type="button" data-sign="1">正电荷</button>
+                    <button class="chip" type="button" data-sign="-1">负电荷</button>
+                </div>
+                <div class="sliders">
+                    <label class="slider-row"><span>轨迹半径 <i class="v">r</i></span><output id="valR"></output><input type="range" id="sliderR" min="0.5" max="2" value="1" step="0.05"></label>
+                    <label class="slider-row" id="rowWidth"><span>粒子束宽度</span><output id="valWidth"></output><input type="range" id="sliderWidth" min="0.2" max="1.9" value="1.6" step="0.05"></label>
+                    <label class="slider-row hidden" id="rowSpread"><span>入射方向张角</span><output id="valSpread"></output><input type="range" id="sliderSpread" min="20" max="170" value="150" step="5"></label>
+                    <label class="slider-row"><span>粒子数</span><output id="valN"></output><input type="range" id="sliderN" min="3" max="15" value="9" step="1"></label>
+                    <label class="slider-row"><span>选中第几个粒子</span><output id="valK"></output><input type="range" id="sliderK" min="1" max="9" value="3" step="1"></label>
+                </div>
+                <div class="checks">
+                    <label class="check-row"><input type="checkbox" id="chkRhombus" checked>菱形辅助线</label>
+                    <label class="check-row"><input type="checkbox" id="chkCenters">全部圆心</label>
+                </div>
+                <div class="button-row" style="margin-top:10px">
+                    <button class="primary-button" id="btnPlay" type="button">发射粒子</button>
+                    <button class="ghost-button" id="btnR" type="button">令 <i class="v">r</i> = <i class="v">R</i></button>
+                </div>
+                <div class="status" id="status"></div>
+            </div>
+            <div class="card concl" id="concl"></div>
+            <div class="card">
+                <h3>选中的粒子</h3>
+                <div class="stat-list" id="stats"></div>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<dialog class="explain" id="explain">
+    <div class="explain-head">
+        <h2>磁聚焦与磁发散 · 数学推导</h2>
+        <button class="ghost-button" id="explainClose" type="button">关闭</button>
+    </div>
+    <div class="explain-body">
+        <div class="explain-grid">
+            <div class="dcard">
+                <h4 style="color:var(--teal)">1. 轨迹半径与周期</h4>
+                <p>洛伦兹力提供向心力：</p>
+                <div class="fm tex" data-f="r1"></div>
+                <div class="fm tex" data-f="r2"></div>
+                <div class="fm tex" data-f="T"></div>
+                <p>同种粒子、同样速率，轨迹圆一样大，周期也相同。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--orange)">2. 磁聚焦：菱形证明</h4>
+                <p>粒子以速度 <i class="v">v</i><sub>0</sub> 平行入射，从 <i class="v">P</i> 点进入磁场，轨迹圆心为 <i class="v">O</i>′，从 <i class="v">Q</i> 点射出。若 <span class="tex" data-f="cond"></span>，则</p>
+                <div class="fm tex" data-f="rh1"></div>
+                <p>四边相等，<i class="v">OPO</i>′<i class="v">Q</i> 是菱形，对边平行：</p>
+                <div class="fm tex" data-f="rh2"></div>
+                <p><i class="v">OQ</i> 的方向与入射点无关，所以每个粒子都从同一点 <i class="v">Q</i> 射出：<span class="key">聚焦点是与入射速度垂直的那条半径的端点</span>（在洛伦兹力指向的一侧）。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--blue)">3. 坐标验证（以及为什么必须 <i class="v">r</i> = <i class="v">R</i>）</h4>
+                <p>以 <i class="v">O</i> 为原点，入射方向为 <i class="v">x</i> 轴，粒子入射高度为 <i class="v">h</i>（正电荷向 +<i class="v">y</i> 偏转），则</p>
+                <div class="fm tex" data-f="c1"></div>
+                <p>检验顶点 <i class="v">Q</i>(0, <i class="v">R</i>) 是否在轨迹圆上：</p>
+                <div class="fm tex" data-f="c2"></div>
+                <div class="fm tex" data-f="c3"></div>
+                <p>要对每一个 <i class="v">h</i> 都等于 0，只能 <span class="tex" data-f="cond"></span>。<i class="v">r</i> ≠ <i class="v">R</i> 时，不同高度的粒子不经过同一点，拖动「轨迹半径」可以看到。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--pink)">4. 磁发散：反过来用</h4>
+                <p>粒子从边界上同一点 <i class="v">S</i> 以不同方向射入，从 <i class="v">P</i> 点射出。仍有</p>
+                <div class="fm tex" data-f="dv1"></div>
+                <p><i class="v">OSO</i>′<i class="v">P</i> 是菱形，所以</p>
+                <div class="fm tex" data-f="dv2"></div>
+                <p>出射速度垂直于 <i class="v">O</i>′<i class="v">P</i>，也就都垂直于 <i class="v">OS</i>：<span class="key">所有粒子平行射出</span>，方向与过 <i class="v">S</i> 的半径垂直。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--amber)">5. 偏转角与运动时间</h4>
+                <p>磁聚焦中，圆心角等于偏转角 <i class="v">θ</i>，由两条半径的方向求出：</p>
+                <div class="fm tex" data-f="t0"></div>
+                <div class="fm tex" data-f="t1"></div>
+                <div class="fm tex" data-f="t2"></div>
+                <p>粒子同时出发，却不同时到达聚焦点：入射位置离聚焦点越远，偏转角越大，用时越长。</p>
+            </div>
+            <div class="dcard">
+                <h4 style="color:var(--teal)">6. 解题时怎么用</h4>
+                <p>看到「圆形磁场 + 平行入射 + 会聚一点」或「圆形磁场 + 一点射入 + 平行射出」，立刻想到：</p>
+                <div class="fm tex" data-f="s1"></div>
+                <p>先由 <i class="v">r</i> = <i class="v">R</i> 求速度，再画菱形找出射点和出射方向，最后用偏转角求时间。</p>
+            </div>
+        </div>
+        <p class="note">画面按比例绘制，长度以磁场区域半径 <i class="v">R</i> 为单位。</p>
+    </div>
+</dialog>
+
+<script src="js/formulas.js?v=20261111"></script>
+<script src="js/typeset.js?v=20261111"></script>
+<script src="js/physics.js?v=20261111"></script>
+<script src="js/main.js?v=20261111"></script>
+</body>
+</html>
