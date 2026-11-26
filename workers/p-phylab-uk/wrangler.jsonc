@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
-  "routes": [{ "pattern": "p.phylab.uk/*", "zone_name": "phylab.uk" }],
+  // 切换前先只在 workers.dev 测试网址上线；课件搬完、检查无误后再加 p.phylab.uk/* 路由。
   "assets": {
     "directory": "../../_site",
     "binding": "ASSETS",
