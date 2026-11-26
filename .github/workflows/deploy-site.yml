@@ -14,6 +14,7 @@ on:
       - "ppt/**"
       - "games/**"
       - "tutor/**"
+      - "vendor/**"
       - "scripts/build-site.mjs"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
@@ -54,7 +55,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html library.html site.css site.js icon.png CNAME _site/
-          cp -R ppt games _site/
+          cp -R ppt games vendor _site/
           mkdir -p _site/tutor
           cp tutor/answers.html tutor/screen.html tutor/data.js _site/tutor/
           cp -R tutor/assets _site/tutor/

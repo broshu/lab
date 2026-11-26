@@ -158,7 +158,9 @@ function buildPpt(files) {
       }
     }
   }
-  const paths = allPaths.filter((path) => /\.(pptx|pdf|html)$/i.test(path));
+  // 只列出真的发布了的课件（Cloudflare 构建时课件不在 _site 里，由 Worker 从 R2 列出）。
+  const published = (path) => !siteDir || existsSync(join(siteDir, pptHref(names.get(path), path).replace(/\/$/, "/index.html")));
+  const paths = allPaths.filter((path) => /\.(pptx|pdf|html)$/i.test(path) && published(path));
   const items = paths.map((path) => ({
     name: cleanFileName(path.split("/").pop()),
     href: pptHref(names.get(path), path),

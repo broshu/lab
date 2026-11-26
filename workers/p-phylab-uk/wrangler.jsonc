@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // p.phylab.uk 整个网站。网页来自本仓库（构建到 _site），课件在 R2。/api/* 由 p-ai-tutor 处理。
+  "name": "p-phylab-uk",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "routes": [{ "pattern": "p.phylab.uk/*", "zone_name": "phylab.uk" }],
+  "assets": {
+    "directory": "../../_site",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none",
+    // 这些网址先经过 Worker：课件在 R2，目录要合并 R2 里的课件，上传页在 Worker 里
+    "run_worker_first": ["/ppt/*", "/manifest.json", "/upload", "/upload/*"]
+  },
+  "r2_buckets": [{ "binding": "COURSEWARE", "bucket_name": "p-phylab-uk-courseware" }],
+  "ai": { "binding": "AI" },
+  // 每天北京时间 03:17 下架满 14 天的课件、清掉回收站里满 30 天的文件
+  "triggers": { "crons": ["17 19 * * *"] },
+  "observability": { "enabled": true }
+}
