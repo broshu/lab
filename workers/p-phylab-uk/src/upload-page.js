@@ -160,6 +160,62 @@ async function restore(entry) {
   refresh();
 }
 
+
+// ------------------------------------------------ 网页课件自动压缩
+// 网页课件里的图片常常是没压缩的 PNG，整页要几十 MB。上传前在浏览器里把每张图
+// 缩到最宽 1920 像素，并改存为 WebP（浏览器不支持时，不透明的图改存 JPEG），只在变小时替换。
+const MAX_WIDTH = 1920;
+const IMAGE_RE = /data:image\\/(png|jpe?g|webp|bmp);base64,[A-Za-z0-9+\\/=]+/g;
+
+function canEncode(type) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 1;
+  return c.toDataURL(type).startsWith("data:" + type);
+}
+
+async function shrinkImage(dataUrl, webp) {
+  const blob = await (await fetch(dataUrl)).blob();
+  const bitmap = await createImageBitmap(blob);
+  const scale = Math.min(1, MAX_WIDTH / bitmap.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  let out;
+  if (webp) {
+    out = canvas.toDataURL("image/webp", 0.85);
+  } else {
+    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let opaque = true;
+    for (let i = 3; i < pixels.length; i += 4) if (pixels[i] < 255) { opaque = false; break; }
+    out = opaque ? canvas.toDataURL("image/jpeg", 0.85) : canvas.toDataURL("image/png");
+  }
+  return out.length < dataUrl.length * 0.9 ? out : dataUrl;
+}
+
+async function compressHtml(file, onProgress) {
+  const text = await file.text();
+  const found = [...new Set(text.match(IMAGE_RE) || [])];
+  if (!found.length) return file;
+  const webp = canEncode("image/webp");
+  const replaced = new Map();
+  let done = 0;
+  for (const url of found) {
+    try {
+      const small = await shrinkImage(url, webp);
+      if (small !== url) replaced.set(url, small);
+    } catch (error) {
+      console.warn("图片压缩失败，保留原图", error);
+    }
+    onProgress(++done, found.length);
+  }
+  if (!replaced.size) return file;
+  const result = text.replace(IMAGE_RE, (url) => replaced.get(url) || url);
+  return new File([result], file.name, { type: "text/html" });
+}
+
 // ------------------------------------------------ 上传
 
 function addFiles(files) {
@@ -171,7 +227,7 @@ function addFiles(files) {
     job.state = el("span", { class: "note" }, job.status);
     job.row = el("tr", {},
       el("td", { class: "name", title: file.name }, file.name),
-      el("td", { class: "small" }, sizeText(file.size)),
+      el("td", { class: "small" }, job.note = el("span", {}, sizeText(file.size))),
       el("td", {}, el("span", { class: "slug" }, "/ppt/", job.input)),
       el("td", {}, el("div", { class: "bar" }, job.bar)),
       el("td", { class: "right" }, job.state));
@@ -210,7 +266,12 @@ async function sendPart(job, start, number, attempt = 1) {
 }
 
 async function upload(job) {
-  const file = job.file;
+  let file = job.file;
+  if (/\\.html?$/i.test(file.name)) {
+    const before = file.size;
+    file = await compressHtml(file, (n, total) => setState(job, "压缩图片 " + n + "/" + total));
+    if (file.size < before) job.note.textContent = sizeText(before) + " → " + sizeText(file.size);
+  }
   setState(job, "上传中…");
   job.input.readOnly = true;
   const started = await post("start", { fileName: file.name, size: file.size });

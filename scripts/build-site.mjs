@@ -8,7 +8,6 @@ import { dirname, join } from "node:path";
 // - 按 ppt/links.json 把 ppt/ 下的中文文件名改成英文链接名，网站上显示的仍是中文名；
 // - 每个网页都放成「文件夹/index.html」，网址里不出现 .html：
 //     /ppt/ 课件列表，/games/ 互动实验列表，/ppt/<英文名>/ 网页课件，/tutor/ 作业问答，/answers/ 作业答案；
-// - 作业问答的旧网址（tutor/screen.html、tutor/screen/）留一个跳转页，自动转到 /tutor/。
 // 仓库里的文件不用按这个结构摆放，照常放即可。
 const siteDir = process.argv[2] || null;
 
@@ -191,32 +190,6 @@ function moveTo(from, to) {
   renameSync(from, to);
 }
 
-function escapeHtml(text) {
-  return text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-}
-
-// 旧网址的跳转页：带上原来的 ?参数 和 #锚点 转到新网址。script 可以自己算目标网址。
-function writeRedirect(file, target, script = "") {
-  const safe = escapeHtml(target);
-  const jump = script || `location.replace(${JSON.stringify(target)} + location.search + location.hash);`;
-  mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, `<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="robots" content="noindex">
-  <title>页面已搬到新地址</title>
-  <link rel="canonical" href="${safe}">
-  <script>${jump}</script>
-  <noscript><meta http-equiv="refresh" content="0; url=${safe}"></noscript>
-</head>
-<body>
-  <p>页面已搬到新地址：<a href="${safe}">${safe}</a></p>
-</body>
-</html>
-`);
-}
-
 // 课件、互动实验的列表页（library.html）复制到 /ppt/ 和 /games/；作业问答放到 /tutor/，作业答案放到 /answers/。
 function publishPages() {
   for (const section of manifest.sections) {
@@ -235,8 +208,6 @@ function publishPages() {
       copyFileSync(answersPage, join(dir, "index.html"));
     }
   }
-  writeRedirect(join(siteDir, "tutor", "screen.html"), "/tutor/");
-  writeRedirect(join(siteDir, "tutor", "screen", "index.html"), "/tutor/");
 }
 
 const files = trackedFiles();
