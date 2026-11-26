@@ -145,22 +145,24 @@ export async function suggestSlug(env, name, data) {
   const hasChinese = /[\u3400-\u9fff\uf900-\ufaff]/.test(name);
   let slug = hasChinese ? '' : cleanSlug(name);
   if (!slug && env.AI) {
-    // 先用多语言模型 GLM；不可用时退回 Llama。新旧两种返回格式都认。
-    for (const model of ['@cf/zai-org/glm-4.7-flash', '@cf/meta/llama-3.1-8b-instruct-fast']) {
+    // 先用 Llama 3.3 70B（快，中文理解好），不可用时退回 8B。每次最多等 15 秒。新旧两种返回格式都认。
+    for (const model of ['@cf/meta/llama-3.3-70b-instruct-fp8-fast', '@cf/meta/llama-3.1-8b-instruct-fast']) {
       try {
-        const answer = await env.AI.run(model, {
+        const run = env.AI.run(model, {
           messages: [
             {
               role: 'system',
               content:
                 'You turn a Chinese high-school physics courseware title into a short English URL slug. ' +
                 'Translate the meaning (never pinyin), 2 to 7 lowercase English words joined by hyphens. ' +
-                'Reply with the slug only, nothing else.',
+                'Use physics terms: 图像 = graphs, 专题强化 = topic review, 试卷讲评 = exam review, 实验 = lab, ' +
+                '高一 = grade-10, 高二 = grade-11, 竞赛 = olympiad. Reply with the slug only, nothing else.',
             },
             { role: 'user', content: name },
           ],
-          max_tokens: 60,
+          max_tokens: 40,
         });
+        const answer = await Promise.race([run, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000))]);
         const text = String(answer?.response ?? answer?.choices?.[0]?.message?.content ?? '')
           .replace(/<think>[\s\S]*?<\/think>/g, '')
           .trim()
