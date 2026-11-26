@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 // 用法：node scripts/build-site.mjs [站点目录]
@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 // - 按 ppt/links.json 把 ppt/ 下的中文文件名改成英文链接名，网站上显示的仍是中文名；
 // - 每个网页都放成「文件夹/index.html」，网址里不出现 .html：
 //     /ppt/ 课件列表，/games/ 互动实验列表，/ppt/<英文名>/ 网页课件，/tutor/ 作业问答，/answers/ 作业答案；
-// - 旧网址（library.html、ppt/*.html、tutor/screen.html、tutor/screen/）留一个跳转页，自动转到新网址。
+// - 作业问答的旧网址（tutor/screen.html、tutor/screen/）留一个跳转页，自动转到 /tutor/。
 // 仓库里的文件不用按这个结构摆放，照常放即可。
 const siteDir = process.argv[2] || null;
 
@@ -152,7 +152,6 @@ function buildPpt(files) {
       if (isHtml(path)) {
         const href = pptHref(linkName, path);
         moveTo(from, join(siteDir, href, "index.html"));
-        writeRedirect(join(siteDir, "ppt", linkName), href);
       } else if (linkName !== path.split("/").pop()) {
         renameSync(from, join(siteDir, "ppt", linkName));
       }
@@ -223,11 +222,7 @@ function publishPages() {
   for (const section of manifest.sections) {
     copyFileSync(join(siteDir, "library.html"), join(siteDir, section.id, "index.html"));
   }
-  writeRedirect(join(siteDir, "library.html"), "/", `
-    const params = new URLSearchParams(location.search);
-    const section = { ppt: "/ppt/", games: "/games/" }[params.get("section")] || "/";
-    const rest = section !== "/" && params.get("path") ? "?" + new URLSearchParams({ path: params.get("path") }) : "";
-    location.replace(section + rest + location.hash);`);
+  rmSync(join(siteDir, "library.html"));
 
   moveTo(join(siteDir, "tutor", "screen.html"), join(siteDir, "tutor", "index.html"));
   moveTo(join(siteDir, "tutor", "answers.html"), join(siteDir, "answers", "index.html"));

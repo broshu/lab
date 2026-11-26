@@ -147,7 +147,7 @@ test('删除进回收站，可以恢复', async () => {
   assert.equal(await call(env, '/ppt/simple-pendulum/').then((r) => r.text()), '<p>pendulum</p>');
 });
 
-test('网页课件：新网址、旧网址跳转、相对路径的视频', async () => {
+test('网页课件：新网址、补斜杠、相对路径的视频，旧网址不再跳转', async () => {
   const env = makeEnv();
   await upload(env, '质谱仪与回旋加速器.html', '<html>cyclotron</html>', 'courseware-a177f9ff');
   const page = await call(env, '/ppt/courseware-a177f9ff/');
@@ -159,10 +159,8 @@ test('网页课件：新网址、旧网址跳转、相对路径的视频', async
   assert.equal(noSlash.status, 301);
   assert.equal(noSlash.headers.get('Location'), 'https://p.phylab.uk/ppt/courseware-a177f9ff/');
 
-  const oldEnglish = await call(env, '/ppt/courseware-a177f9ff.html');
-  assert.equal(oldEnglish.headers.get('Location'), 'https://p.phylab.uk/ppt/courseware-a177f9ff/');
-  const oldChinese = await call(env, `/ppt/${encodeURIComponent('质谱仪与回旋加速器.html')}`);
-  assert.equal(oldChinese.headers.get('Location'), 'https://p.phylab.uk/ppt/courseware-a177f9ff/');
+  assert.equal((await call(env, '/ppt/courseware-a177f9ff.html')).status, 404);
+  assert.equal((await call(env, `/ppt/${encodeURIComponent('质谱仪与回旋加速器.html')}`)).status, 404);
 
   const video = await call(env, '/ppt/courseware-a177f9ff/videos/a.mp4');
   assert.equal(await video.text(), 'video');

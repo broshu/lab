@@ -464,13 +464,6 @@ async function handlePpt(request, env, ctx, url) {
     // 下载文件 /ppt/<网址名>.pptx
     const file = data.items.find((i) => i.ext !== 'html' && i.slug === base && i.ext === ext);
     if (file) return serveFile(request, env, ctx, file);
-    // 旧网址：/ppt/<网址名>.html 和更早的 /ppt/<中文名>.html
-    if (ext === 'html') {
-      const old = data.items.find((i) => i.ext === 'html' && (i.slug === base || i.name === base));
-      if (old) return Response.redirect(`${url.origin}${hrefOf(old)}${url.search}`, 301);
-    }
-    const byName = data.items.find((i) => i.fileName === `${base}.${ext}`);
-    if (byName) return Response.redirect(`${url.origin}${hrefOf(byName)}`, 301);
   }
 
   return env.ASSETS.fetch(request); // 仓库里的文件（模板、视频）或 404
