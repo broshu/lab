@@ -145,23 +145,32 @@ export async function suggestSlug(env, name, data) {
   const hasChinese = /[\u3400-\u9fff\uf900-\ufaff]/.test(name);
   let slug = hasChinese ? '' : cleanSlug(name);
   if (!slug && env.AI) {
-    try {
-      const answer = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You turn a Chinese high-school physics courseware title into a short English URL slug. ' +
-              'Translate the meaning (never pinyin), 2 to 7 lowercase English words joined by hyphens, ' +
-              'no grade numbers unless in the title. Reply with the slug only.',
-          },
-          { role: 'user', content: name },
-        ],
-        max_tokens: 40,
-      });
-      slug = cleanSlug(String(answer?.response || '').split('\n')[0]);
-    } catch (error) {
-      console.warn('slug suggestion failed', error);
+    // 先用多语言模型 GLM；不可用时退回 Llama。新旧两种返回格式都认。
+    for (const model of ['@cf/zai-org/glm-4.7-flash', '@cf/meta/llama-3.1-8b-instruct-fast']) {
+      try {
+        const answer = await env.AI.run(model, {
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You turn a Chinese high-school physics courseware title into a short English URL slug. ' +
+                'Translate the meaning (never pinyin), 2 to 7 lowercase English words joined by hyphens. ' +
+                'Reply with the slug only, nothing else.',
+            },
+            { role: 'user', content: name },
+          ],
+          max_tokens: 60,
+        });
+        const text = String(answer?.response ?? answer?.choices?.[0]?.message?.content ?? '')
+          .replace(/<think>[\s\S]*?<\/think>/g, '')
+          .trim()
+          .split('\n')
+          .pop();
+        slug = cleanSlug(text).split('-').slice(0, 8).join('-');
+        if (slug) break;
+      } catch (error) {
+        console.warn(`slug suggestion failed with ${model}`, error);
+      }
     }
   }
   if (!slug) slug = `courseware-${await shortHash(name)}`;
